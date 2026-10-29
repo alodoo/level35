@@ -115,6 +115,33 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;
   background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.yest{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+.yest .k{color:var(--muted)}
+.yest b{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.pill{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px}
+.pill.ok{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.pill.miss{background:var(--soft);color:var(--muted)}
+.wk-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--soft);border-radius:12px;padding:10px 12px;min-width:0;display:flex;flex-direction:column;gap:3px}
+.stat b{font-family:var(--display);font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;color:var(--muted)}
+.delta{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.delta.up{color:var(--good)}.delta.down{color:var(--accent)}
+.wk-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wb{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.wb .col{width:100%;max-width:36px;height:72px;background:var(--soft);border-radius:7px;display:flex;align-items:flex-end;overflow:hidden}
+.wb .col i{display:block;width:100%;background:color-mix(in srgb,var(--accent) 45%,var(--soft))}
+.wb.solid .col i{background:var(--accent)}
+.wb.fut .col{background:transparent;border:1px dashed var(--line)}
+.wb.today .col{outline:2px solid var(--ink);outline-offset:1px}
+.wb .d{font-size:10.5px;font-weight:700;color:var(--muted)}
+.wb.today .d{color:var(--ink)}
+.wb .v{font-family:var(--mono);font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk-habits{display:flex;flex-direction:column;gap:8px;padding-top:4px;border-top:1px solid var(--line)}
+.wh{display:grid;grid-template-columns:minmax(0,1fr) 80px 34px;gap:10px;align-items:center;font-size:13.5px;padding-top:4px}
+.wh .track{height:6px;background:var(--soft);border-radius:9px;overflow:hidden}
+.wh .track i{display:block;height:100%;background:var(--good)}
+.wh .n{font-family:var(--mono);font-size:12px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .btns{display:flex;gap:8px;flex-wrap:wrap}
@@ -146,7 +173,15 @@ html{-webkit-tap-highlight-color:transparent}
       <div><h2 id="dayTitle">Today</h2><div class="sub" id="daySub"></div></div>
       <div class="nav"><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></div>
     </div>
+    <div class="yest" id="yest" hidden></div>
     <div class="list" id="habits"></div>
+  </section>
+
+  <section class="grid-card" aria-label="This week">
+    <div class="sec-head"><h3>This week</h3><span class="label" id="wkRange"></span></div>
+    <div class="wk-stats" id="wkStats"></div>
+    <div class="wk-bars" id="wkBars"></div>
+    <div class="wk-habits" id="wkHabits"></div>
   </section>
 
   <section style="display:flex;flex-direction:column;gap:12px" aria-label="Quests">
@@ -172,7 +207,7 @@ html{-webkit-tap-highlight-color:transparent}
     </div>
   </section>
 
-  <p class="rule">A solid day means: up at 7:30, job block done, moved your body, and one responsibility task. Solid days build the streak and unlock new habits.</p>
+  <p class="rule">A solid day means: up at 7:30, job block done, trained (gym, cardio or move), and one responsibility task. Solid days build the streak and unlock new habits.</p>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -184,7 +219,7 @@ const LOCK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-wi
 const HABITS=[
   {id:'wake',name:'Up at 7:30',hint:'Phone charged outside the bedroom',xp:15,core:true},
   {id:'job',name:'Job block, 9:30–13:00',hint:'Out of the house: library or coworking',xp:25,core:true,counter:true},
-  {id:'move',name:'Move',hint:'Gym on program days, run or walk on the others',xp:20,core:true},
+  {id:'move',name:'Training',hint:'Gym, cardio or move, depending on the day',xp:20,core:true},
   {id:'resp',name:'One responsibility task',hint:'30 minutes: bike, home, admin, pickup',xp:15,core:true,text:true},
   {id:'crea',name:'Creatine with breakfast',hint:'Attached to breakfast so it sticks',xp:5},
   {id:'screens',name:'No games or series before work is done',hint:'They are the reward, not the default',xp:10},
@@ -193,6 +228,11 @@ const HABITS=[
 ];
 const UNLOCKS=[{id:'team',name:'Basketball or boxing session',hint:'Fixed time, people expecting you',xp:30,need:10}];
 const SOLID_BONUS=10;
+function moveFor(s){const w=parse(s).getDay();
+  if(w===1||w===3||w===5)return{name:'Gym',hint:'Program day: lift, then stretch',kind:'gym'};
+  if(w===2||w===4)return{name:'Cardio',hint:'Run, bike or rower, then stretch',kind:'cardio'};
+  return{name:'Move',hint:'Anything active: walk, hike, swim, a game',kind:'move'}}
+function view(h,s){return h.id==='move'?Object.assign({},h,moveFor(s)):h}
 const DEFAULT_QUESTS=[];
 const RANKS=[[1,'Rebooting'],[3,'Back in motion'],[5,'Building momentum'],[8,'Consistent'],[11,'Locked in'],[15,'Unstoppable']];
 
@@ -260,7 +300,7 @@ function render(){
   $('xpNow').textContent=xp+' XP';
   $('xpNext').textContent=(L.need-L.into)+' to level '+(L.lv+1);
   $('streak').textContent=streak();
-  renderDay(); renderQuests(); renderCal();
+  renderDay(); renderWeek(); renderQuests(); renderCal();
 }
 function renderDay(){
   const t=today(),d=day(viewDate),dt=parse(viewDate);
@@ -268,10 +308,12 @@ function renderDay(){
   $('dayTitle').textContent=rel;
   $('daySub').textContent=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' · '+dayXP(viewDate)+' / '+MAXDAY+' XP';
   $('next').disabled=viewDate>=t;
+  renderYest();
   const box=$('habits');box.innerHTML='';
   const sc=solidCount();
   const list=HABITS.concat(UNLOCKS.filter(u=>sc>=u.need||(d.h&&d.h[u.id])));
-  for(const h of list){
+  for(const h0 of list){
+    const h=view(h0,viewDate);
     const on=!!(d.h&&d.h[h.id]);
     const row=document.createElement('div');row.className='row'+(on?' on':'');
     const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;
@@ -313,6 +355,57 @@ function renderDay(){
   const ban=document.createElement('div');ban.className='solid-banner';
   ban.innerHTML=isSolid(viewDate)?'<b>Solid day.</b> +'+SOLID_BONUS+' XP bonus and the streak continues.':'Core habits: '+done+' of 4 done. Finish all four for a solid day.';
   box.appendChild(ban);
+}
+function renderYest(){
+  const y=$('yest'),t=today();
+  if(viewDate!==t){y.hidden=true;return}
+  const ys=addDays(t,-1),x=dayXP(ys);y.hidden=false;y.innerHTML='';
+  const k=document.createElement('span');k.className='k';k.textContent='Yesterday';
+  const v=document.createElement('b');v.textContent=x?x+' XP':'Nothing logged';
+  const pill=document.createElement('span');
+  if(isSolid(ys)){pill.className='pill ok';pill.textContent='Solid day'}
+  else if(x){pill.className='pill miss';pill.textContent='Not solid'}
+  else{pill.className='pill miss';pill.textContent='Tap ‹ to fill in'}
+  y.append(k,v,pill);
+}
+function renderWeek(){
+  const t=today(),mon=addDays(t,-((parse(t).getDay()+6)%7)),elapsed=((parse(t).getDay()+6)%7)+1;
+  const sun=addDays(mon,6),f=s=>parse(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  $('wkRange').textContent=f(mon)+' – '+f(sun);
+  let xp=0,last=0,solid=0,apps=0;
+  for(let i=0;i<elapsed;i++){const s=addDays(mon,i);xp+=dayXP(s);if(isSolid(s))solid++;apps+=(days[s]&&days[s].apps)||0;last+=dayXP(addDays(mon,i-7))}
+  const dlt=xp-last;
+  const st=$('wkStats');st.innerHTML='';
+  const stat=(val,lab,dtext,dcls)=>{const e=document.createElement('div');e.className='stat';
+    const b=document.createElement('b');b.textContent=val;const sp=document.createElement('span');sp.textContent=lab;e.append(b,sp);
+    if(dtext){const d=document.createElement('span');d.className='delta '+(dcls||'');d.textContent=dtext;e.appendChild(d)}st.appendChild(e)};
+  stat(xp,'XP this week',dlt>0?'+'+dlt+' vs last wk':dlt<0?'−'+(-dlt)+' vs last wk':'same as last wk',dlt>0?'up':dlt<0?'down':'');
+  stat(solid+'/'+elapsed,'solid days','');
+  stat(apps,'applications sent','');
+  const bars=$('wkBars');bars.innerHTML='';
+  ['M','T','W','T','F','S','S'].forEach((L,i)=>{const s=addDays(mon,i),e=document.createElement('button');e.type='button';
+    e.className='wb'+(s>t?' fut':'')+(s===t?' today':'')+(isSolid(s)?' solid':'');
+    const x=dayXP(s);e.innerHTML='<div class="col"><i></i></div><span class="d"></span><span class="v"></span>';
+    e.querySelector('i').style.height=(s>t?0:Math.round(x/MAXDAY*100))+'%';
+    e.querySelector('.d').textContent=L;e.querySelector('.v').textContent=s>t?'':x;
+    e.setAttribute('aria-label',parse(s).toDateString()+', '+x+' XP');
+    if(s<=t)e.onclick=()=>{viewDate=s;render();window.scrollTo({top:0,behavior:'smooth'})};else e.disabled=true;
+    bars.appendChild(e)});
+  const wh=$('wkHabits');wh.innerHTML='';
+  const rows=[];
+  for(const h of HABITS.concat(UNLOCKS)){
+    if(h.id==='move'){
+      for(const kind of ['gym','cardio','move']){let hit=0,due=0,nm='';
+        for(let i=0;i<elapsed;i++){const s=addDays(mon,i),m=moveFor(s);if(m.kind!==kind)continue;nm=m.name;due++;if(days[s]&&days[s].h&&days[s].h.move)hit++}
+        if(due)rows.push([nm,hit,due])}
+      continue}
+    let hit=0;for(let i=0;i<elapsed;i++){const s=addDays(mon,i);if(days[s]&&days[s].h&&days[s].h[h.id])hit++}
+    if(UNLOCKS.includes(h)&&!hit&&solidCount()<h.need)continue;
+    rows.push([h.name,hit,elapsed]);
+  }
+  for(const [nm,hit,due] of rows){const r=document.createElement('div');r.className='wh';
+    r.innerHTML='<span></span><div class="track"><i></i></div><span class="n"></span>';
+    r.firstChild.textContent=nm;r.querySelector('i').style.width=Math.round(hit/due*100)+'%';r.querySelector('.n').textContent=hit+'/'+due;wh.appendChild(r)}
 }
 function renderQuests(){
   const box=$('quests');box.innerHTML='';const qs=getQuests();
@@ -370,7 +463,9 @@ function toggle(h,val){
   const after=levelInfo(totalXP()).lv;
   if(after>before)toast('Level '+after+' · '+rankFor(after));
   else if(!wasSolid&&isSolid(viewDate)){const u=UNLOCKS.find(u=>sc<u.need&&solidCount()>=u.need);toast(u?'Unlocked: '+u.name:'Solid day · streak '+streak())}
-  else if(val)toast('+'+h.xp+' XP');
+  else if(after<before)toast('Unmarked · back to level '+after);
+  else if(wasSolid&&!isSolid(viewDate))toast('Unmarked · no longer a solid day');
+  else toast(val?'+'+h.xp+' XP':'Unmarked · −'+h.xp+' XP');
 }
 function bump(n){const d=ensure(viewDate);d.apps=Math.max(0,(d.apps||0)+n);saveDay(viewDate);renderDay()}
 function toggleQuest(id){
@@ -378,7 +473,7 @@ function toggleQuest(id){
   quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?today():null}):q);
   saveState();render();const q=quests.find(q=>q.id===id);
   const after=levelInfo(totalXP()).lv;
-  toast(after>before?'Level '+after+' · '+rankFor(after):q.done?'Quest done · +'+q.xp+' XP':'Quest reopened');
+  toast(after>before?'Level '+after+' · '+rankFor(after):after<before?'Quest reopened · back to level '+after:q.done?'Quest done · +'+q.xp+' XP':'Quest reopened · −'+q.xp+' XP');
 }
 let tt;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),1800)}
 
