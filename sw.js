@@ -1,5 +1,5 @@
 // Level 35 offline cache. Bump VERSION when files change.
-const VERSION = 'level35-v4';
+const VERSION = 'level35-v5';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -12,6 +12,11 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  // Only cache the app itself and its fonts. Never GitHub sync calls or anything else.
+  const url = new URL(req.url);
+  const own = url.origin === self.location.origin;
+  const font = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
+  if (!own && !font) return;
   // The page itself: network first so updates arrive, cache when offline.
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req).then(res => {

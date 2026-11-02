@@ -164,6 +164,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 a.calchip,button.calchip{color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent)}
 .calerr{font-size:12px;color:var(--accent);width:100%}
 .empty{padding:16px;color:var(--muted);font-size:14px}
+.gh-fields{display:flex;flex-direction:column;gap:8px}
+.gh-fields input{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;min-width:0;width:100%}
+.gh-status{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.gh-status .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.gh-status.ok .dot{background:var(--good)}
+.gh-status.err{color:var(--accent)}.gh-status.err .dot{background:var(--accent)}
+.gh-steps{margin:0;padding-left:20px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.gh-steps b{color:var(--ink);font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .btns{display:flex;gap:8px;flex-wrap:wrap}
@@ -232,9 +240,27 @@ html{-webkit-tap-highlight-color:transparent}
   </section>
 
 
+  <section class="grid-card" aria-label="GitHub sync">
+    <div class="sec-head"><h3>GitHub sync</h3><span class="label" id="ghLabel">Off</span></div>
+    <div class="gh-status" id="ghStatus"><span class="dot"></span><span id="ghMsg">Saves your progress to a private GitHub repo after every change.</span></div>
+    <div id="ghSetup" style="display:flex;flex-direction:column;gap:12px">
+      <ol class="gh-steps">
+        <li>Create a <b>private</b> repo called <b>level35-data</b>.</li>
+        <li>Make a fine-grained token: GitHub → Settings → Developer settings → Fine-grained tokens. Repository access: <b>only level35-data</b>. Permission: <b>Contents → Read and write</b>.</li>
+        <li>Paste it below.</li>
+      </ol>
+      <div class="gh-fields">
+        <input id="ghRepo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" value="alodoo/level35-data" aria-label="Private repo (owner/name)">
+        <input id="ghToken" type="password" autocomplete="off" placeholder="Paste your token (github_pat_…)" aria-label="GitHub token">
+      </div>
+      <div class="btns"><button class="btn primary" id="ghConnect" type="button">Connect</button></div>
+    </div>
+    <div class="btns" id="ghOn" hidden><button class="btn" id="ghNow" type="button">Sync now</button><button class="btn" id="ghOff" type="button">Disconnect</button></div>
+  </section>
+
   <section class="grid-card" aria-label="Backup">
     <div class="sec-head"><h3>Backup</h3><span class="label" id="bkWhen"></span></div>
-    <p class="bk-note">Your progress lives on this phone. Copy a backup now and then and paste it into Notes, so you never lose your streak.</p>
+    <p class="bk-note">A manual copy, for when GitHub sync is off. Copy it now and then and paste it into Notes.</p>
     <div class="btns"><button class="btn primary" id="exp" type="button">Copy backup</button><button class="btn" id="imp" type="button">Restore from backup</button></div>
     <textarea class="bk" id="expTxt" readonly hidden aria-label="Backup text"></textarea>
     <div id="impBox" hidden style="display:flex;flex-direction:column;gap:8px">
@@ -297,18 +323,101 @@ function streak(){let s=today(),n=0;if(!isSolid(s))s=addDays(s,-1);while(isSolid
 function getQuests(){return quests||DEFAULT_QUESTS}
 
 /* ---------- persistence (on device) ---------- */
-const LS='level35-v1';
-function lsLoad(){try{const r=JSON.parse(localStorage.getItem(LS)||'null');if(r){days=r.days||{};quests=r.quests||null}}catch(e){}}
-function lsSave(){try{localStorage.setItem(LS,JSON.stringify({days,quests}))}catch(e){toast('Couldn’t save on this phone')}}
+const LS='level35-v1';let updated=0;
+function lsLoad(){try{const r=JSON.parse(localStorage.getItem(LS)||'null');if(r){days=r.days||{};quests=r.quests||null;updated=r.updated||0}}catch(e){}}
+function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({days,quests,updated}))}catch(e){toast('Couldn’t save on this phone')}}
+function lsSave(){updated=Date.now();lsWrite();gh.schedule()}
 function saveDay(s){lsSave()}
 function saveState(){lsSave()}
 const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 async function initStore(){
-  lsLoad();render();setSync();
+  lsLoad();render();setSync();gh.init();
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 }
-function setSync(){$('sync').textContent=standalone?'Saved on this phone. Works offline.':'Tip: Share → Add to Home Screen to install, then use it from there.'}
+function setSync(){$('sync').textContent=gh.on()?'Saved on this phone and synced to GitHub.':standalone?'Saved on this phone. Works offline.':'Tip: Share → Add to Home Screen to install, then use it from there.'}
+
+/* ---------- GitHub sync ---------- */
+const gh=(function(){
+  const KEY='level35-gh',FILE='level35.json',API='https://api.github.com';
+  let cfg=null,timer=null,busy=false,again=false;
+  try{cfg=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  const store=()=>{try{cfg?localStorage.setItem(KEY,JSON.stringify(cfg)):localStorage.removeItem(KEY)}catch(e){}};
+  const on=()=>!!(cfg&&cfg.token&&cfg.repo);
+  const enc=str=>{const b=new TextEncoder().encode(str);let x='';for(let i=0;i<b.length;i+=8192)x+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(x)};
+  const dec=b64=>new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g,'')),c=>c.charCodeAt(0)));
+  async function req(path,opt){
+    const r=await fetch(API+'/repos/'+cfg.repo+path,Object.assign({cache:'no-store'},opt||{},{headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'}}));
+    let body=null;try{body=await r.json()}catch(e){}
+    return{status:r.status,body};
+  }
+  function status(kind,msg){const el=$('ghStatus');el.className='gh-status '+(kind||'');$('ghMsg').textContent=msg;
+    $('ghLabel').textContent=on()?(kind==='err'?'Needs attention':'On'):'Off';
+    $('ghSetup').hidden=on();$('ghOn').hidden=!on();setSync()}
+  const hhmm=t=>new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  function fail(st,body){
+    if(st===0)return status('err','Offline. Changes are saved on the phone and will sync when you’re back online.');
+    if(st===401)return status('err','GitHub rejected the token. It may have expired. Disconnect and paste a new one.');
+    if(st===403&&body&&/rate limit/i.test(body.message||''))return status('err','GitHub is limiting requests. It will try again later.');
+    if(st===403||st===404)return status('err','Can’t write to '+cfg.repo+'. Check the repo name and that the token has Contents read and write on it.');
+    status('err','GitHub didn’t save it ('+st+'). It will retry on your next change.');
+  }
+  async function pull(){
+    let r;try{r=await req('/contents/'+FILE)}catch(e){return fail(0)}
+    if(r.status===404)return{missing:true};
+    if(r.status!==200){fail(r.status,r.body);return null}
+    let data=null;try{data=JSON.parse(dec(r.body.content))}catch(e){}
+    cfg.sha=r.body.sha;store();return{data};
+  }
+  async function push(){
+    const body={message:'Sync '+new Date().toISOString().slice(0,16).replace('T',' '),content:enc(JSON.stringify({app:'level35',v:1,updated,days,quests:getQuests()},null,1))};
+    if(cfg.sha)body.sha=cfg.sha;
+    let r;try{r=await req('/contents/'+FILE,{method:'PUT',body:JSON.stringify(body),keepalive:true})}catch(e){fail(0);return false}
+    if(r.status===200||r.status===201){cfg.sha=r.body.content.sha;cfg.last=Date.now();store();status('ok','Synced at '+hhmm(cfg.last));return true}
+    if(r.status===409||r.status===422)return 'conflict';
+    fail(r.status,r.body);return false;
+  }
+  async function sync(){
+    if(!on())return;
+    if(busy){again=true;return}
+    busy=true;clearTimeout(timer);
+    try{
+      const got=await pull();
+      if(got&&got.data&&typeof got.data.days==='object'&&(got.data.updated||0)>updated){
+        days=got.data.days;quests=Array.isArray(got.data.quests)?got.data.quests:null;updated=got.data.updated;lsWrite();render();
+        cfg.last=Date.now();store();status('ok','Synced at '+hhmm(cfg.last)+' · loaded newer data from GitHub');
+      }else if(got&&(got.missing||(got.data&&(got.data.updated||0)<updated))){
+        if(got.missing){cfg.sha=null}
+        const res=await push();
+        if(res==='conflict'){const g2=await pull();if(g2&&!g2.missing)await push()}
+      }else if(got){cfg.last=Date.now();store();status('ok','Synced at '+hhmm(cfg.last))}
+    }finally{busy=false;if(again){again=false;sync()}}
+  }
+  function schedule(){if(!on())return;clearTimeout(timer);status('','Saving to GitHub…');timer=setTimeout(sync,4000)}
+  function flush(){if(on()&&timer){clearTimeout(timer);timer=null;sync()}}
+  async function connect(){
+    const repo=$('ghRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,''),token=$('ghToken').value.trim();
+    if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){toast('Repo should look like alodoo/level35-data');return}
+    if(!token){toast('Paste your token first');return}
+    cfg={repo,token,sha:null};
+    $('ghConnect').disabled=true;$('ghMsg').textContent='Checking…';
+    let r;try{r=await req('')}catch(e){r={status:0}}
+    $('ghConnect').disabled=false;
+    if(r.status!==200){const st=r.status;fail(st,r.body);cfg=null;status('err',st===401?'GitHub rejected that token. Copy it again.':st===0?'No connection. Try again when you’re online.':'Can’t see '+repo+'. Check the name, and that the token includes this repo.');return}
+    if(!r.body.private){cfg=null;status('err',repo+' is public, so anyone could read your data. Make it private in its GitHub settings, then connect again.');return}
+    if(r.body.permissions&&r.body.permissions.push===false){cfg=null;status('err','The token can read '+repo+' but not write. Give it Contents → Read and write.');return}
+    store();$('ghToken').value='';status('','Connected. Syncing…');await sync();
+  }
+  function init(){
+    $('ghConnect').onclick=connect;
+    $('ghNow').onclick=()=>{status('','Syncing…');sync()};
+    $('ghOff').onclick=()=>{cfg=null;store();clearTimeout(timer);status('','Disconnected. Your data stays on this phone and in the GitHub repo.')};
+    if(on()){status(cfg.last?'ok':'',cfg.last?'Last synced '+hhmm(cfg.last):'Connected');sync()}else status('','Saves your progress to a private GitHub repo after every change.');
+  }
+  addEventListener('online',()=>{if(on())sync()});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)flush();else if(on())sync()});
+  return{init,schedule,on};
+})();
 
 /* ---------- backup ---------- */
 function backupText(){return JSON.stringify({app:'level35',v:1,saved:today(),days,quests:getQuests()})}
