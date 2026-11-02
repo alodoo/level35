@@ -1,5 +1,5 @@
 // Level 35 offline cache. Bump VERSION when files change.
-const VERSION = 'level35-v5';
+const VERSION = 'level35-v6';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -19,7 +19,8 @@ self.addEventListener('fetch', e => {
   if (!own && !font) return;
   // The page itself: network first so updates arrive, cache when offline.
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then(res => {
+    // Always ask the server for the latest page (skip the browser's 10-minute cache).
+    e.respondWith(fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }).then(res => {
       const copy = res.clone(); caches.open(VERSION).then(c => c.put('./', copy)); return res;
     }).catch(() => caches.match('./')));
     return;
