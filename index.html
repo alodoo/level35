@@ -260,12 +260,12 @@ html{-webkit-tap-highlight-color:transparent}
 
   <section class="grid-card" aria-label="Backup">
     <div class="sec-head"><h3>Backup</h3><span class="label" id="bkWhen"></span></div>
-    <p class="bk-note">A manual copy, for when GitHub sync is off. Copy it now and then and paste it into Notes.</p>
-    <div class="btns"><button class="btn primary" id="exp" type="button">Copy backup</button><button class="btn" id="imp" type="button">Restore from backup</button></div>
+    <p class="bk-note">A manual copy, for when GitHub sync is off. Adding from a backup only adds what’s missing and never deletes anything.</p>
+    <div class="btns"><button class="btn primary" id="exp" type="button">Copy backup</button><button class="btn" id="imp" type="button">Add from backup</button></div>
     <textarea class="bk" id="expTxt" readonly hidden aria-label="Backup text"></textarea>
     <div id="impBox" hidden style="display:flex;flex-direction:column;gap:8px">
       <textarea class="bk" id="impTxt" placeholder="Paste your backup here" aria-label="Paste backup"></textarea>
-      <div class="btns"><button class="btn primary" id="impGo" type="button">Replace my data with this backup</button><button class="btn" id="impCancel" type="button">Cancel</button></div>
+      <div class="btns"><button class="btn primary" id="impGo" type="button">Add to my data</button><button class="btn" id="impCancel" type="button">Cancel</button></div>
     </div>
   </section>
 
@@ -432,9 +432,20 @@ $('impCancel').onclick=()=>{$('impBox').hidden=true;$('impTxt').value=''};
 $('impGo').onclick=()=>{
   let r;try{r=JSON.parse($('impTxt').value.trim())}catch(e){toast('That isn’t a Level 35 backup. Copy it again and paste the whole text.');return}
   if(!r||typeof r.days!=='object'||Array.isArray(r.days)){toast('That backup has no days in it. Copy it again.');return}
-  days=r.days;quests=Array.isArray(r.quests)?r.quests:null;lsSave();
+  // Merge: keep everything already here, add what's missing. Never deletes.
+  const cur=getQuests().slice(),haveId=new Set(cur.map(q=>q.id)),haveTxt=new Set(cur.map(q=>(q.text||'').trim().toLowerCase()));
+  let addedQ=0,addedD=0;
+  for(const q of (Array.isArray(r.quests)?r.quests:[])){
+    if(!q||!q.text||haveId.has(q.id)||haveTxt.has(q.text.trim().toLowerCase()))continue;
+    cur.push(Object.assign({},q));haveId.add(q.id);haveTxt.add(q.text.trim().toLowerCase());addedQ++}
+  const nd=Object.assign({},days);
+  for(const s in r.days){const b=r.days[s];if(!b||typeof b!=='object')continue;
+    if(!nd[s]){nd[s]=JSON.parse(JSON.stringify(b));addedD++;continue}
+    const a=nd[s],h=Object.assign({},a.h||{});for(const k in (b.h||{}))if(b.h[k])h[k]=true;
+    nd[s]=Object.assign({},a,{h,apps:Math.max(a.apps||0,b.apps||0),task:a.task||b.task||''})}
+  days=nd;quests=cur;lsSave();
   $('impBox').hidden=true;$('impTxt').value='';viewDate=today();render();
-  toast('Restored '+Object.keys(days).length+' days');
+  toast('Added '+addedQ+(addedQ===1?' task':' tasks')+' and '+addedD+(addedD===1?' day':' days'));
 };
 function showBk(){let w=null;try{w=localStorage.getItem(LS+'-bk')}catch(e){}
   $('bkWhen').textContent=w?'Last copied '+parse(w).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'Never copied'}
