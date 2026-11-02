@@ -142,6 +142,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .wh .track{height:6px;background:var(--soft);border-radius:9px;overflow:hidden}
 .wh .track i{display:block;height:100%;background:var(--good)}
 .wh .n{font-family:var(--mono);font-size:12px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.sec-right{display:flex;align-items:center;gap:10px}
+.plus{width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:24px;font-weight:600;line-height:1;display:grid;place-items:center;transition:transform .2s}
+.plus[aria-expanded="true"]{transform:rotate(45deg)}
+.tform{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.tform input[type=text],.tform input[type=date],.tform input[type=time],.tform select{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;min-width:0}
+.tform input[type=text]{width:100%}
+.trow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.flabel{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);width:100%}
+.chip{padding:8px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg);font-size:13.5px;font-weight:600}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sw{display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:600;cursor:pointer}
+.sw input{width:20px;height:20px;margin:0;accent-color:var(--accent)}
+.sw.sub{font-weight:500;color:var(--muted);font-size:13.5px}
+.tbtn{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:600;font-size:14px}
+.tbtn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.meta{font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:3px}
+.meta .late{color:var(--accent);font-weight:600}
+.calchip{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--muted);text-decoration:none}
+.calchip.ok{color:var(--good);background:color-mix(in srgb,var(--good) 15%,transparent)}
+a.calchip,button.calchip{color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent)}
+.calerr{font-size:12px;color:var(--accent);width:100%}
+.empty{padding:16px;color:var(--muted);font-size:14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .btns{display:flex;gap:8px;flex-wrap:wrap}
@@ -184,8 +206,22 @@ html{-webkit-tap-highlight-color:transparent}
     <div class="wk-habits" id="wkHabits"></div>
   </section>
 
-  <section style="display:flex;flex-direction:column;gap:12px" aria-label="Quests">
-    <div class="sec-head"><h3>Quests</h3><span class="label" id="qCount"></span></div>
+  <section style="display:flex;flex-direction:column;gap:12px" aria-label="Tasks">
+    <div class="sec-head"><h3>Tasks</h3><div class="sec-right"><span class="label" id="qCount"></span><button class="plus" id="tPlus" type="button" aria-label="New task" aria-expanded="false" aria-controls="taskForm">+</button></div></div>
+    <form class="tform" id="taskForm" hidden>
+      <input id="tTitle" type="text" maxlength="100" placeholder="What needs doing?" aria-label="Task">
+      <div class="trow"><span class="flabel">Day</span>
+        <button class="chip" type="button" data-d="0">Today</button><button class="chip" type="button" data-d="1">Tomorrow</button><button class="chip" type="button" data-d="none">Anytime</button>
+        <input id="tDate" type="date" aria-label="Pick a day">
+      </div>
+      <label class="sw"><input id="tTimed" type="checkbox"> At a set time</label>
+      <div class="trow" id="tTimeRow" hidden>
+        <input id="tTime" type="time" aria-label="Time">
+        <select id="tDur" aria-label="Duration"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select>
+      </div>
+      <label class="sw sub" id="tCalRow" hidden><input id="tCal" type="checkbox" checked> <span id="tCalTxt">Add to Google Calendar</span></label>
+      <div class="trow"><button class="tbtn primary" type="submit">Add task</button><button class="tbtn" type="button" id="tCancel">Cancel</button></div>
+    </form>
     <div class="list" id="quests"></div>
   </section>
 
@@ -407,31 +443,94 @@ function renderWeek(){
     r.innerHTML='<span></span><div class="track"><i></i></div><span class="n"></span>';
     r.firstChild.textContent=nm;r.querySelector('i').style.width=Math.round(hit/due*100)+'%';r.querySelector('.n').textContent=hit+'/'+due;wh.appendChild(r)}
 }
+/* ---------- tasks + calendar ---------- */
+const CAL='Google Calendar',inflight=new Set();let mcpP=null;
+function getMcp(){if(!mcpP)mcpP=(window.claude&&window.claude.use)?window.claude.use('mcp').catch(()=>null):Promise.resolve(null);return mcpP}
+const pad=n=>String(n).padStart(2,'0');
+function endOf(q){const [h,m]=q.time.split(':').map(Number);const d=parse(q.date);d.setHours(h,m+(q.dur||60),0,0);return d}
+function isoLocal(d){return ymd(d)+'T'+pad(d.getHours())+':'+pad(d.getMinutes())+':00'}
+function gcalLink(q){const e=endOf(q);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(q.text)+'&dates='+q.date.replace(/-/g,'')+'T'+q.time.replace(':','')+'00/'+ymd(e).replace(/-/g,'')+'T'+pad(e.getHours())+pad(e.getMinutes())+'00&ctz=Europe%2FMadrid&details='+encodeURIComponent('From Level 35')}
+function setQ(id,patch){quests=getQuests().map(x=>x.id===id?Object.assign({},x,patch):x);saveState();render()}
+const CAL_MSG={needs_reauth:'Reconnect Google Calendar in claude.ai Settings → Connectors, then retry.',server_not_connected:'Add Google Calendar in claude.ai Settings → Connectors, then retry.',selection_required:'Pick which Google Calendar to use when claude.ai asks, then retry.',not_in_manifest:'Calendar access is off for this page. Tap Retry and allow it.',approval_required:'Calendar needs your OK. Tap Retry and allow it.',blocked_by_policy:'Your organization blocks calendar access here.',server_unavailable:'Google didn’t confirm. Check your calendar before retrying.',upstream_error:'Google didn’t confirm. Check your calendar before retrying.',cancelled:'Google didn’t confirm. Check your calendar before retrying.'};
+function findId(p,r){try{
+  if(p&&typeof p==='object'){if(typeof p.id==='string')return p.id;if(typeof p.eventId==='string')return p.eventId;for(const k of ['event','result','data'])if(p[k]&&typeof p[k].id==='string')return p[k].id}
+  const t=typeof p==='string'?p:JSON.stringify(r||{});const m=t.match(/"id"\s*:\s*"([^"]+)"/)||t.match(/[Ee]vent ?[Ii][Dd]\W+([A-Za-z0-9_]+)/);return m?m[1]:null}catch(e){return null}}
+async function pushCal(id){
+  const q=getQuests().find(x=>x.id===id);if(!q||!q.time||inflight.has(id))return;
+  const mcp=await getMcp();
+  if(!mcp){setQ(id,{cal:'link'});toast('Task added. Tap “Add to calendar” to save it.');return}
+  inflight.add(id);setQ(id,{cal:'want',calErr:null});
+  try{
+    const r=await mcp.callTool(CAL,'create_event',{summary:q.text,startTime:q.date+'T'+q.time+':00',endTime:isoLocal(endOf(q)),description:'From Level 35',overrideReminders:[{method:'popup',minutes:15}]});
+    inflight.delete(id);setQ(id,{cal:'ok',calId:findId(r&&r.payload,r),calErr:null});toast('Added to Google Calendar');
+  }catch(e){inflight.delete(id);const code=(e&&e.code)||'upstream_error';
+    setQ(id,{cal:'err',calErr:CAL_MSG[code]||(code==='tool_error'?'Google Calendar refused it: '+String(e.message||'').slice(0,100):'Calendar isn’t reachable here right now.')})}
+}
+async function dropCal(q){if(q.cal!=='ok')return;const mcp=await getMcp();
+  if(!mcp||!q.calId){toast('Removed. Delete it in Google Calendar too.');return}
+  try{await mcp.callTool(CAL,'delete_event',{eventId:q.calId});toast('Removed from tasks and your calendar')}catch(e){toast('Removed. Delete it in Google Calendar too.')}}
+function dueText(q){if(!q.date)return '';const t=today();
+  const w=q.date===t?'Today':q.date===addDays(t,1)?'Tomorrow':q.date===addDays(t,-1)?'Yesterday':parse(q.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  return w+(q.time?' · '+q.time:'')}
 function renderQuests(){
-  const box=$('quests');box.innerHTML='';const qs=getQuests();
-  const open=qs.filter(q=>!q.done),closed=qs.filter(q=>q.done);
-  $('qCount').textContent=closed.length+' of '+qs.length+' done';
+  const box=$('quests');box.innerHTML='';const qs=getQuests(),t=today();
+  const key=q=>(q.date||'9999-12-31')+(q.time||'99:99');
+  const open=qs.filter(q=>!q.done).sort((a,b)=>key(a)<key(b)?-1:key(a)>key(b)?1:0);
+  const closed=qs.filter(q=>q.done).sort((a,b)=>(b.doneOn||'').localeCompare(a.doneOn||''));
+  $('qCount').textContent=qs.length?closed.length+' of '+qs.length+' done':'';
+  if(!qs.length){const e=document.createElement('div');e.className='empty';e.textContent='No tasks yet. Tap + to add one.';box.appendChild(e);return}
   for(const q of open.concat(closed)){
     const row=document.createElement('div');row.className='row q'+(q.done?' on':'');
     const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;b.setAttribute('aria-pressed',q.done);b.setAttribute('aria-label',q.text);
     b.onclick=()=>toggleQuest(q.id);
     const txt=document.createElement('div');txt.className='txt';
     const n=document.createElement('div');n.className='name';n.textContent=q.text;txt.appendChild(n);
-    if(q.done&&q.doneOn){const w=document.createElement('div');w.className='when';w.textContent='Done '+parse(q.doneOn).toLocaleDateString('en-GB',{day:'numeric',month:'short'});txt.appendChild(w)}
+    const meta=document.createElement('div');meta.className='meta';
+    if(q.done){if(q.doneOn){const w=document.createElement('span');w.textContent='Done '+parse(q.doneOn).toLocaleDateString('en-GB',{day:'numeric',month:'short'});meta.appendChild(w)}}
+    else{
+      if(q.date){const d=document.createElement('span');const late=q.date<t;d.className=late?'late':'';d.textContent=(late?'Overdue · ':'')+dueText(q);meta.appendChild(d)}
+      if(q.time){
+        if(q.cal==='ok'){const c=document.createElement('span');c.className='calchip ok';c.textContent='In calendar';meta.appendChild(c)}
+        else if(inflight.has(q.id)){const c=document.createElement('span');c.className='calchip';c.textContent='Adding to calendar…';meta.appendChild(c)}
+        else if(q.cal==='link'||q.cal==='linked'){const a=document.createElement('a');a.className='calchip';a.href=gcalLink(q);a.target='_blank';a.rel='noopener';
+          a.textContent=q.cal==='linked'?'Opened in Calendar ↗':'Add to calendar ↗';a.onclick=()=>setTimeout(()=>setQ(q.id,{cal:'linked'}),400);meta.appendChild(a)}
+        else if(q.cal==='err'||q.cal==='want'){const r=document.createElement('button');r.type='button';r.className='calchip';r.textContent='Retry calendar';r.onclick=()=>pushCal(q.id);meta.appendChild(r);
+          const m=document.createElement('span');m.className='calerr';m.textContent=q.calErr||'Not confirmed. Check your calendar before retrying.';meta.appendChild(m)}
+      }
+    }
+    if(meta.childNodes.length)txt.appendChild(meta);
     const right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:6px';
     const xp=document.createElement('span');xp.className='xp';xp.textContent='+'+q.xp;right.appendChild(xp);
-    if(!q.done){const del=document.createElement('button');del.className='del'+(armDel===q.id?' arm':'');del.textContent=armDel===q.id?'Remove?':'×';
-      del.setAttribute('aria-label','Remove quest');
-      del.onclick=()=>{if(armDel===q.id){quests=getQuests().filter(x=>x.id!==q.id);armDel=null;saveState();render()}else{armDel=q.id;renderQuests();setTimeout(()=>{if(armDel===q.id){armDel=null;renderQuests()}},3000)}};
+    if(!q.done){const del=document.createElement('button');del.type='button';del.className='del'+(armDel===q.id?' arm':'');del.textContent=armDel===q.id?'Remove?':'×';
+      del.setAttribute('aria-label','Remove task');
+      del.onclick=()=>{if(armDel===q.id){const gone=q;quests=getQuests().filter(x=>x.id!==q.id);armDel=null;saveState();render();dropCal(gone)}else{armDel=q.id;renderQuests();setTimeout(()=>{if(armDel===q.id){armDel=null;renderQuests()}},3000)}};
       right.appendChild(del)}
     row.append(b,txt,right);box.appendChild(row);
   }
-  const add=document.createElement('form');add.className='addq';
-  add.innerHTML='<input id="newQuest" type="text" maxlength="100" placeholder="Add a one-off task" aria-label="New quest"><button type="submit">Add</button>';
-  add.onsubmit=e=>{e.preventDefault();const v=add.querySelector('input').value.trim();if(!v)return;
-    quests=getQuests().concat([{id:'q'+Date.now().toString(36),text:v,xp:20,done:false}]);saveState();render();toast('Quest added · +20 XP when done')};
-  box.appendChild(add);
 }
+(function taskForm(){
+  const f=$('taskForm'),plus=$('tPlus'),dIn=$('tDate'),timed=$('tTimed'),tIn=$('tTime');
+  const chips=[...f.querySelectorAll('.chip')];
+  const syncChips=()=>{const v=dIn.value,t=today();chips.forEach(c=>c.classList.toggle('on',c.dataset.d==='none'?!v:v===addDays(t,+c.dataset.d)))};
+  const syncTime=()=>{$('tTimeRow').hidden=!timed.checked;$('tCalRow').hidden=!timed.checked;
+    if(timed.checked&&!dIn.value){dIn.value=today();syncChips()}
+    if(timed.checked&&!tIn.value){const d=new Date();tIn.value=pad(Math.min(23,d.getHours()+1))+':00'}};
+  const open=v=>{f.hidden=!v;plus.setAttribute('aria-expanded',v);if(v){f.reset();dIn.value=today();syncChips();syncTime();$('tTitle').focus()}};
+  plus.onclick=()=>open(f.hidden);$('tCancel').onclick=()=>open(false);
+  chips.forEach(c=>c.onclick=()=>{dIn.value=c.dataset.d==='none'?'':addDays(today(),+c.dataset.d);if(!dIn.value&&timed.checked){timed.checked=false;syncTime()}syncChips()});
+  dIn.onchange=()=>{if(!dIn.value&&timed.checked){timed.checked=false;syncTime()}syncChips()};
+  timed.onchange=syncTime;
+  getMcp().then(m=>{$('tCalTxt').textContent=m?'Add to Google Calendar with a 15-minute reminder':'Add an “Add to calendar” button so you can save it to Google Calendar'});
+  f.onsubmit=e=>{e.preventDefault();const text=$('tTitle').value.trim();
+    if(!text){toast('Give the task a name');$('tTitle').focus();return}
+    const isTimed=timed.checked;if(isTimed&&!tIn.value){toast('Pick a time, or turn off “At a set time”');return}
+    const q={id:'q'+Date.now().toString(36),text,xp:20,done:false,date:dIn.value||null,time:isTimed?tIn.value:null,dur:isTimed?+$('tDur').value:null,cal:null};
+    const wantCal=isTimed&&$('tCal').checked;
+    quests=getQuests().concat([q]);saveState();open(false);render();
+    if(wantCal)pushCal(q.id);else toast('Task added · +20 XP when done');
+  };
+})();
 function renderCal(){
   const cal=$('cal');cal.innerHTML='';const t=today();
   ['M','T','W','T','F','S','S'].forEach(w=>{const e=document.createElement('div');e.className='wd';e.textContent=w;cal.appendChild(e)});
@@ -473,7 +572,7 @@ function toggleQuest(id){
   quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?today():null}):q);
   saveState();render();const q=quests.find(q=>q.id===id);
   const after=levelInfo(totalXP()).lv;
-  toast(after>before?'Level '+after+' · '+rankFor(after):after<before?'Quest reopened · back to level '+after:q.done?'Quest done · +'+q.xp+' XP':'Quest reopened · −'+q.xp+' XP');
+  toast(after>before?'Level '+after+' · '+rankFor(after):after<before?'Task reopened · back to level '+after:q.done?'Task done · +'+q.xp+' XP':'Task reopened · −'+q.xp+' XP');
 }
 let tt;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),1800)}
 
