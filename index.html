@@ -243,7 +243,7 @@ html{-webkit-tap-highlight-color:transparent}
     </div>
   </section>
 
-  <p class="rule">A solid day means: up at 7:30, job block done, trained (gym, cardio or move), and one responsibility task. Solid days build the streak and unlock new habits.</p>
+  <p class="rule">A solid weekday means: up at 7:30, job block done, trained (gym or cardio), and one responsibility task. On weekends it’s just up at 7:30 and one responsibility task. Solid days build the streak and unlock new habits.</p>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -255,7 +255,7 @@ const LOCK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-wi
 const HABITS=[
   {id:'wake',name:'Up at 7:30',hint:'Phone charged outside the bedroom',xp:15,core:true},
   {id:'job',name:'Job block, 9:30–13:00',hint:'Out of the house: library or coworking',xp:25,core:true,counter:true},
-  {id:'move',name:'Training',hint:'Gym, cardio or move, depending on the day',xp:20,core:true},
+  {id:'move',name:'Training',hint:'Gym Mon/Wed/Fri, cardio Tue/Thu',xp:20,core:true},
   {id:'resp',name:'One responsibility task',hint:'30 minutes: bike, home, admin, pickup',xp:15,core:true,text:true},
   {id:'crea',name:'Creatine with breakfast',hint:'Attached to breakfast so it sticks',xp:5},
   {id:'screens',name:'No games or series before work is done',hint:'They are the reward, not the default',xp:10},
@@ -265,9 +265,13 @@ const HABITS=[
 const UNLOCKS=[{id:'team',name:'Basketball or boxing session',hint:'Fixed time, people expecting you',xp:30,need:10}];
 const SOLID_BONUS=10;
 function moveFor(s){const w=parse(s).getDay();
-  if(w===1||w===3||w===5)return{name:'Gym',hint:'Program day: lift, then stretch',kind:'gym'};
-  if(w===2||w===4)return{name:'Cardio',hint:'Run, bike or rower, then stretch',kind:'cardio'};
+  if(w===1||w===3||w===5)return{name:'Gym · 18:00',hint:'Program day: lift, then stretch',kind:'gym'};
+  if(w===2||w===4)return{name:'Cardio · 18:30',hint:'Run, bike or rower, then stretch',kind:'cardio'};
   return{name:'Move',hint:'Anything active: walk, hike, swim, a game',kind:'move'}}
+const WEEKEND=['wake','resp'];
+function isWeekend(s){const w=parse(s).getDay();return w===0||w===6}
+function dueFor(s){return isWeekend(s)?HABITS.filter(h=>WEEKEND.includes(h.id)):HABITS}
+function isDue(h,s){return UNLOCKS.includes(h)?!isWeekend(s):dueFor(s).includes(h)}
 function view(h,s){return h.id==='move'?Object.assign({},h,moveFor(s)):h}
 const DEFAULT_QUESTS=[];
 const RANKS=[[1,'Rebooting'],[3,'Back in motion'],[5,'Building momentum'],[8,'Consistent'],[11,'Locked in'],[15,'Unstoppable']];
@@ -280,11 +284,11 @@ function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d
 function addDays(s,n){const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)}
 function today(){return ymd(new Date())}
 function day(s){return days[s]||{h:{},apps:0,task:''}}
-function isSolid(s){const d=days[s];return !!d&&HABITS.filter(h=>h.core).every(h=>d.h&&d.h[h.id])}
+function isSolid(s){const d=days[s];return !!d&&dueFor(s).filter(h=>h.core).every(h=>d.h&&d.h[h.id])}
 function dayXP(s){const d=days[s];if(!d||!d.h)return 0;let x=0;
   for(const h of HABITS.concat(UNLOCKS)) if(d.h[h.id]) x+=h.xp;
   if(isSolid(s)) x+=SOLID_BONUS; return x}
-const MAXDAY=HABITS.reduce((a,h)=>a+h.xp,0)+SOLID_BONUS;
+function maxDay(s){return dueFor(s).reduce((a,h)=>a+h.xp,0)+SOLID_BONUS}
 function solidCount(){return Object.keys(days).filter(isSolid).length}
 function totalXP(){let x=0;for(const s in days)x+=dayXP(s);for(const q of getQuests())if(q.done)x+=q.xp;return x}
 function levelInfo(xp){let lv=1,need=150,base=0;while(xp>=base+need){base+=need;lv++;need=150+50*(lv-1)}return{lv,into:xp-base,need}}
@@ -342,12 +346,13 @@ function renderDay(){
   const t=today(),d=day(viewDate),dt=parse(viewDate);
   const rel=viewDate===t?'Today':viewDate===addDays(t,-1)?'Yesterday':dt.toLocaleDateString('en-GB',{weekday:'long'});
   $('dayTitle').textContent=rel;
-  $('daySub').textContent=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' · '+dayXP(viewDate)+' / '+MAXDAY+' XP';
+  $('daySub').textContent=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' · '+dayXP(viewDate)+' / '+maxDay(viewDate)+' XP';
   $('next').disabled=viewDate>=t;
   renderYest();
   const box=$('habits');box.innerHTML='';
   const sc=solidCount();
-  const list=HABITS.concat(UNLOCKS.filter(u=>sc>=u.need||(d.h&&d.h[u.id])));
+  const wk=isWeekend(viewDate),ticked=h=>!!(d.h&&d.h[h.id]);
+  const list=HABITS.filter(h=>isDue(h,viewDate)||ticked(h)).concat(UNLOCKS.filter(u=>(!wk&&sc>=u.need)||ticked(u)));
   for(const h0 of list){
     const h=view(h0,viewDate);
     const on=!!(d.h&&d.h[h.id]);
@@ -378,7 +383,7 @@ function renderDay(){
     box.appendChild(row);
   }
   for(const u of UNLOCKS){
-    if(sc>=u.need||(d.h&&d.h[u.id]))continue;
+    if(wk||sc>=u.need||(d.h&&d.h[u.id]))continue;
     const r=document.createElement('div');r.className='locked';
     r.innerHTML='<span class="lock">'+LOCK+'</span><div><div class="lname" style="font-weight:600"></div><div class="hint" style="font-size:12.5px"></div><div class="minibar"><i></i></div></div><span class="xp"></span>';
     r.querySelector('.lname').textContent=u.name;
@@ -387,9 +392,9 @@ function renderDay(){
     r.querySelector('.xp').textContent='+'+u.xp;
     box.appendChild(r);
   }
-  const done=HABITS.filter(h=>h.core&&d.h&&d.h[h.id]).length;
+  const coreDue=dueFor(viewDate).filter(h=>h.core),done=coreDue.filter(ticked).length;
   const ban=document.createElement('div');ban.className='solid-banner';
-  ban.innerHTML=isSolid(viewDate)?'<b>Solid day.</b> +'+SOLID_BONUS+' XP bonus and the streak continues.':'Core habits: '+done+' of 4 done. Finish all four for a solid day.';
+  ban.innerHTML=isSolid(viewDate)?'<b>Solid day.</b> +'+SOLID_BONUS+' XP bonus and the streak continues.':wk?'Weekend: up at 7:30 plus one responsibility task makes a solid day ('+done+' of 2).':'Core habits: '+done+' of 4 done. Finish all four for a solid day.';
   box.appendChild(ban);
 }
 function renderYest(){
@@ -422,7 +427,7 @@ function renderWeek(){
   ['M','T','W','T','F','S','S'].forEach((L,i)=>{const s=addDays(mon,i),e=document.createElement('button');e.type='button';
     e.className='wb'+(s>t?' fut':'')+(s===t?' today':'')+(isSolid(s)?' solid':'');
     const x=dayXP(s);e.innerHTML='<div class="col"><i></i></div><span class="d"></span><span class="v"></span>';
-    e.querySelector('i').style.height=(s>t?0:Math.round(x/MAXDAY*100))+'%';
+    e.querySelector('i').style.height=(s>t?0:Math.round(x/maxDay(s)*100))+'%';
     e.querySelector('.d').textContent=L;e.querySelector('.v').textContent=s>t?'':x;
     e.setAttribute('aria-label',parse(s).toDateString()+', '+x+' XP');
     if(s<=t)e.onclick=()=>{viewDate=s;render();window.scrollTo({top:0,behavior:'smooth'})};else e.disabled=true;
@@ -431,13 +436,13 @@ function renderWeek(){
   const rows=[];
   for(const h of HABITS.concat(UNLOCKS)){
     if(h.id==='move'){
-      for(const kind of ['gym','cardio','move']){let hit=0,due=0,nm='';
-        for(let i=0;i<elapsed;i++){const s=addDays(mon,i),m=moveFor(s);if(m.kind!==kind)continue;nm=m.name;due++;if(days[s]&&days[s].h&&days[s].h.move)hit++}
+      for(const kind of ['gym','cardio']){let hit=0,due=0,nm=kind==='gym'?'Gym':'Cardio';
+        for(let i=0;i<elapsed;i++){const s=addDays(mon,i),m=moveFor(s);if(m.kind!==kind)continue;due++;if(days[s]&&days[s].h&&days[s].h.move)hit++}
         if(due)rows.push([nm,hit,due])}
       continue}
-    let hit=0;for(let i=0;i<elapsed;i++){const s=addDays(mon,i);if(days[s]&&days[s].h&&days[s].h[h.id])hit++}
-    if(UNLOCKS.includes(h)&&!hit&&solidCount()<h.need)continue;
-    rows.push([h.name,hit,elapsed]);
+    let hit=0,due=0;for(let i=0;i<elapsed;i++){const s=addDays(mon,i);if(!isDue(h,s))continue;due++;if(days[s]&&days[s].h&&days[s].h[h.id])hit++}
+    if(!due||(UNLOCKS.includes(h)&&!hit&&solidCount()<h.need))continue;
+    rows.push([h.name,hit,due]);
   }
   for(const [nm,hit,due] of rows){const r=document.createElement('div');r.className='wh';
     r.innerHTML='<span></span><div class="track"><i></i></div><span class="n"></span>';
@@ -540,7 +545,7 @@ function renderCal(){
     const dd=parse(s).getDate();
     if(s>t){c.classList.add('fut');c.disabled=true;c.textContent='';}
     else{
-      const f=dayXP(s)/MAXDAY;
+      const f=Math.min(1,dayXP(s)/maxDay(s));
       if(f>0)c.style.background='color-mix(in srgb, var(--accent) '+Math.round(18+f*82)+'%, var(--soft))';
       if(isSolid(s)){c.classList.add('solid');c.textContent=dd}
       if(s===t)c.classList.add('today');
