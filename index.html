@@ -172,6 +172,9 @@ a.calchip,button.calchip{color:var(--accent);background:color-mix(in srgb,var(--
 .gh-status.err{color:var(--accent)}.gh-status.err .dot{background:var(--accent)}
 .gh-steps{margin:0;padding-left:20px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 .gh-steps b{color:var(--ink);font-weight:600}
+.extra select{flex:1;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+.linked{font-size:13px;font-weight:600;color:var(--good);min-width:0}
+.extra .mini{font-size:12px;color:var(--muted);width:100%}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .btns{display:flex;gap:8px;flex-wrap:wrap}
@@ -496,9 +499,21 @@ function renderDay(){
     }
     if(h.text){
       const ex=document.createElement('div');ex.className='extra';
-      const inp=document.createElement('input');inp.type='text';inp.id='task-'+viewDate;inp.placeholder='What was it? e.g. fixed the bike';inp.value=d.task||'';
-      inp.onchange=()=>{ensure(viewDate).task=inp.value.slice(0,140);saveDay(viewDate)};
-      ex.appendChild(inp);row.appendChild(ex);
+      const isOn=!!(d.h&&d.h[h.id]),linked=d.taskId&&getQuests().find(q=>q.id===d.taskId);
+      const freeText=()=>{const inp=document.createElement('input');inp.type='text';inp.id='task-'+viewDate;inp.placeholder='What was it? e.g. fixed the bike';inp.value=d.task||'';
+        inp.onchange=()=>{ensure(viewDate).task=inp.value.slice(0,140);saveDay(viewDate)};return inp};
+      if(isOn&&linked){const l=document.createElement('span');l.className='linked';l.textContent='✓ '+linked.text+' · done in Tasks';ex.appendChild(l)}
+      else if(isOn){ex.appendChild(freeText())}
+      else{
+        const sel=document.createElement('select');sel.id='resp-'+viewDate;sel.setAttribute('aria-label','Which task did you do?');
+        const o0=document.createElement('option');o0.value='';o0.textContent='Pick the task you did…';sel.appendChild(o0);
+        for(const q of getQuests().filter(q=>!q.done)){const o=document.createElement('option');o.value=q.id;o.textContent=q.text;sel.appendChild(o)}
+        const oo=document.createElement('option');oo.value='__other';oo.textContent='Something else…';sel.appendChild(oo);
+        sel.onchange=()=>{if(sel.value==='__other'){ex.innerHTML='';ex.appendChild(freeText());const m=document.createElement('span');m.className='mini';m.textContent='Write what you did, then tick the circle.';ex.appendChild(m);ex.querySelector('input').focus()}
+          else if(sel.value)doResp(sel.value)};
+        ex.appendChild(sel);
+      }
+      row.appendChild(ex);
     }
     box.appendChild(row);
   }
@@ -683,6 +698,8 @@ function ensure(s){if(!days[s])days[s]={h:{},apps:0,task:''};if(!days[s].h)days[
 function toggle(h,val){
   const wasSolid=isSolid(viewDate),before=levelInfo(totalXP()).lv,sc=solidCount();
   const d=ensure(viewDate);d.h=Object.assign({},d.h,{[h.id]:val});
+  if(h.id==='resp'&&!val&&d.taskId){const id=d.taskId;d.taskId=null;d.task='';
+    quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:false,doneOn:null}):q);saveState()}
   saveDay(viewDate);render();
   const after=levelInfo(totalXP()).lv;
   if(after>before)toast('Level '+after+' · '+rankFor(after));
@@ -692,12 +709,24 @@ function toggle(h,val){
   else toast(val?'+'+h.xp+' XP':'Unmarked · −'+h.xp+' XP');
 }
 function bump(n){const d=ensure(viewDate);d.apps=Math.max(0,(d.apps||0)+n);saveDay(viewDate);renderDay()}
+function respXP(){return HABITS.find(h=>h.id==='resp').xp}
+function doResp(qid){
+  const before=levelInfo(totalXP()).lv,wasSolid=isSolid(viewDate),q=getQuests().find(x=>x.id===qid);if(!q)return;
+  const d=ensure(viewDate);d.h=Object.assign({},d.h,{resp:true});d.taskId=qid;d.task=q.text;
+  quests=getQuests().map(x=>x.id===qid?Object.assign({},x,{done:true,doneOn:viewDate}):x);
+  saveDay(viewDate);saveState();render();
+  const after=levelInfo(totalXP()).lv;
+  toast(after>before?'Level '+after+' · '+rankFor(after):(!wasSolid&&isSolid(viewDate))?'Solid day · streak '+streak():'Done in both places · +'+(q.xp+respXP())+' XP');
+}
 function toggleQuest(id){
-  const before=levelInfo(totalXP()).lv;
-  quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?today():null}):q);
+  const before=levelInfo(totalXP()).lv,t=today();let linkedNote='';
+  const was=getQuests().find(q=>q.id===id);
+  quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?t:null}):q);
+  if(was&&!was.done){const d=ensure(t);if(!(d.h&&d.h.resp)){d.h=Object.assign({},d.h,{resp:true});d.taskId=id;d.task=was.text;saveDay(t);linkedNote=' · counts as today’s responsibility'}}
+  else if(was){for(const s in days){const d=days[s];if(d&&d.taskId===id){days[s]=Object.assign({},d,{h:Object.assign({},d.h,{resp:false}),taskId:null,task:''});saveDay(s)}}}
   saveState();render();const q=quests.find(q=>q.id===id);
   const after=levelInfo(totalXP()).lv;
-  toast(after>before?'Level '+after+' · '+rankFor(after):after<before?'Task reopened · back to level '+after:q.done?'Task done · +'+q.xp+' XP':'Task reopened · −'+q.xp+' XP');
+  toast(after>before?'Level '+after+' · '+rankFor(after):after<before?'Task reopened · back to level '+after:q.done?'Task done · +'+q.xp+' XP'+linkedNote:'Task reopened · −'+q.xp+' XP');
 }
 let tt;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),1800)}
 
