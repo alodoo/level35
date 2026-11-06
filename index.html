@@ -322,16 +322,16 @@ html{-webkit-tap-highlight-color:transparent}
 
   <section class="grid-card" aria-label="Backup">
     <div class="sec-head"><h3>Backup</h3><span class="label" id="bkWhen"></span></div>
-    <p class="bk-note">A manual copy, for when GitHub sync is off. Adding from a backup only adds what’s missing and never deletes anything.</p>
+    <p class="bk-note">A manual copy, for when GitHub sync is off. “Add from backup” also takes a plain list of tasks, one per line. It only adds what’s missing and never deletes anything.</p>
     <div class="btns"><button class="btn primary" id="exp" type="button">Copy backup</button><button class="btn" id="imp" type="button">Add from backup</button></div>
     <textarea class="bk" id="expTxt" readonly hidden aria-label="Backup text"></textarea>
     <div id="impBox" hidden style="display:flex;flex-direction:column;gap:8px">
-      <textarea class="bk" id="impTxt" placeholder="Paste your backup here" aria-label="Paste backup"></textarea>
+      <textarea class="bk" id="impTxt" placeholder="Paste a backup, or a list of tasks (one per line)" aria-label="Paste backup"></textarea>
       <div class="btns"><button class="btn primary" id="impGo" type="button">Add to my data</button><button class="btn" id="impCancel" type="button">Cancel</button></div>
     </div>
   </section>
 
-  <p class="rule">A solid day = up on time + job + training (weekends: just up on time). Streak boost: ×1.5 from day 3, ×2 from day 5. Early on you can miss 1 day without losing the streak; after 2 weeks, 2 in a row. An Extra Boost ⚡ gives ×1.5 XP all of the next day. Max ×3.</p>
+  <p class="rule">A solid day = up on time + made bed + job + training + tidied house (weekends: just up on time). Streak boost: ×1.5 from day 3, ×2 from day 5. Early on you can miss 1 day without losing the streak; after 2 weeks, 2 in a row. An Extra Boost ⚡ gives ×1.5 XP all of the next day. Max ×3.</p>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="lvlup" id="lvlup" hidden role="dialog" aria-modal="true" aria-labelledby="luTitle">
@@ -383,9 +383,11 @@ function habitsFor(s,lv){
   if(isWeekend(s))return t.team?[wake,team]:[wake];
   const gym=w===1||w===3||w===5;
   const list=[wake,
+    {id:'madebed',name:'Made bed',hint:'Right after getting up',xp:5,core:true},
     {id:'job',name:JOB[t.job].name,hint:JOB[t.job].hint,xp:25,core:true,counter:true},
     {id:'log',name:'Logged progress in the job tracker',hint:'Every CV and reply, same day',xp:10},
     {id:'train',name:gym?'Gym · 18:00':'Cardio · 18:30',hint:gym?'Program day: lift, then stretch':'Run, bike or rower, then stretch',xp:20,core:true},
+    {id:'tidy',name:'Tidied the house',hint:'10 minutes: dishes, surfaces, floor',xp:10,core:true},
     {id:'crea',name:'Creatine with breakfast',hint:'Attached to breakfast so it sticks',xp:5}];
   if(t.screens)list.push({id:'screens',name:'No games or series before work is done',hint:'They are the reward, not the default',xp:10});
   list.push({id:'plan',name:'Planned tomorrow',hint:'2 minutes before bed',xp:5},{id:'bed',name:'In bed by '+t.bed,hint:'Phone out of the bedroom',xp:15});
@@ -571,7 +573,13 @@ $('exp').onclick=()=>{
 $('imp').onclick=()=>{$('impBox').hidden=false;$('impTxt').focus()};
 $('impCancel').onclick=()=>{$('impBox').hidden=true;$('impTxt').value=''};
 $('impGo').onclick=()=>{
-  let r;try{r=JSON.parse($('impTxt').value.trim())}catch(e){toast('That isn’t a Level 35 backup. Copy it again and paste the whole text.');return}
+  const raw=$('impTxt').value.trim();if(!raw){toast('Paste a backup or a list of tasks');return}
+  let r;try{r=JSON.parse(raw)}catch(e){
+    const cur=getQuests().slice(),have=new Set(cur.map(q=>(q.text||'').trim().toLowerCase()));let n=0;
+    raw.split(/\r?\n/).map(l=>l.replace(/^\s*(?:[-*•·]|\d+[.)])\s*/,'').trim()).filter(Boolean).forEach((t,i)=>{
+      if(have.has(t.toLowerCase()))return;have.add(t.toLowerCase());cur.push({id:'q'+Date.now().toString(36)+i,text:t.slice(0,100),xp:20,done:false,date:null,time:null,dur:null,cal:null});n++});
+    quests=cur;lsSave();$('impBox').hidden=true;$('impTxt').value='';render();
+    toast(n?'Added '+n+(n===1?' task':' tasks'):'Those tasks are already in your list');return}
   if(!r||typeof r.days!=='object'||Array.isArray(r.days)){toast('That backup has no days in it. Copy it again.');return}
   // Merge: keep everything already here, add what's missing. Never deletes.
   const cur=getQuests().slice(),haveId=new Set(cur.map(q=>q.id)),haveTxt=new Set(cur.map(q=>(q.text||'').trim().toLowerCase()));
@@ -752,7 +760,7 @@ function renderLadder(){
   const box=$('ladder'),lv=curLevel();box.innerHTML='';
   for(const s of LADDER){const li=document.createElement('li');li.className=s.lv<=lv?'done':s===LADDER.find(x=>x.lv>lv)?'nextup':'';
     const b=document.createElement('b');b.textContent='LV '+s.lv;const sp=document.createElement('span');
-    sp.textContent=s.lv===1?'Up by 8:30 · 3+ CVs · log tracker · gym/cardio · creatine · plan · bed by 00:00':changesAt(s.lv).join(' · ');
+    sp.textContent=s.lv===1?'Up by 8:30 · made bed · 3+ CVs · log tracker · gym/cardio · tidied house · creatine · plan · bed by 00:00':changesAt(s.lv).join(' · ');
     li.append(b,sp);box.appendChild(li)}
 }
 
