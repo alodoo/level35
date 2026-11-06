@@ -17,20 +17,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: single mobile column — scoreboard header, today's checklist, quests, 4-week grid */
+/* Layout: single mobile column — scoreboard (character, level, streak, boosts), today's checklist + Extra Boost, week, tasks, 4-week grid */
 :root{
   --bg:#F2F3F7; --surface:#FFFFFF; --ink:#141A2B; --muted:#5A6276; --line:#DCE0E9;
-  --accent:#E8541A; --accent-ink:#FFFFFF; --good:#1E9466; --soft:#E9ECF3;
+  --accent:#E8541A; --accent-ink:#FFFFFF; --good:#1E9466; --soft:#E9ECF3; --boost:#E5A800; --boost-ink:#7A5200; --boost-bg:#FFF7DB;
   --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
   --body:"Figtree",-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0D111E; --surface:#161B2C; --ink:#EDEFF6; --muted:#949BB0; --line:#262D44;
-  --accent:#FF6A2B; --accent-ink:#1A0D06; --good:#3CC98E; --soft:#1E2438; color-scheme:dark}}
+  --accent:#FF6A2B; --accent-ink:#1A0D06; --good:#3CC98E; --soft:#1E2438; --boost:#FFD23F; --boost-ink:#FFD84F; --boost-bg:#262312; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0D111E; --surface:#161B2C; --ink:#EDEFF6; --muted:#949BB0; --line:#262D44;
-  --accent:#FF6A2B; --accent-ink:#1A0D06; --good:#3CC98E; --soft:#1E2438; color-scheme:dark}
+  --accent:#FF6A2B; --accent-ink:#1A0D06; --good:#3CC98E; --soft:#1E2438; --boost:#FFD23F; --boost-ink:#FFD84F; --boost-bg:#262312; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;
@@ -205,6 +205,40 @@ a.calchip,button.calchip{color:var(--accent);background:color-mix(in srgb,var(--
 .btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .bk-note{margin:0;font-size:13px;color:var(--muted)}
 textarea.bk{width:100%;min-height:90px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:12px;resize:vertical}
+.brand-row{display:flex;align-items:center;gap:6px}
+.mute{width:30px;height:30px;border-radius:9px;color:var(--muted);display:grid;place-items:center}
+.mute svg{width:18px;height:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip2{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--soft);color:var(--muted)}
+.chip2.hot,.chip2.warn{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.chip2.boost{background:var(--boost-bg);color:var(--boost-ink);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--boost) 60%,transparent)}
+.row.boostrow{background:var(--boost-bg)}
+.boostrow .tick{border-color:var(--boost);color:var(--boost)}
+.boostrow .tick svg{opacity:1}
+.row.boostrow.on .tick{background:var(--boost);border-color:var(--boost)}
+.row.boostrow.on .tick svg{color:#1B1F2E!important}
+.boostrow .name,.row.boostrow.on .name{color:var(--boost-ink);text-decoration:none}
+.boostrow .xp,.row.boostrow.on .xp,.boostnote{color:var(--boost-ink)}
+.boostrow .extra input[type=text]{font-size:16px}
+.wh .track i.bz{background:var(--boost)}
+.cell.bz{box-shadow:inset 0 -3px 0 var(--boost)}
+.cell.sel.bz{box-shadow:inset 0 0 0 2px var(--accent),inset 0 -5px 0 var(--boost)}
+.lookpanel{display:flex;flex-direction:column;gap:8px}
+.ladder{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.ladder li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;font-size:13px;color:var(--muted);align-items:baseline}
+.ladder li b{font-family:var(--mono);font-size:11.5px}
+.ladder li.done{color:var(--ink)}.ladder li.done b{color:var(--good)}
+.ladder li.nextup{color:var(--ink)}.ladder li.nextup b{color:var(--accent)}
+.nav button:disabled{opacity:.3}
+.lvlup{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 75%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px,env(safe-area-inset-left,0px))}
+.lu-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px 20px;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;animation:pop .55s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+.lu-card h2{margin:0;font-family:var(--display);font-weight:800;font-size:54px;line-height:1;color:var(--accent);text-transform:uppercase}
+.lu-card canvas{width:120px;height:120px;image-rendering:pixelated;image-rendering:crisp-edges;background:var(--soft);border-radius:18px}
+.lu-rank{font-weight:700}
+.lu-new{margin:0;padding:12px 14px 12px 30px;text-align:left;background:var(--soft);border-radius:12px;width:100%;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.lu-card .btn{width:100%;padding:12px}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -214,14 +248,15 @@ html{-webkit-tap-highlight-color:transparent}
   <section class="board" aria-label="Progress">
     <div class="board-top">
       <div>
-        <div class="brand">Level 35</div>
-        <div class="lvl-row"><button class="hero" id="hero" type="button" aria-label="Your character. Tap to see every look." aria-expanded="false" aria-controls="looks"><canvas id="heroCv" width="20" height="20"></canvas></button><div class="lvl-txt"><div class="lvl"><span class="lvl-num" id="lvlNum"><small>LV</small>1</span><span class="rank" id="rank">Rebooting</span></div><div class="next" id="nextLook"></div></div></div>
+        <div class="brand-row"><span class="brand">Level 35</span><button class="mute" id="mute" type="button"></button></div>
+        <div class="lvl-row"><button class="hero" id="hero" type="button" aria-label="Your character. Tap to see every look." aria-expanded="false" aria-controls="lookPanel"><canvas id="heroCv" width="20" height="20"></canvas></button><div class="lvl-txt"><div class="lvl"><span class="lvl-num" id="lvlNum"><small>LV</small>1</span><span class="rank" id="rank">Rebooting</span></div><div class="next" id="nextLook"></div></div></div>
       </div>
       <div class="streak"><b id="streak">0</b><span class="label">day streak</span></div>
     </div>
     <div class="barwrap" id="barWrap"><div class="bar" aria-hidden="true"><i id="bar" style="width:0%"></i></div></div>
-    <div class="bar-meta"><span id="xpNow">0 XP</span><span id="xpNext">150 to next level</span></div>
-    <div class="looks" id="looks" hidden></div>
+    <div class="bar-meta"><span id="xpNow">0 XP</span><span id="xpNext">600 to level 2</span></div>
+    <div class="chips" id="chips"></div>
+    <div class="lookpanel" id="lookPanel" hidden><span class="label">Your looks</span><div class="looks" id="looks"></div><span class="label">Your path</span><ol class="ladder" id="ladder"></ol></div>
     <div class="sync" id="sync">Loading…</div>
   </section>
 
@@ -296,71 +331,148 @@ html{-webkit-tap-highlight-color:transparent}
     </div>
   </section>
 
-  <p class="rule">A solid weekday means: up at 7:30, job block done, trained (gym or cardio), and one responsibility task. On weekends it’s just up at 7:30 and one responsibility task. Solid days build the streak and unlock new habits.</p>
+  <p class="rule">A solid day = up on time + job + training (weekends: just up on time). Streak boost: ×1.5 from day 3, ×2 from day 5. Early on you can miss 1 day without losing the streak; after 2 weeks, 2 in a row. An Extra Boost ⚡ gives ×1.5 XP all of the next day. Max ×3.</p>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="lvlup" id="lvlup" hidden role="dialog" aria-modal="true" aria-labelledby="luTitle">
+  <div class="lu-card">
+    <span class="label">Level up</span>
+    <h2 id="luTitle">Level 2</h2>
+    <canvas id="luCv" width="20" height="20"></canvas>
+    <div class="lu-rank" id="luRank"></div>
+    <span class="label" id="luHead">Starting tomorrow</span>
+    <ul class="lu-new" id="luNew"></ul>
+    <button class="btn primary" id="luOk" type="button">Let’s go</button>
+  </div>
+</div>
 
 <script>
 (function(){
 const CHECK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-ink)"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
-const LOCK='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>';
+const BOLT='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.2 1.5 3.5 9h3.8l-.9 5.5L12.5 7H8.7z" fill="currentColor"/></svg>';
 
-const HABITS=[
-  {id:'wake',name:'Up at 7:30',hint:'Phone charged outside the bedroom',xp:15,core:true},
-  {id:'job',name:'Job block, 9:30–13:00',hint:'Out of the house: library or coworking',xp:25,core:true,counter:true},
-  {id:'move',name:'Training',hint:'Gym Mon/Wed/Fri, cardio Tue/Thu',xp:20,core:true},
-  {id:'resp',name:'One responsibility task',hint:'30 minutes: bike, home, admin, pickup',xp:15,core:true,text:true},
-  {id:'crea',name:'Creatine with breakfast',hint:'Attached to breakfast so it sticks',xp:5},
-  {id:'screens',name:'No games or series before work is done',hint:'They are the reward, not the default',xp:10},
-  {id:'plan',name:'Planned tomorrow',hint:'2 minutes before bed',xp:5},
-  {id:'bed',name:'In bed by 23:00',hint:'8 hours before the 7:30 alarm',xp:15}
+/* ---------- the ladder: each level tightens one thing ---------- */
+const LADDER=[
+  {lv:1,wake:'8:30',bed:'00:00',job:'cv3'},
+  {lv:2,wake:'8:15',bed:'23:45'},
+  {lv:3,job:'cv4'},
+  {lv:4,wake:'8:00',bed:'23:30'},
+  {lv:5,job:'cv5',screens:true},
+  {lv:6,wake:'7:45',bed:'23:15'},
+  {lv:7,job:'block'},
+  {lv:8,wake:'7:30',bed:'23:00'},
+  {lv:10,team:true}
 ];
-const UNLOCKS=[{id:'team',name:'Basketball or boxing session',hint:'Fixed time, people expecting you',xp:30,need:10}];
-const SOLID_BONUS=10;
-function moveFor(s){const w=parse(s).getDay();
-  if(w===1||w===3||w===5)return{name:'Gym · 18:00',hint:'Program day: lift, then stretch',kind:'gym'};
-  if(w===2||w===4)return{name:'Cardio · 18:30',hint:'Run, bike or rower, then stretch',kind:'cardio'};
-  return{name:'Move',hint:'Anything active: walk, hike, swim, a game',kind:'move'}}
-const WEEKEND=['wake','resp'];
+const JOB={
+  cv3:{name:'Sent 3+ CVs',hint:'Count them below'},
+  cv4:{name:'Sent 4+ CVs',hint:'Count them below'},
+  cv5:{name:'Sent 5+ CVs + 2 outreach messages',hint:'Outreach = a message to a real person'},
+  block:{name:'Job block, 9:30–13:00',hint:'Out of the house: library or coworking'}
+};
+function targets(lv){const t={};for(const s of LADDER)if(lv>=s.lv)Object.assign(t,s);return t}
+function changesAt(lv){const s=LADDER.find(x=>x.lv===lv);if(!s)return[];const out=[];
+  if(s.wake)out.push('Up by '+s.wake);if(s.bed)out.push('In bed by '+s.bed);if(s.job)out.push(JOB[s.job].name);
+  if(s.screens)out.push('New habit: no games or series before work');if(s.team)out.push('Unlocked: basketball or boxing session');return out}
+function nextChange(lv){const s=LADDER.find(x=>x.lv>lv);return s?{lv:s.lv,list:changesAt(s.lv)}:null}
+
 function isWeekend(s){const w=parse(s).getDay();return w===0||w===6}
-function dueFor(s){return isWeekend(s)?HABITS.filter(h=>WEEKEND.includes(h.id)):HABITS}
-function isDue(h,s){return UNLOCKS.includes(h)?!isWeekend(s):dueFor(s).includes(h)}
-function view(h,s){return h.id==='move'?Object.assign({},h,moveFor(s)):h}
-const DEFAULT_QUESTS=[];
+function habitsFor(s,lv){
+  const t=targets(lv),w=parse(s).getDay();
+  const wake={id:'wake',name:'Up by '+t.wake,hint:'Phone charged outside the bedroom',xp:15,core:true};
+  const team={id:'team',name:'Basketball or boxing session',hint:'Fixed time, people expecting you',xp:30};
+  if(isWeekend(s))return t.team?[wake,team]:[wake];
+  const gym=w===1||w===3||w===5;
+  const list=[wake,
+    {id:'job',name:JOB[t.job].name,hint:JOB[t.job].hint,xp:25,core:true,counter:true},
+    {id:'log',name:'Logged progress in the job tracker',hint:'Every CV and reply, same day',xp:10},
+    {id:'train',name:gym?'Gym · 18:00':'Cardio · 18:30',hint:gym?'Program day: lift, then stretch':'Run, bike or rower, then stretch',xp:20,core:true},
+    {id:'crea',name:'Creatine with breakfast',hint:'Attached to breakfast so it sticks',xp:5}];
+  if(t.screens)list.push({id:'screens',name:'No games or series before work is done',hint:'They are the reward, not the default',xp:10});
+  list.push({id:'plan',name:'Planned tomorrow',hint:'2 minutes before bed',xp:5},{id:'bed',name:'In bed by '+t.bed,hint:'Phone out of the bedroom',xp:15});
+  if(t.team)list.push(team);
+  return list;
+}
+const SIGNUPS=[{id:'bball',text:'Signed up for basketball'},{id:'boxing',text:'Signed up for boxing'}];
 const STAGES=[[1,'Rebooting'],[3,'Back in motion'],[5,'Building momentum'],[8,'Consistent'],[11,'Locked in'],[14,'Strong'],[17,'Interview ready'],[20,'Team player'],[23,'Fighter'],[26,'Unstoppable'],[30,'Champion'],[35,'Level 35']];
-const RANKS=STAGES;
-let lastXP=null;
+const DEFAULT_QUESTS=[];
 
-let days={}, quests=null, viewDate=ymd(new Date()), armDel=null, uid=null, coll=null, mode='local';
+let days={},quests=null,start=null,viewDate=ymd(new Date()),armDel=null,lastXP=null,TL=null;
 const $=id=>document.getElementById(id);
-
 function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
 function addDays(s,n){const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)}
 function today(){return ymd(new Date())}
-function day(s){return days[s]||{h:{},apps:0,task:''}}
-function isSolid(s){const d=days[s];return !!d&&dueFor(s).filter(h=>h.core).every(h=>d.h&&d.h[h.id])}
-function dayXP(s){const d=days[s];if(!d||!d.h)return 0;let x=0;
-  for(const h of HABITS.concat(UNLOCKS)) if(d.h[h.id]) x+=h.xp;
-  if(isSolid(s)) x+=SOLID_BONUS; return x}
-function maxDay(s){return dueFor(s).reduce((a,h)=>a+h.xp,0)+SOLID_BONUS}
-function solidCount(){return Object.keys(days).filter(isSolid).length}
-function totalXP(){let x=0;for(const s in days)x+=dayXP(s);for(const q of getQuests())if(q.done)x+=q.xp;return x}
-function levelInfo(xp){let lv=1,need=150,base=0;while(xp>=base+need){base+=need;lv++;need=150+50*(lv-1)}return{lv,into:xp-base,need}}
-function rankFor(lv){let r=RANKS[0][1];for(const [l,n] of RANKS)if(lv>=l)r=n;return r}
-function streak(){let s=today(),n=0;if(!isSolid(s))s=addDays(s,-1);while(isSolid(s)){n++;s=addDays(s,-1)}return n}
 function getQuests(){return quests||DEFAULT_QUESTS}
+function day(s){return days[s]||{h:{},apps:0,extra:null}}
+function lvOf(s){const d=days[s];return d&&d.lv?d.lv:curLevel()}
+
+/* ---------- XP, streak, boosts ---------- */
+const need=lv=>600+100*(lv-1);
+function levelInfo(xp){let lv=1,base=0;while(xp>=base+need(lv)){base+=need(lv);lv++}return{lv,into:xp-base,need:need(lv)}}
+function rankFor(lv){let r=STAGES[0][1];for(const [l,n] of STAGES)if(lv>=l)r=n;return r}
+function isSolid(s){const d=days[s];if(!d||!d.h)return false;return habitsFor(s,lvOf(s)).filter(h=>h.core).every(h=>d.h[h.id])}
+function baseXP(s){const d=days[s];if(!d||!d.h)return 0;return habitsFor(s,lvOf(s)).reduce((a,h)=>a+(d.h[h.id]?h.xp:0),0)}
+function baseMax(s){return habitsFor(s,lvOf(s)).reduce((a,h)=>a+h.xp,0)}
+const tier=n=>n>=5?2:n>=3?1.5:1;
+const allowed=n=>n>=14?2:1;
+const hasExtra=s=>!!(days[s]&&days[s].extra);
+// Walk every day from the start: who is solid, the streak, misses, and each day's multiplier.
+function timeline(){
+  const map={},t=today();let streak=0,miss=0,resets=0;
+  if(start)for(let s=start;s<=t;s=addDays(s,1)){
+    const sol=isSolid(s);let sm=1;
+    if(sol){miss=0;streak++;sm=tier(streak)}
+    else if(s<t){miss++;if(miss>allowed(streak)){streak=0;miss=0;resets++}}
+    const boost=hasExtra(addDays(s,-1))?1.5:1;
+    const mult=Math.min(3,(sol?sm:1)*boost);
+    map[s]={sol,streak,miss,sm,boost,mult,xp:Math.round(baseXP(s)*mult)};
+  }
+  return{map,streak,miss,resets};
+}
+function dayXP(s){const e=TL&&TL.map[s];return e?e.xp:0}
+function totalXP(){let x=0;for(const s in TL.map)x+=TL.map[s].xp;return x}
+function curLevel(){return TL?levelInfo(totalXP()).lv:1}
+function recompute(){TL={map:{},streak:0,miss:0};TL=timeline()}
+
+/* ---------- sound: original 8-bit jingles, made in the browser ---------- */
+const SND=(function(){
+  let ctx=null,muted=false;try{muted=localStorage.getItem('level35-mute')==='1'}catch(e){}
+  function ac(){try{if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ctx=new C()}if(ctx.state==='suspended')ctx.resume();return ctx}catch(e){return null}}
+  function tone(c,f,t0,d,type,vol,slide){const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,t0);
+    if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);g.gain.setValueAtTime(vol||.1,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+    o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.03)}
+  const play=fn=>{if(muted)return;const c=ac();if(c)fn(c,c.currentTime+.01)};
+  return{
+    blip:()=>play((c,t)=>tone(c,660,t,.09,'square',.07,990)),
+    unblip:()=>play((c,t)=>tone(c,520,t,.1,'square',.06,300)),
+    boost:()=>play((c,t)=>{tone(c,900,t,.18,'triangle',.12,2400);tone(c,1800,t+.12,.2,'square',.04,3200)}),
+    levelUp:()=>play((c,t)=>{let k=0;
+      [[392,494,587],[440,554,659],[494,622,740],[523,659,784]].forEach(ch=>ch.forEach(f=>{tone(c,f,t+k*.065,.11,'square',.09);k++}));
+      const e=t+k*.065;[1047,1319,1568].forEach(f=>tone(c,f,e,.7,'square',.05));tone(c,262,e,.7,'triangle',.14);tone(c,2093,e+.1,.25,'square',.03,4186)}),
+    set:m=>{muted=m;try{localStorage.setItem('level35-mute',m?'1':'0')}catch(e){}},
+    get muted(){return muted},
+    unlock:()=>{if(!muted)ac()}
+  };
+})();
 
 /* ---------- persistence (on device) ---------- */
-const LS='level35-v1';let updated=0;
-function lsLoad(){try{const r=JSON.parse(localStorage.getItem(LS)||'null');if(r){days=r.days||{};quests=r.quests||null;updated=r.updated||0}}catch(e){}}
-function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({days,quests,updated}))}catch(e){toast('Couldn’t save on this phone')}}
+const LS='level35-v1',SCHEMA=2;let updated=0,wasReset=false;
+// Anything saved before the progression rebuild is wiped (tasks are kept).
+function migrate(r){
+  if(r&&r.schema===SCHEMA)return{days:r.days||{},quests:Array.isArray(r.quests)?r.quests:null,start:r.start||today(),updated:r.updated||0,fresh:false};
+  return{days:{},quests:r&&Array.isArray(r.quests)?r.quests:null,start:today(),updated:0,fresh:true};
+}
+function lsLoad(){let r=null;try{r=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){}
+  const m=migrate(r);days=m.days;quests=m.quests;start=m.start;updated=m.updated;
+  if(r&&m.fresh){wasReset=true;lsWrite()}}
+function lsWrite(){try{localStorage.setItem(LS,JSON.stringify({schema:SCHEMA,start,days,quests,updated}))}catch(e){toast('Couldn’t save on this phone')}}
 function lsSave(){updated=Date.now();lsWrite();gh.schedule()}
 function saveDay(s){lsSave()}
 function saveState(){lsSave()}
 const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 async function initStore(){
   lsLoad();render();setSync();gh.init();
+  if(wasReset)toast('Fresh start: Level 1, day one');
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 }
@@ -399,7 +511,7 @@ const gh=(function(){
     cfg.sha=r.body.sha;store();return{data};
   }
   async function push(){
-    const body={message:'Sync '+new Date().toISOString().slice(0,16).replace('T',' '),content:enc(JSON.stringify({app:'level35',v:1,updated,days,quests:getQuests()},null,1))};
+    const body={message:'Sync '+new Date().toISOString().slice(0,16).replace('T',' '),content:enc(JSON.stringify({app:'level35',v:2,schema:SCHEMA,start,updated,days,quests:getQuests()},null,1))};
     if(cfg.sha)body.sha=cfg.sha;
     let r;try{r=await req('/contents/'+FILE,{method:'PUT',body:JSON.stringify(body),keepalive:true})}catch(e){fail(0);return false}
     if(r.status===200||r.status===201){cfg.sha=r.body.content.sha;cfg.last=Date.now();store();status('ok','Synced at '+hhmm(cfg.last));return true}
@@ -413,7 +525,7 @@ const gh=(function(){
     try{
       const got=await pull();
       if(got&&got.data&&typeof got.data.days==='object'&&(got.data.updated||0)>updated){
-        days=got.data.days;quests=Array.isArray(got.data.quests)?got.data.quests:null;updated=got.data.updated;lsWrite();render();
+        {const m=migrate(got.data);days=m.days;quests=m.quests;start=m.start;if(m.fresh){updated=Date.now();lsWrite();timer=setTimeout(sync,1500)}else{updated=m.updated;lsWrite()}viewDate=today();lastXP=null;render();}
         cfg.last=Date.now();store();status('ok','Synced at '+hhmm(cfg.last)+' · loaded newer data from GitHub');
       }else if(got&&(got.missing||(got.data&&(got.data.updated||0)<updated))){
         if(got.missing){cfg.sha=null}
@@ -449,7 +561,7 @@ const gh=(function(){
 })();
 
 /* ---------- backup ---------- */
-function backupText(){return JSON.stringify({app:'level35',v:1,saved:today(),days,quests:getQuests()})}
+function backupText(){return JSON.stringify({app:'level35',v:2,schema:SCHEMA,saved:today(),start,days,quests:getQuests()})}
 $('exp').onclick=()=>{
   const t=backupText(),box=$('expTxt');
   const done=()=>{toast('Backup copied. Paste it into Notes.');try{localStorage.setItem(LS+'-bk',today())}catch(e){};showBk()};
@@ -468,10 +580,10 @@ $('impGo').onclick=()=>{
     if(!q||!q.text||haveId.has(q.id)||haveTxt.has(q.text.trim().toLowerCase()))continue;
     cur.push(Object.assign({},q));haveId.add(q.id);haveTxt.add(q.text.trim().toLowerCase());addedQ++}
   const nd=Object.assign({},days);
-  for(const s in r.days){const b=r.days[s];if(!b||typeof b!=='object')continue;
+  if(r.schema===SCHEMA)for(const s in r.days){const b=r.days[s];if(!b||typeof b!=='object')continue;
     if(!nd[s]){nd[s]=JSON.parse(JSON.stringify(b));addedD++;continue}
     const a=nd[s],h=Object.assign({},a.h||{});for(const k in (b.h||{}))if(b.h[k])h[k]=true;
-    nd[s]=Object.assign({},a,{h,apps:Math.max(a.apps||0,b.apps||0),task:a.task||b.task||''})}
+    nd[s]=Object.assign({},a,{h,apps:Math.max(a.apps||0,b.apps||0),extra:a.extra||b.extra||null})}
   days=nd;quests=cur;lsSave();
   $('impBox').hidden=true;$('impTxt').value='';viewDate=today();render();
   toast('Added '+addedQ+(addedQ===1?' task':' tasks')+' and '+addedD+(addedD===1?' day':' days'));
@@ -484,136 +596,234 @@ showBk();
 function xpFloat(n){const w=$('barWrap');if(!w)return;const f=document.createElement('span');f.className='xpfloat'+(n<0?' neg':'');
   f.textContent=(n>0?'+':'−')+Math.abs(n)+' XP';w.appendChild(f);setTimeout(()=>f.remove(),1200);
   const b=$('bar').parentNode;b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse')}
+const fmtMult=m=>'×'+(Math.round(m*100)/100);
 function render(){
+  recompute();
   const xp=totalXP(),L=levelInfo(xp);
   if(lastXP!==null&&xp!==lastXP)xpFloat(xp-lastXP);lastXP=xp;
   $('lvlNum').innerHTML='<small>LV</small>'+L.lv;
   $('rank').textContent=rankFor(L.lv);
   HERO.set(L.lv);
+  const nx=nextChange(L.lv);
+  $('nextLook').textContent=nx?'LV '+nx.lv+' adds: '+nx.list.join(' · '):'Full plan unlocked';
   $('bar').style.width=Math.round(L.into/L.need*100)+'%';
   $('xpNow').textContent=xp+' XP';
   $('xpNext').textContent=(L.need-L.into)+' to level '+(L.lv+1);
-  $('streak').textContent=streak();
-  renderDay(); renderWeek(); renderQuests(); renderCal();
+  $('streak').textContent=TL.streak;
+  renderChips();renderDay();renderWeek();renderQuests();renderCal();
+  if(!$('lookPanel').hidden)renderLadder();
+}
+function renderChips(){
+  const t=today(),box=$('chips');box.innerHTML='';const e=TL.map[t]||{boost:1};
+  const add=(cls,txt)=>{const c=document.createElement('span');c.className='chip2 '+cls;c.textContent=txt;box.appendChild(c)};
+  const sm=tier(TL.streak+(isSolid(t)?0:1));
+  add(sm>1?'hot':'', isSolid(t)?'Solid day · '+fmtMult(sm)+' XP':'Solid today = '+fmtMult(sm)+' XP');
+  if(e.boost>1)add('boost','⚡ '+fmtMult(e.boost)+' boost today');
+  if(TL.streak>0){const left=allowed(TL.streak)-TL.miss;add(left<=0?'warn':'',left<=0?'0 misses left':left+(left===1?' miss left':' misses left'))}
 }
 function renderDay(){
-  const t=today(),d=day(viewDate),dt=parse(viewDate);
+  const t=today(),d=day(viewDate),dt=parse(viewDate),lv=lvOf(viewDate),e=TL.map[viewDate];
   const rel=viewDate===t?'Today':viewDate===addDays(t,-1)?'Yesterday':dt.toLocaleDateString('en-GB',{weekday:'long'});
   $('dayTitle').textContent=rel;
-  $('daySub').textContent=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' · '+dayXP(viewDate)+' / '+maxDay(viewDate)+' XP';
-  $('next').disabled=viewDate>=t;
+  $('daySub').textContent=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' · '+dayXP(viewDate)+' XP'+(e&&e.mult>1?' ('+fmtMult(e.mult)+')':'');
+  $('next').disabled=viewDate>=t;$('prev').disabled=!!start&&viewDate<=start;
   renderYest();
   const box=$('habits');box.innerHTML='';
-  const sc=solidCount();
-  const wk=isWeekend(viewDate),ticked=h=>!!(d.h&&d.h[h.id]);
-  const list=HABITS.filter(h=>isDue(h,viewDate)||ticked(h)).concat(UNLOCKS.filter(u=>(!wk&&sc>=u.need)||ticked(u)));
-  for(const h0 of list){
-    const h=view(h0,viewDate);
+  for(const h of habitsFor(viewDate,lv)){
     const on=!!(d.h&&d.h[h.id]);
     const row=document.createElement('div');row.className='row'+(on?' on':'');
-    const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;
-    b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',h.name);
-    b.onclick=()=>toggle(h,!on);
-    const txt=document.createElement('div');txt.className='txt';
-    txt.innerHTML='<div class="name"></div><div class="hint"></div>';
+    const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',h.name);b.onclick=()=>toggle(h,!on);
+    const txt=document.createElement('div');txt.className='txt';txt.innerHTML='<div class="name"></div><div class="hint"></div>';
     txt.querySelector('.name').textContent=h.name;
     if(h.core){const s=document.createElement('span');s.className='core';s.textContent='core';txt.querySelector('.name').appendChild(s)}
-    txt.querySelector('.hint').textContent=h.hint;
-    txt.style.cursor='pointer';txt.onclick=()=>toggle(h,!on);
+    txt.querySelector('.hint').textContent=h.hint;txt.style.cursor='pointer';txt.onclick=()=>toggle(h,!on);
     const xp=document.createElement('span');xp.className='xp';xp.textContent='+'+h.xp;
     row.append(b,txt,xp);
-    if(h.counter){
-      const ex=document.createElement('div');ex.className='extra';
-      ex.innerHTML='<div class="counter">Applications & outreach sent <button aria-label="One less">−</button><b></b><button aria-label="One more">+</button></div>';
-      const [minus,plus]=ex.querySelectorAll('button');ex.querySelector('b').textContent=d.apps||0;
-      minus.onclick=()=>bump(-1);plus.onclick=()=>bump(1);row.appendChild(ex);
-    }
-    if(h.text){
-      const ex=document.createElement('div');ex.className='extra';
-      const isOn=!!(d.h&&d.h[h.id]),linked=d.taskId&&getQuests().find(q=>q.id===d.taskId);
-      const freeText=()=>{const inp=document.createElement('input');inp.type='text';inp.id='task-'+viewDate;inp.placeholder='What was it? e.g. fixed the bike';inp.value=d.task||'';
-        inp.onchange=()=>{ensure(viewDate).task=inp.value.slice(0,140);saveDay(viewDate)};return inp};
-      if(isOn&&linked){const l=document.createElement('span');l.className='linked';l.textContent='✓ '+linked.text+' · done in Tasks';ex.appendChild(l)}
-      else if(isOn){ex.appendChild(freeText())}
-      else{
-        const sel=document.createElement('select');sel.id='resp-'+viewDate;sel.setAttribute('aria-label','Which task did you do?');
-        const o0=document.createElement('option');o0.value='';o0.textContent='Pick the task you did…';sel.appendChild(o0);
-        for(const q of getQuests().filter(q=>!q.done)){const o=document.createElement('option');o.value=q.id;o.textContent=q.text;sel.appendChild(o)}
-        const oo=document.createElement('option');oo.value='__other';oo.textContent='Something else…';sel.appendChild(oo);
-        sel.onchange=()=>{if(sel.value==='__other'){ex.innerHTML='';ex.appendChild(freeText());const m=document.createElement('span');m.className='mini';m.textContent='Write what you did, then tick the circle.';ex.appendChild(m);ex.querySelector('input').focus()}
-          else if(sel.value)doResp(sel.value)};
-        ex.appendChild(sel);
-      }
-      row.appendChild(ex);
-    }
+    if(h.counter){const ex=document.createElement('div');ex.className='extra';
+      ex.innerHTML='<div class="counter">CVs sent <button aria-label="One less">−</button><b></b><button aria-label="One more">+</button></div>';
+      const [minus,plus]=ex.querySelectorAll('button');ex.querySelector('b').textContent=d.apps||0;minus.onclick=()=>bump(-1);plus.onclick=()=>bump(1);row.appendChild(ex)}
     box.appendChild(row);
   }
-  for(const u of UNLOCKS){
-    if(wk||sc>=u.need||(d.h&&d.h[u.id]))continue;
-    const r=document.createElement('div');r.className='locked';
-    r.innerHTML='<span class="lock">'+LOCK+'</span><div><div class="lname" style="font-weight:600"></div><div class="hint" style="font-size:12.5px"></div><div class="minibar"><i></i></div></div><span class="xp"></span>';
-    r.querySelector('.lname').textContent=u.name;
-    r.querySelector('.hint').textContent='Unlocks after '+u.need+' solid days ('+sc+'/'+u.need+')';
-    r.querySelector('.minibar i').style.width=Math.min(100,sc/u.need*100)+'%';
-    r.querySelector('.xp').textContent='+'+u.xp;
-    box.appendChild(r);
-  }
-  const coreDue=dueFor(viewDate).filter(h=>h.core),done=coreDue.filter(ticked).length;
+  box.appendChild(boostRow(d));
+  const core=habitsFor(viewDate,lv).filter(h=>h.core),done=core.filter(h=>d.h&&d.h[h.id]).length;
   const ban=document.createElement('div');ban.className='solid-banner';
-  ban.innerHTML=isSolid(viewDate)?'<b>Solid day.</b> +'+SOLID_BONUS+' XP bonus and the streak continues.':wk?'Weekend: up at 7:30 plus one responsibility task makes a solid day ('+done+' of 2).':'Core habits: '+done+' of 4 done. Finish all four for a solid day.';
+  ban.innerHTML=isSolid(viewDate)?'<b>Solid day.</b> Streak keeps growing.':isWeekend(viewDate)?'Weekend: up on time makes a solid day.':'Core: '+done+' of '+core.length+' done. All '+core.length+' make a solid day.';
   box.appendChild(ban);
+}
+function boostRow(d){
+  const x=d.extra,row=document.createElement('div');row.className='row boostrow'+(x?' on':'');
+  const b=document.createElement('button');b.className='tick';b.innerHTML=x?CHECK:BOLT;b.setAttribute('aria-pressed',!!x);b.setAttribute('aria-label','Extra Boost');
+  b.onclick=()=>{if(x)clearExtra(viewDate);else{const sel=row.querySelector('select');if(sel)sel.focus();toast('Pick what you did from the list')}};
+  const txt=document.createElement('div');txt.className='txt';
+  const n=document.createElement('div');n.className='name';n.textContent='Extra Boost ⚡';
+  const hn=document.createElement('div');hn.className='hint';hn.textContent=x?'✓ '+x.text:'Do a task or sign up → ×1.5 XP all of the next day';
+  txt.append(n,hn);
+  const tag=document.createElement('span');tag.className='xp';tag.textContent='×1.5';
+  row.append(b,txt,tag);
+  if(!x){
+    const ex=document.createElement('div');ex.className='extra';
+    const sel=document.createElement('select');sel.id='boost-'+viewDate;sel.setAttribute('aria-label','What did you do?');
+    const opt=(v,t)=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)};
+    opt('','Pick what you did…');
+    const used=new Set(Object.values(days).map(v=>v&&v.extra&&v.extra.kind==='signup'?v.extra.id:null));
+    for(const s of SIGNUPS)if(!used.has(s.id))opt('s:'+s.id,s.text);
+    for(const q of getQuests().filter(q=>!q.done))opt('t:'+q.id,q.text);
+    opt('other','Something else…');
+    sel.onchange=()=>{const v=sel.value;if(!v)return;
+      if(v==='other'){ex.innerHTML='';const inp=document.createElement('input');inp.type='text';inp.id='boostTxt-'+viewDate;inp.maxLength=100;inp.placeholder='What did you do?';
+        const go=document.createElement('button');go.type='button';go.className='tbtn primary';go.textContent='Boost';
+        go.onclick=()=>{const t=inp.value.trim();if(!t){toast('Write what you did');inp.focus();return}setExtra(viewDate,{kind:'other',text:t.slice(0,100)})};
+        inp.onkeydown=e=>{if(e.key==='Enter')go.click()};ex.append(inp,go);inp.focus();return}
+      if(v.startsWith('s:')){const s=SIGNUPS.find(x=>x.id===v.slice(2));setExtra(viewDate,{kind:'signup',id:s.id,text:s.text})}
+      else{const q=getQuests().find(x=>x.id===v.slice(2));if(q)setExtra(viewDate,{kind:'task',id:q.id,text:q.text})}};
+    ex.appendChild(sel);row.appendChild(ex);
+  }else{
+    const ex=document.createElement('div');ex.className='extra';const l=document.createElement('span');l.className='linked boostnote';
+    l.textContent=viewDate===today()?'Tomorrow: ×1.5 XP'+(x.kind==='task'?' · done in Tasks':''):(x.kind==='task'?'Done in Tasks':'Boosted the next day');ex.appendChild(l);row.appendChild(ex);
+  }
+  return row;
 }
 function renderYest(){
   const y=$('yest'),t=today();
   if(viewDate!==t){y.hidden=true;return}
-  const ys=addDays(t,-1),x=dayXP(ys);y.hidden=false;y.innerHTML='';
+  const ys=addDays(t,-1),e=TL.map[ys];
+  if(!e){y.hidden=true;return}
+  y.hidden=false;y.innerHTML='';
   const k=document.createElement('span');k.className='k';k.textContent='Yesterday';
-  const v=document.createElement('b');v.textContent=x?x+' XP':'Nothing logged';
+  const v=document.createElement('b');v.textContent=e.xp?e.xp+' XP':'Nothing logged';
   const pill=document.createElement('span');
-  if(isSolid(ys)){pill.className='pill ok';pill.textContent='Solid day'}
-  else if(x){pill.className='pill miss';pill.textContent='Not solid'}
-  else{pill.className='pill miss';pill.textContent='Tap ‹ to fill in'}
+  if(e.sol){pill.className='pill ok';pill.textContent='Solid day'}
+  else{pill.className='pill miss';pill.textContent=e.xp?'Missed':'Tap ‹ to fill in'}
   y.append(k,v,pill);
 }
 function renderWeek(){
   const t=today(),mon=addDays(t,-((parse(t).getDay()+6)%7)),elapsed=((parse(t).getDay()+6)%7)+1;
-  const sun=addDays(mon,6),f=s=>parse(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-  $('wkRange').textContent=f(mon)+' – '+f(sun);
+  const f=s=>parse(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  $('wkRange').textContent=f(mon)+' – '+f(addDays(mon,6));
   let xp=0,last=0,solid=0,apps=0;
   for(let i=0;i<elapsed;i++){const s=addDays(mon,i);xp+=dayXP(s);if(isSolid(s))solid++;apps+=(days[s]&&days[s].apps)||0;last+=dayXP(addDays(mon,i-7))}
-  const dlt=xp-last;
-  const st=$('wkStats');st.innerHTML='';
+  const dlt=xp-last,st=$('wkStats');st.innerHTML='';
   const stat=(val,lab,dtext,dcls)=>{const e=document.createElement('div');e.className='stat';
     const b=document.createElement('b');b.textContent=val;const sp=document.createElement('span');sp.textContent=lab;e.append(b,sp);
     if(dtext){const d=document.createElement('span');d.className='delta '+(dcls||'');d.textContent=dtext;e.appendChild(d)}st.appendChild(e)};
   stat(xp,'XP this week',dlt>0?'+'+dlt+' vs last wk':dlt<0?'−'+(-dlt)+' vs last wk':'same as last wk',dlt>0?'up':dlt<0?'down':'');
   stat(solid+'/'+elapsed,'solid days','');
-  stat(apps,'applications sent','');
+  stat(apps,'CVs sent','');
   const bars=$('wkBars');bars.innerHTML='';
   ['M','T','W','T','F','S','S'].forEach((L,i)=>{const s=addDays(mon,i),e=document.createElement('button');e.type='button';
     e.className='wb'+(s>t?' fut':'')+(s===t?' today':'')+(isSolid(s)?' solid':'');
-    const x=dayXP(s);e.innerHTML='<div class="col"><i></i></div><span class="d"></span><span class="v"></span>';
-    e.querySelector('i').style.height=(s>t?0:Math.round(x/maxDay(s)*100))+'%';
+    const x=dayXP(s),mx=baseMax(s)*2;e.innerHTML='<div class="col"><i></i></div><span class="d"></span><span class="v"></span>';
+    e.querySelector('i').style.height=(s>t?0:Math.min(100,Math.round(x/mx*100)))+'%';
     e.querySelector('.d').textContent=L;e.querySelector('.v').textContent=s>t?'':x;
     e.setAttribute('aria-label',parse(s).toDateString()+', '+x+' XP');
-    if(s<=t)e.onclick=()=>{viewDate=s;render();window.scrollTo({top:0,behavior:'smooth'})};else e.disabled=true;
+    if(s<=t&&(!start||s>=start))e.onclick=()=>{viewDate=s;render();window.scrollTo({top:0,behavior:'smooth'})};else e.disabled=true;
     bars.appendChild(e)});
-  const wh=$('wkHabits');wh.innerHTML='';
-  const rows=[];
-  for(const h of HABITS.concat(UNLOCKS)){
-    if(h.id==='move'){
-      for(const kind of ['gym','cardio']){let hit=0,due=0,nm=kind==='gym'?'Gym':'Cardio';
-        for(let i=0;i<elapsed;i++){const s=addDays(mon,i),m=moveFor(s);if(m.kind!==kind)continue;due++;if(days[s]&&days[s].h&&days[s].h.move)hit++}
-        if(due)rows.push([nm,hit,due])}
-      continue}
-    let hit=0,due=0;for(let i=0;i<elapsed;i++){const s=addDays(mon,i);if(!isDue(h,s))continue;due++;if(days[s]&&days[s].h&&days[s].h[h.id])hit++}
-    if(!due||(UNLOCKS.includes(h)&&!hit&&solidCount()<h.need))continue;
-    rows.push([h.name,hit,due]);
-  }
-  for(const [nm,hit,due] of rows){const r=document.createElement('div');r.className='wh';
+  const wh=$('wkHabits');wh.innerHTML='';const rows=new Map();
+  for(let i=0;i<elapsed;i++){const s=addDays(mon,i);if(start&&s<start)continue;
+    for(const h of habitsFor(s,lvOf(s))){const key=h.id==='train'?'Training':h.id==='wake'?'Up on time':h.id==='bed'?'Bed on time':h.id==='job'?'Job':h.name;
+      const r=rows.get(key)||[0,0];r[1]++;if(days[s]&&days[s].h&&days[s].h[h.id])r[0]++;rows.set(key,r)}}
+  let boosts=0;for(let i=0;i<elapsed;i++)if(hasExtra(addDays(mon,i)))boosts++;
+  for(const [nm,[hit,due]] of rows){const r=document.createElement('div');r.className='wh';
     r.innerHTML='<span></span><div class="track"><i></i></div><span class="n"></span>';
     r.firstChild.textContent=nm;r.querySelector('i').style.width=Math.round(hit/due*100)+'%';r.querySelector('.n').textContent=hit+'/'+due;wh.appendChild(r)}
+  const r=document.createElement('div');r.className='wh';r.innerHTML='<span>Extra Boosts ⚡</span><div class="track"><i class="bz"></i></div><span class="n"></span>';
+  r.querySelector('i').style.width=Math.round(boosts/elapsed*100)+'%';r.querySelector('.n').textContent=boosts;wh.appendChild(r);
 }
+function renderCal(){
+  const cal=$('cal');cal.innerHTML='';const t=today();
+  ['M','T','W','T','F','S','S'].forEach(w=>{const e=document.createElement('div');e.className='wd';e.textContent=w;cal.appendChild(e)});
+  const mon=addDays(t,-((parse(t).getDay()+6)%7)),from=addDays(mon,-21);
+  for(let i=0;i<28;i++){
+    const s=addDays(from,i),c=document.createElement('button');c.type='button';c.className='cell';const dd=parse(s).getDate();
+    if(s>t||(start&&s<start)){c.classList.add('fut');c.disabled=true;c.textContent=''}
+    else{const f=Math.min(1,baseXP(s)/baseMax(s));
+      if(f>0)c.style.background='color-mix(in srgb, var(--accent) '+Math.round(18+f*82)+'%, var(--soft))';
+      if(isSolid(s)){c.classList.add('solid');c.textContent=dd}
+      if(hasExtra(s))c.classList.add('bz');
+      if(s===t)c.classList.add('today');if(s===viewDate)c.classList.add('sel');
+      c.setAttribute('aria-label',parse(s).toDateString()+', '+dayXP(s)+' XP');
+      c.onclick=()=>{viewDate=s;render();window.scrollTo({top:0,behavior:'smooth'})}}
+    cal.appendChild(c);
+  }
+  const n=Object.keys(TL.map).filter(s=>TL.map[s].sol).length;
+  $('solidTotal').textContent=n+(n===1?' solid day':' solid days')+' total';
+}
+function renderLadder(){
+  const box=$('ladder'),lv=curLevel();box.innerHTML='';
+  for(const s of LADDER){const li=document.createElement('li');li.className=s.lv<=lv?'done':s===LADDER.find(x=>x.lv>lv)?'nextup':'';
+    const b=document.createElement('b');b.textContent='LV '+s.lv;const sp=document.createElement('span');
+    sp.textContent=s.lv===1?'Up by 8:30 · 3+ CVs · log tracker · gym/cardio · creatine · plan · bed by 00:00':changesAt(s.lv).join(' · ');
+    li.append(b,sp);box.appendChild(li)}
+}
+
+/* ---------- actions ---------- */
+function ensure(s){if(!days[s])days[s]={h:{},apps:0,extra:null,lv:curLevel()};if(!days[s].h)days[s].h={};return days[s]}
+function afterChange(beforeLv){
+  const after=curLevel();
+  if(after>beforeLv)levelUp(beforeLv,after);
+  return after;
+}
+function toggle(h,val){
+  SND.unlock();recompute();
+  const before=curLevel(),wasSolid=isSolid(viewDate),xp0=totalXP();
+  const d=ensure(viewDate);d.h=Object.assign({},d.h,{[h.id]:val});
+  saveDay(viewDate);render();
+  const after=afterChange(before),dx=totalXP()-xp0;
+  if(after>before)return;
+  if(val)SND.blip();else SND.unblip();
+  if(after<before)toast('Unmarked · back to level '+after);
+  else if(!wasSolid&&isSolid(viewDate))toast('Solid day · streak '+TL.streak);
+  else if(wasSolid&&!isSolid(viewDate))toast('Unmarked · no longer a solid day');
+  else toast((dx>=0?'+':'−')+Math.abs(dx)+' XP');
+}
+function bump(n){const d=ensure(viewDate);d.apps=Math.max(0,(d.apps||0)+n);saveDay(viewDate);renderDay();renderWeek()}
+function setExtra(s,x){
+  SND.unlock();const d=ensure(s);d.extra=x;
+  if(x.kind==='task')quests=getQuests().map(q=>q.id===x.id?Object.assign({},q,{done:true,doneOn:s}):q);
+  saveDay(s);saveState();render();SND.boost();
+  toast(s===today()?'⚡ Extra Boost: ×1.5 XP all of tomorrow':'⚡ Extra Boost added');
+}
+function clearExtra(s){
+  const d=ensure(s),x=d.extra;if(!x)return;d.extra=null;
+  if(x.kind==='task')quests=getQuests().map(q=>q.id===x.id?Object.assign({},q,{done:false,doneOn:null}):q);
+  saveDay(s);saveState();render();SND.unblip();toast('Extra Boost removed');
+}
+function toggleQuest(id){
+  SND.unlock();const t=today(),was=getQuests().find(q=>q.id===id);if(!was)return;
+  quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?t:null}):q);
+  let note='';
+  if(!was.done){const d=ensure(t);if(!d.extra){d.extra={kind:'task',id,text:was.text};saveDay(t);note=' · ⚡ ×1.5 XP tomorrow'}}
+  else{for(const s in days){const d=days[s];if(d&&d.extra&&d.extra.kind==='task'&&d.extra.id===id){days[s]=Object.assign({},d,{extra:null});saveDay(s)}}}
+  saveState();render();
+  if(!was.done){if(note)SND.boost();else SND.blip()}else SND.unblip();
+  toast(!was.done?'Task done'+note:'Task reopened');
+}
+
+/* ---------- level-up screen ---------- */
+let luTimer=null;
+function levelUp(from,to){
+  SND.levelUp();
+  const st=lv=>{let i=0;STAGES.forEach((s,k)=>{if(lv>=s[0])i=k});return i};
+  const si=st(to),newLook=si>st(from);
+  $('luTitle').textContent='Level '+to;
+  $('luRank').textContent=newLook?'New look: '+STAGES[si][1]:rankFor(to);
+  const ul=$('luNew');ul.innerHTML='';let ch=[];for(let l=from+1;l<=to;l++)ch=ch.concat(changesAt(l));
+  $('luHead').textContent=ch.length?'Starting tomorrow':'Keep it going';
+  (ch.length?ch:['Same habits, more XP. Your next change is at LV '+((nextChange(to)||{lv:'—'}).lv)+'.']).forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li)});
+  const cv=$('luCv'),g=cv.getContext('2d');let t=1;HERO._draw(g,si,t);clearInterval(luTimer);
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)luTimer=setInterval(()=>{t++;HERO._draw(g,si,t)},260);
+  $('lvlup').hidden=false;$('luOk').focus();
+}
+$('luOk').onclick=()=>{$('lvlup').hidden=true;clearInterval(luTimer)};
+$('lvlup').onclick=e=>{if(e.target.id==='lvlup')$('luOk').click()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lvlup').hidden)$('luOk').click()});
+function renderMute(){const m=SND.muted;$('mute').innerHTML=m?
+  '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13 7.5l4 5M17 7.5l-4 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>':
+  '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13.2 7a4 4 0 010 6M15.4 5a7 7 0 010 10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>';
+  $('mute').setAttribute('aria-label',m?'Turn sound on':'Turn sound off');$('mute').setAttribute('aria-pressed',m)}
+$('mute').onclick=()=>{SND.set(!SND.muted);renderMute();if(!SND.muted){SND.unlock();SND.blip()}};
+renderMute();
+
 /* ---------- tasks + calendar ---------- */
 const CAL='Google Calendar',inflight=new Set();let mcpP=null;
 function getMcp(){if(!mcpP)mcpP=(window.claude&&window.claude.use)?window.claude.use('mcp').catch(()=>null):Promise.resolve(null);return mcpP}
@@ -672,7 +882,7 @@ function renderQuests(){
     }
     if(meta.childNodes.length)txt.appendChild(meta);
     const right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:6px';
-    const xp=document.createElement('span');xp.className='xp';xp.textContent='+'+q.xp;right.appendChild(xp);
+    
     if(!q.done){const del=document.createElement('button');del.type='button';del.className='del'+(armDel===q.id?' arm':'');del.textContent=armDel===q.id?'Remove?':'×';
       del.setAttribute('aria-label','Remove task');
       del.onclick=()=>{if(armDel===q.id){const gone=q;quests=getQuests().filter(x=>x.id!==q.id);armDel=null;saveState();render();dropCal(gone)}else{armDel=q.id;renderQuests();setTimeout(()=>{if(armDel===q.id){armDel=null;renderQuests()}},3000)}};
@@ -699,66 +909,9 @@ function renderQuests(){
     const q={id:'q'+Date.now().toString(36),text,xp:20,done:false,date:dIn.value||null,time:isTimed?tIn.value:null,dur:isTimed?+$('tDur').value:null,cal:null};
     const wantCal=isTimed&&$('tCal').checked;
     quests=getQuests().concat([q]);saveState();open(false);render();
-    if(wantCal)pushCal(q.id);else toast('Task added · +20 XP when done');
+    if(wantCal)pushCal(q.id);else toast('Task added. Doing it = Extra Boost ⚡');
   };
 })();
-function renderCal(){
-  const cal=$('cal');cal.innerHTML='';const t=today();
-  ['M','T','W','T','F','S','S'].forEach(w=>{const e=document.createElement('div');e.className='wd';e.textContent=w;cal.appendChild(e)});
-  const td=parse(t);const mon=addDays(t,-((td.getDay()+6)%7));const start=addDays(mon,-21);
-  for(let i=0;i<28;i++){
-    const s=addDays(start,i);const c=document.createElement('button');c.className='cell';
-    const dd=parse(s).getDate();
-    if(s>t){c.classList.add('fut');c.disabled=true;c.textContent='';}
-    else{
-      const f=Math.min(1,dayXP(s)/maxDay(s));
-      if(f>0)c.style.background='color-mix(in srgb, var(--accent) '+Math.round(18+f*82)+'%, var(--soft))';
-      if(isSolid(s)){c.classList.add('solid');c.textContent=dd}
-      if(s===t)c.classList.add('today');
-      if(s===viewDate)c.classList.add('sel');
-      c.setAttribute('aria-label',parse(s).toDateString()+', '+dayXP(s)+' XP');
-      c.onclick=()=>{viewDate=s;render();window.scrollTo({top:0,behavior:'smooth'})};
-    }
-    cal.appendChild(c);
-  }
-  {const n=solidCount();$('solidTotal').textContent=n+(n===1?' solid day':' solid days')+' total';}
-}
-
-/* ---------- actions ---------- */
-function ensure(s){if(!days[s])days[s]={h:{},apps:0,task:''};if(!days[s].h)days[s].h={};return days[s]}
-function toggle(h,val){
-  const wasSolid=isSolid(viewDate),before=levelInfo(totalXP()).lv,sc=solidCount();
-  const d=ensure(viewDate);d.h=Object.assign({},d.h,{[h.id]:val});
-  if(h.id==='resp'&&!val&&d.taskId){const id=d.taskId;d.taskId=null;d.task='';
-    quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:false,doneOn:null}):q);saveState()}
-  saveDay(viewDate);render();
-  const after=levelInfo(totalXP()).lv;
-  if(after>before)toast('Level '+after+' · '+rankFor(after));
-  else if(!wasSolid&&isSolid(viewDate)){const u=UNLOCKS.find(u=>sc<u.need&&solidCount()>=u.need);toast(u?'Unlocked: '+u.name:'Solid day · streak '+streak())}
-  else if(after<before)toast('Unmarked · back to level '+after);
-  else if(wasSolid&&!isSolid(viewDate))toast('Unmarked · no longer a solid day');
-  else toast(val?'+'+h.xp+' XP':'Unmarked · −'+h.xp+' XP');
-}
-function bump(n){const d=ensure(viewDate);d.apps=Math.max(0,(d.apps||0)+n);saveDay(viewDate);renderDay()}
-function respXP(){return HABITS.find(h=>h.id==='resp').xp}
-function doResp(qid){
-  const before=levelInfo(totalXP()).lv,wasSolid=isSolid(viewDate),q=getQuests().find(x=>x.id===qid);if(!q)return;
-  const d=ensure(viewDate);d.h=Object.assign({},d.h,{resp:true});d.taskId=qid;d.task=q.text;
-  quests=getQuests().map(x=>x.id===qid?Object.assign({},x,{done:true,doneOn:viewDate}):x);
-  saveDay(viewDate);saveState();render();
-  const after=levelInfo(totalXP()).lv;
-  toast(after>before?'Level '+after+' · '+rankFor(after):(!wasSolid&&isSolid(viewDate))?'Solid day · streak '+streak():'Done in both places · +'+(q.xp+respXP())+' XP');
-}
-function toggleQuest(id){
-  const before=levelInfo(totalXP()).lv,t=today();let linkedNote='';
-  const was=getQuests().find(q=>q.id===id);
-  quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?t:null}):q);
-  if(was&&!was.done){const d=ensure(t);if(!(d.h&&d.h.resp)){d.h=Object.assign({},d.h,{resp:true});d.taskId=id;d.task=was.text;saveDay(t);linkedNote=' · counts as today’s responsibility'}}
-  else if(was){for(const s in days){const d=days[s];if(d&&d.taskId===id){days[s]=Object.assign({},d,{h:Object.assign({},d.h,{resp:false}),taskId:null,task:''});saveDay(s)}}}
-  saveState();render();const q=quests.find(q=>q.id===id);
-  const after=levelInfo(totalXP()).lv;
-  toast(after>before?'Level '+after+' · '+rankFor(after):after<before?'Task reopened · back to level '+after:q.done?'Task done · +'+q.xp+' XP'+linkedNote:'Task reopened · −'+q.xp+' XP');
-}
 /* ---------- 8-bit hero: 12 looks from LV 1 to LV 35 ---------- */
 const HERO=(function(){
   const W=20,O='#1B1F2E',HAIR='#3A2A1E';
@@ -855,14 +1008,14 @@ const HERO=(function(){
       const lab=document.createElement('span');lab.textContent='LV '+s[0];
       const nm=document.createElement('span');nm.className='nm';nm.textContent=i>cur?'???':s[1];
       el.append(c,lab,nm);box.appendChild(el)});}
-  function toggleLooks(){const box=$('looks'),open=box.hidden;box.hidden=!open;$('hero').setAttribute('aria-expanded',open);if(open)renderLooks()}
+  function toggleLooks(){const box=$('lookPanel'),open=box.hidden;box.hidden=!open;$('hero').setAttribute('aria-expanded',open);if(open){renderLooks();renderLadder()}}
   function set(lv){const i=stageFor(lv);
     if(!cv){cv=$('heroCv');g=cv.getContext('2d');$('hero').onclick=toggleLooks;
       if(!RM)setInterval(()=>{if(!document.hidden&&cur>=0){t++;draw(g,cur,t)}},300)}
-    if(cur!==-1&&i>cur){const b=$('hero');b.classList.remove('evolve');void b.offsetWidth;b.classList.add('evolve');setTimeout(()=>toast('New look unlocked: '+STAGES[i][1]),1900)}
+    if(cur!==-1&&i>cur){const b=$('hero');b.classList.remove('evolve');void b.offsetWidth;b.classList.add('evolve')}
     const changed=i!==cur;cur=i;draw(g,cur,t);
-    const n=STAGES[i+1];$('nextLook').textContent=n?'Next look at LV '+n[0]+' · tap to see all':'Final form · tap to see all';
-    if(changed&&!$('looks').hidden)renderLooks();
+    
+    if(changed&&!$('lookPanel').hidden)renderLooks();
   }
   return{set,_draw:draw,_n:S.length};
 })();
