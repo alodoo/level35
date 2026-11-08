@@ -293,7 +293,13 @@ textarea.bk{width:100%;min-height:90px;padding:10px;border:1px solid var(--line)
 .he-f{display:flex;flex-direction:column;gap:6px;min-width:0}
 .he-f input[type=text],.he-f input[type=number],.he-f input[type=time],.he-f input[type=date]{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
 .he-fields{display:flex;flex-direction:column;gap:12px}
-.he-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.he-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.he-two>*{min-width:0}
+@media (max-width:350px){.he-two{grid-template-columns:minmax(0,1fr)}}
+/* iPhone draws time/date boxes with a fixed width of their own: make them shrink to the column */
+.he-f input[type=time],.he-f input[type=date]{-webkit-appearance:none;appearance:none;box-sizing:border-box;display:block;max-width:100%;min-height:44px;line-height:22px;text-align:left}
+.he-f input[type=time]::-webkit-date-and-time-value,.he-f input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.he-f input[type=time]::-webkit-datetime-edit,.he-f input[type=date]::-webkit-datetime-edit{padding:0}
 .he-three{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}
 .he-note{margin:0;font-size:12.5px;color:var(--muted)}
 .he-err{color:var(--accent);font-size:13.5px;font-weight:600;min-height:1em}
