@@ -2226,13 +2226,15 @@ const HERO16=(function(){
   L[34]=(d,t)=>{const{p,r}=d,cx=24,su={shirt:K.suit,cape:K.cape},em=(ty)=>{r(cx-2,ty+2,4,3,K.gold);r(cx-1,ty+3,2,1,K.goldS)};
     if(MOOD===0){bossCloud(d,0,false,t);[[3,0],[8,2],[13,1],[17,3]].forEach(([x,o])=>{const y=12+((t+o)%8);p(x,y,K.rain);p(x,y+1,K.rain)});
       if(t%6<2){[[10,11],[9,12],[10,13],[11,13],[10,14],[9,15],[8,16]].forEach(([x,y])=>{p(x,y,K.sun);p(x+1,y,K.sunS)})}
-      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades',mouth:'neutral',brows:'fierce'});return}
+      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));em(18);head(d,cx-8,2,{hair:true,mouth:'neutral',brows:'fierce'});return}
     if(MOOD===1){const hit=t%3!==0,dx=hit?(t%2?1:-1):0;bossCloud(d,dx,hit,t);
-      shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'down',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades',brows:'fierce'});
-      if(hit){for(let k=0;k<6;k++){p(12-k,10-Math.round(k*0.3),k%2?WH:'#7FD4FF');p(12-k,9-Math.round(k*0.3),'#7FD4FF')}sparkle(d,8,8,K.sun)}return}
+      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,brows:'fierce'});
+      if(hit){r(20,9,2,2,'#FF3B3B');r(26,9,2,2,'#FF3B3B');p(20,9,WH);p(26,9,WH);
+        for(let k=0;k<9;k++){const y=Math.round(k*0.45);p(19-k,10-y,k%2?'#FF8A8A':'#FF3B3B');p(19-k,11-y,'#FF3B3B');p(19-k,9-y,'rgba(255,59,59,.45)')}
+        sparkle(d,10,6,K.sun)}else{r(20,9,2,2,'#FF8A8A');r(26,9,2,2,'#FF8A8A')}return}
     rainbow(d);sun(d,t,2,2);
     [[0,9],[26,3],[2,20]].forEach(([x,y],i)=>{const xx=i===1?x+(t%4):x-(t%4);smallCloud(d,xx,y,K.cloud)});
-    shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'up',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades'});
+    shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'up',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true});
     if(t%2)sparkle(d,30,14,K.sun)};
 
   // 35 Level 35: his own number 35 jersey. The XP bar is nearly full, then it fills up, then he lifts a gold 35 overhead with fireworks
