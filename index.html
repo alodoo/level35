@@ -752,7 +752,7 @@ const ROOMLIB=[
   {id:'boxes',obj:'boxes',text:'Last boxes unpacked or cleared',why:'Nothing left half done'}
 ];
 const ROOM=ROOMLIB;const roomLib=id=>ROOMLIB.find(r=>"room-"+r.id===id);
-const STAGES=[[1,'Rebooting'],[2,'Getting up'],[3,'Back in motion'],[4,'Clearing up'],[5,'Building momentum'],[6,'Out of bed'],[7,'Fuelled up'],[8,'Consistent'],[9,'On a roll'],[10,'Warming up'],[11,'Locked in'],[12,'Pushing harder'],[13,'Getting fit'],[14,'Strong'],[15,'Learning'],[16,'Applying'],[17,'Interview ready'],[18,'Making calls'],[19,'Playing'],[20,'Team player'],[21,'Climbing'],[22,'Disciplined'],[23,'Fighter'],[24,'Balanced'],[25,'Charged up'],[26,'Unstoppable'],[27,'Saving the day'],[28,'Famous'],[29,'Almost there'],[30,'Champion'],[31,'Leading'],[32,'Building an empire'],[33,'Top of the world'],[34,'Royal'],[35,'Level 35']];
+const STAGES=[[1,'Rebooting'],[2,'Getting up'],[3,'Back in motion'],[4,'Clearing up'],[5,'Building momentum'],[6,'Out of bed'],[7,'Fuelled up'],[8,'Consistent'],[9,'On a roll'],[10,'Warming up'],[11,'Locked in'],[12,'Pushing harder'],[13,'Getting fit'],[14,'Strong'],[15,'Learning'],[16,'Applying'],[17,'Interview ready'],[18,'Making calls'],[19,'Playing'],[20,'Team player'],[21,'Climbing'],[22,'Disciplined'],[23,'Fighter'],[24,'Balanced'],[25,'Charged up'],[26,'Unstoppable'],[27,'Saving the day'],[28,'Famous'],[29,'Almost there'],[30,'Champion'],[31,'Leading'],[32,'Building an empire'],[33,'Top of the world'],[34,'Final boss'],[35,'Level 35']];
 const DEFAULT_QUESTS=[];
 
 let profile={name:''},days={},quests=null,start=null,viewDate=ymd(new Date()),armDel=null,lastXP=null,TL=null;
@@ -1885,7 +1885,7 @@ const HERO16=(function(){
   function plane(d,x,y){const{p}=d;p(x,y,WH);p(x+1,y,WH);p(x+2,y,WH);p(x+1,y-1,WH);p(x,y+1,K.cloudS)}
   function fball(d,x,y){const{p,r}=d;r(x+1,y,3,1,WH);r(x,y+1,5,3,WH);r(x+1,y+4,3,1,WH);p(x+2,y+2,O);p(x+1,y+1,O);p(x+3,y+3,O);p(x+3,y+1,K.cloudS);p(x+1,y+3,K.cloudS)}
   function bubble(d,x,y){const{p,r}=d;r(x+1,y,7,1,WH);r(x,y+1,9,4,WH);r(x+1,y+5,7,1,WH);p(x+2,y+6,WH);p(x+1,y+7,WH)}
-  function digit(d,x,y,n,c){const F={1:['010','110','010','010','111'],2:['111','001','111','100','111'],3:['111','001','011','001','111']}[n];F.forEach((row,j)=>[...row].forEach((v,i)=>{if(v==='1')d.p(x+i,y+j,c)}))}
+  function digit(d,x,y,n,c){const F={1:['010','110','010','010','111'],2:['111','001','111','100','111'],3:['111','001','011','001','111'],5:['111','100','111','001','111']}[n];F.forEach((row,j)=>[...row].forEach((v,i)=>{if(v==='1')d.p(x+i,y+j,c)}))}
   function medal(d,c){const{p,r}=d;p(14,18,K.red);p(17,18,K.red);p(15,19,K.red);p(16,19,K.red);r(15,20,2,2,c)}
   function bricks(d,rows,x0,w){const{r}=d;for(let j=0;j<rows;j++){const y=30-j*2;for(let i=0;i<w;i+=3){const x=x0+i+((j%2)?1:0);r(x,y,2,2,'#C0573A');r(x+2,y,1,2,'#8E3A26')}}}
   function bill(d,x,y,a){const{p,r}=d;if(a){r(x,y,4,2,K.cash);p(x+1,y,K.cashS);p(x+2,y+1,K.cashS)}else{r(x,y,2,4,K.cash);p(x,y+1,K.cashS);p(x+1,y+2,K.cashS)}}
@@ -2119,12 +2119,6 @@ const HERO16=(function(){
     if(MOOD===1)pts.slice(0,1+(t%6)).forEach(([x,y])=>p(x,y,'#3F7BD9'));
     if(MOOD===2){pts.forEach(([x,y])=>p(x,y,K.cashS));[[7,6],[8,4],[9,2],[10,1]].forEach(([x,y])=>p(x,y,K.cashS));p(9,1,K.cashS);p(11,1,K.cashS);p(10,0,K.cashS);if(t%2)sparkle(d,12,4,K.sun)}
     shadow(d,16);body(d,16,18,{shirt:K.navy,armL:MOOD===0?'down':'out',armR:MOOD===2?'up':'down'});tie(d,18);head(d,8,2,{hair:true,eyes:blink(t,14)})};
-  // 34 Royal: gold outfit without a crown, then the crown floats down, then crowned with a sceptre
-  L[34]=(d,t)=>{const{p,r}=d;shadow(d,16);
-    body(d,16,18,{shirt:K.gold,pants:K.goldS,cape:K.cape,flap:MOOD===2?(t%2?1:-1):0,armR:MOOD===2?'wave':'down'});
-    head(d,8,2,{hair:true,eyes:'shades',mouth:'soft'});
-    if(MOOD===1){const k=t%7;crown(d,[3,1,0,0,0,0,0][k]-3+[3,3,3,2,1,0,0][k],[14,12,9,6,3,1,0][k]);if(k===6)sparkle(d,25,0,WH)}
-    if(MOOD===2){crown(d,0);r(25,4,1,10,K.goldS);r(24,1,3,3,K.red);p(24,1,K.tongue);if(t%3===0)sparkle(d,28,1,WH)}};
   /* ---- redrawn looks ---- */
   const flip=d=>({p:(x,y,c)=>d.p(x,31-y,c),r:(x,y,w,h,c)=>d.r(x,32-y-h,w,h,c)});
   const shift=(d,dx)=>({p:(x,y,c)=>d.p(x+dx,y,c),r:(x,y,w,h,c)=>d.r(x+dx,y,w,h,c)});
@@ -2223,6 +2217,36 @@ const HERO16=(function(){
     r(9,29,14,1,WH);r(6,30,20,1,'#DDE3EE');r(3,31,26,1,M);
     r(26,8,1,22,O);r(27,8,4,3,K.red);if(a)p(31,9,K.red);else p(31,11,K.red);
     shadow(d,12,29);body(d,16,16,{shirt:'#3CC98E',armR:'up'});head(d,8,0,{hair:true})};
+  // 34 Final boss: the storm cloud from level 1 comes back. It looms, he blasts it, then it bursts into sunshine and a rainbow
+  function bossCloud(d,dx,hurt,t){const{p,r}=d,c='#5E6678',cs='#454C5E',ch='#7D8699';
+    r(3+dx,2,14,1,c);r(1+dx,3,18,7,c);r(0+dx,5,20,4,c);r(2+dx,10,16,1,cs);r(4+dx,3,5,1,ch);r(2+dx,4,3,1,ch);
+    if(hurt){[[4,5],[5,6],[6,5],[5,4],[12,5],[13,6],[14,5],[13,4]].forEach(([x,y])=>p(x+dx,y,WH))}
+    else{r(4+dx,5,3,2,WH);r(12+dx,5,3,2,WH);p(5+dx,6,K.red);p(13+dx,6,K.red);r(3+dx,4,4,1,O);r(12+dx,4,4,1,O);p(6+dx,3,O);p(12+dx,3,O)}
+    r(7+dx,8,6,1,O);p(6+dx,9,O);p(13+dx,9,O)}
+  L[34]=(d,t)=>{const{p,r}=d,cx=24,su={shirt:K.suit,cape:K.cape},em=(ty)=>{r(cx-2,ty+2,4,3,K.gold);r(cx-1,ty+3,2,1,K.goldS)};
+    if(MOOD===0){bossCloud(d,0,false,t);[[3,0],[8,2],[13,1],[17,3]].forEach(([x,o])=>{const y=12+((t+o)%8);p(x,y,K.rain);p(x,y+1,K.rain)});
+      if(t%6<2){[[10,11],[9,12],[10,13],[11,13],[10,14],[9,15],[8,16]].forEach(([x,y])=>{p(x,y,K.sun);p(x+1,y,K.sunS)})}
+      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades',mouth:'neutral',brows:'fierce'});return}
+    if(MOOD===1){const hit=t%3!==0,dx=hit?(t%2?1:-1):0;bossCloud(d,dx,hit,t);
+      shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'down',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades',brows:'fierce'});
+      if(hit){for(let k=0;k<6;k++){p(12-k,10-Math.round(k*0.3),k%2?WH:'#7FD4FF');p(12-k,9-Math.round(k*0.3),'#7FD4FF')}sparkle(d,8,8,K.sun)}return}
+    rainbow(d);sun(d,t,2,2);
+    [[0,9],[26,3],[2,20]].forEach(([x,y],i)=>{const xx=i===1?x+(t%4):x-(t%4);smallCloud(d,xx,y,K.cloud)});
+    shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'up',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades'});
+    if(t%2)sparkle(d,30,14,K.sun)};
+
+  // 35 Level 35: his own number 35 jersey. The XP bar is nearly full, then it fills up, then he lifts a gold 35 overhead with fireworks
+  L[35]=(d,t)=>{const{p,r}=d,J='#1B1F2E',G=K.gold,pct=MOOD===0?0.85:MOOD===1?Math.min(1,0.85+(t%6)*0.03):1;
+    r(0,6,6,26,O);r(1,7,4,24,'#2A3150');const fh=Math.round(24*pct);r(1,31-fh,4,fh,MOOD===2&&t%2?K.goldH:G);r(1,31-fh,1,fh,K.goldH);
+    if(MOOD===1){p(2,31-fh-1-(t%3),K.goldH);p(3,31-fh-3+(t%2),WH)}
+    digit(d,1,0,3,MOOD===2?G:WH);digit(d,4,0,5,MOOD===2?G:WH);
+    if(MOOD===2){const c=t>>1,burst=(x,y,col,s)=>{p(x,y,col);if(s>0)[[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{p(x+a*s,y+b*s,col);p(x+a*(s+1),y+b*(s+1),col)});if(s>1)[[1,1],[-1,1],[1,-1],[-1,-1]].forEach(([a,b])=>p(x+a*s,y+b*s,col))};
+      burst(...[[28,4],[27,15],[10,12]][c%3],K.fw[c%5],t%3);burst(...[[27,15],[28,4],[29,24]][c%3],K.fw[(c+2)%5],(t+1)%3);confetti(d,t)}
+    shadow(d,16);
+    const arms=MOOD===2?['reach','reach']:MOOD===1?['down',t%2?'up':'wave']:['down','down'];
+    body(d,16,18,{shirt:J,pants:'#5A6276',armL:arms[0],armR:arms[1]});digit(d,12,19,3,G);digit(d,16,19,5,G);
+    head(d,8,2,{hair:true,eyes:blink(t,12),mouth:'soft'});
+    if(MOOD===2){r(9,0,14,8,O);r(10,1,12,6,G);r(10,1,12,1,K.goldH);r(20,1,2,6,K.goldS);digit(d,12,2,3,J);digit(d,16,2,5,J);r(8,1,2,2,G);r(22,1,2,2,G);if(t%3===0)sparkle(d,16,0,WH)}};
   const S=Array.from({length:35},(_,i)=>L[i+1]);
   function draw(ctx,i,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;S[i](api(ctx),t)}
   return{draw,n:S.length,floorShadow:v=>{FLOOR_SHADOW=v},setMood:m=>{MOOD=m},get mood(){return MOOD}};
