@@ -291,7 +291,7 @@ textarea.bk{width:100%;min-height:90px;padding:10px;border:1px solid var(--line)
 .he-card{max-width:440px;max-height:calc(100dvh - 32px);overflow:auto;align-items:stretch;text-align:left}
 .he-name{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;font-size:17px;font-weight:600}
 .he-f{display:flex;flex-direction:column;gap:6px;min-width:0}
-.he-f input[type=text],.he-f input[type=number],.he-f input[type=time]{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+.he-f input[type=text],.he-f input[type=number],.he-f input[type=time],.he-f input[type=date]{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
 .he-fields{display:flex;flex-direction:column;gap:12px}
 .he-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .he-three{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}
@@ -496,6 +496,7 @@ html{-webkit-tap-highlight-color:transparent}
     <h1 class="su-title">Build your plan</h1>
     <p class="su-lead">Start where you are, not where you want to be. Pick your habits, say where you are now and where you want to get to, and the app builds the levels for you.</p>
     <label class="he-f"><span class="label">Your name</span><input id="suName" type="text" maxlength="30" placeholder="Shown to friends next to your streak"></label>
+    <label class="he-f"><span class="label">When did you start?</span><input id="suStartDate" type="date"><span class="he-note">Today, or an earlier day if you want to tick off days you’ve already done. Up to 90 days back.</span></label>
     <div class="he-f"><span class="label">How consistent are you right now?</span>
       <div class="su-opts" id="suCons">
         <button type="button" data-v="rarely"><b>Rarely</b><span>I start things and drop them. Go slow.</span></button>
@@ -1329,7 +1330,7 @@ function openSetup(mode){
   if(SU.mode==='edit'){const c=latestConfig();SU.cons=c.consistency;SU.habits=clone(c.habits);SU.name=profile.name||''}
   else{SU.habits=[];SU.cons='sometimes';SU.name=profile.name||''}
   SU.room=getQuests().filter(q=>q.room&&!q.done).map(q=>({qid:q.id,text:q.text,why:q.why||'',custom:!roomLib(q.id)}));
-  $('suName').value=SU.name;$('suStart').textContent=SU.mode==='edit'?'Save changes (start tomorrow)':'Start Level 1';
+  $('suName').value=SU.name;SU.start=today();{const d=$('suStartDate');d.value=SU.start;d.max=SU.start;d.min=addDays(SU.start,-90)}$('suStart').textContent=SU.mode==='edit'?'Save changes (start tomorrow)':'Start Level 1';
   $('suCancel').hidden=SU.mode!=='edit';
   document.querySelector('.wrap').hidden=true;$('setup').hidden=false;suGo(SU.mode==='edit'?2:1);window.scrollTo(0,0);
 }
@@ -1339,7 +1340,8 @@ function suGo(n){SU.step=n;SU_STEPS.forEach((id,i)=>$(id).hidden=i+1!==n);$('suS
   if(n===1)renderCons();if(n===2){renderSuList();renderLib()}if(n===3)renderSuRoom();if(n===4)renderPlan();window.scrollTo(0,0)}
 function renderCons(){[...$('suCons').children].forEach(b=>{b.classList.toggle('on',b.dataset.v===SU.cons);b.setAttribute('aria-pressed',b.dataset.v===SU.cons)})}
 $('suCons').onclick=e=>{const b=e.target.closest('button');if(!b)return;SU.cons=b.dataset.v;renderCons()};
-$('suNext1').onclick=()=>{SU.name=$('suName').value.trim().slice(0,30);suGo(2)};
+$('suNext1').onclick=()=>{SU.name=$('suName').value.trim().slice(0,30);
+  const t=today(),v=$('suStartDate').value;SU.start=/^\d{4}-\d{2}-\d{2}$/.test(v)?(v>t?t:v<addDays(t,-90)?addDays(t,-90):v):t;suGo(2)};
 $('suBack2').onclick=()=>suGo(1);$('suBack3').onclick=()=>suGo(3);$('suBackR').onclick=()=>suGo(2);$('suNextR').onclick=()=>suGo(4);
 $('suCancel').onclick=()=>closeSetup();
 $('suNext2').onclick=()=>{const daily=SU.habits.filter(h=>h.kind!=='once');
@@ -1481,7 +1483,7 @@ $('suStart').onclick=()=>{
     const hs=buildLadder(clone(SU.habits),SU.cons,curLevel(),true);
     configs=configs.filter(c=>c.from<from);configs.push({from,consistency:SU.cons,habits:hs,signups:cur.signups||[]});
   }else{
-    const t=today();configs=[newConfig(SU.habits,SU.cons,t,[])];start=t;days={};
+    const t=SU.start||today();configs=[newConfig(SU.habits,SU.cons,t,[])];start=t;days={};
   }
   {const keep=new Set(SU.room.map(r=>r.qid));
     quests=getQuests().filter(q=>!q.room||q.done||keep.has(q.id));
@@ -1490,7 +1492,7 @@ $('suStart').onclick=()=>{
   {const have=new Set(getQuests().map(q=>q.text.toLowerCase()));
     quests=getQuests().concat(once.filter(h=>!have.has(h.title.toLowerCase())).map(h=>({id:'room-'+h.id,text:h.title,why:h.hint||'',room:true,xp:0,done:false})))}
   lsSave();closeSetup();viewDate=today();lastXP=null;render();
-  toast(SU.mode==='edit'?'Saved. Your changes start tomorrow.':'Level 1, day one. Let’s go.');
+  toast(SU.mode==='edit'?'Saved. Your changes start tomorrow.':start<today()?'Plan starts '+parse(start).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'. Tap ‹ to tick off earlier days.':'Level 1, day one. Let’s go.');
 };
 
 $('editPlan').onclick=()=>openSetup('edit');
