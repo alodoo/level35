@@ -2229,8 +2229,9 @@ const HERO16=(function(){
     if(MOOD===1){const hit=t%3!==0,dx=hit?(t%2?1:-1):0;bossCloud(d,dx,hit,t);
       shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,brows:'fierce'});
       if(hit){r(20,9,2,2,'#FF3B3B');r(26,9,2,2,'#FF3B3B');p(20,9,WH);p(26,9,WH);
-        for(let k=0;k<9;k++){const y=Math.round(k*0.45);p(19-k,10-y,k%2?'#FF8A8A':'#FF3B3B');p(19-k,11-y,'#FF3B3B');p(19-k,9-y,'rgba(255,59,59,.45)')}
-        sparkle(d,10,6,K.sun)}else{r(20,9,2,2,'#FF8A8A');r(26,9,2,2,'#FF8A8A')}return}
+        const beam=(x0,y0)=>{const tx=10,ty2=6,n=x0-tx;for(let k=0;k<=n;k++){const x=x0-k,y=Math.round(y0+(ty2-y0)*k/n);p(x,y,(k+t)%2?'#FF8A8A':'#FF3B3B');p(x,y+1,'#FF3B3B')}};
+        beam(26,9);beam(20,9);r(20,9,2,2,'#FF3B3B');r(26,9,2,2,'#FF3B3B');p(20,9,WH);p(26,9,WH);
+        sparkle(d,10,6,K.sun);sparkle(d,10,6,WH);p(8,4,K.sun);p(12,8,K.sun)}else{r(20,9,2,2,'#FF8A8A');r(26,9,2,2,'#FF8A8A')}return}
     rainbow(d);sun(d,t,2,2);
     [[0,9],[26,3],[2,20]].forEach(([x,y],i)=>{const xx=i===1?x+(t%4):x-(t%4);smallCloud(d,xx,y,K.cloud)});
     shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'up',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true});
