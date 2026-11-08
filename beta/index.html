@@ -506,7 +506,7 @@ html{-webkit-tap-highlight-color:transparent}
   </section>
   <section class="su-step" id="su2" hidden>
     <h1 class="su-title">Your habits</h1>
-    <p class="su-lead">Mark up to 3 as CORE: the ones that make a day count. Rate each by how hard it is for you right now. Harder habits are worth more.</p>
+    <p class="su-lead">Mark the ones that make a day count as CORE. Fewer CORE habits make solid days easier to hit. Rate each by how hard it is for you right now. Harder habits are worth more.</p>
     <div class="su-list" id="suList"></div>
     <div class="label" id="suNote"></div>
     <h2 class="su-sub">Add habits</h2>
@@ -587,7 +587,7 @@ const BOLT='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.2 1.5 3.5 9h
 const ALL=[0,1,2,3,4,5,6],WKD=[1,2,3,4,5],DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const KINDS={daily:'Every day',weekly:'Days a week',amount:'An amount',time:'A time',avoid:'Stop doing',once:'One-time change'};
 const EFFORT={1:'Easy',2:'Takes effort',3:'Hard'};
-const MAX_CORE=3;
+
 const PACE={
   rarely:{initial:3,time:15,timeSteps:6,amountSteps:4,per:1},
   sometimes:{initial:5,time:15,timeSteps:4,amountSteps:3,per:1},
@@ -1383,7 +1383,7 @@ function renderSuList(){
     const del=document.createElement('button');del.type='button';del.className='del';del.textContent='×';del.setAttribute('aria-label','Remove '+h.title);
     del.onclick=()=>{SU.habits.splice(i,1);renderSuList();renderLib()};
     row.append(txt,del);box.appendChild(row)});
-  const n=cores();$('suNote').textContent=n+' of '+MAX_CORE+' CORE · '+SU.habits.length+(SU.habits.length===1?' habit':' habits');
+  const n=cores();$('suNote').textContent=n+' CORE · '+SU.habits.length+(SU.habits.length===1?' habit':' habits');
 }
 function renderLib(){
   const box=$('suLib');box.innerHTML='';const have=new Set(SU.habits.map(h=>h.title.toLowerCase()));
@@ -1429,8 +1429,8 @@ function renderEditor(){
     f.appendChild(field('How many days a week now?',inp('number',d.from!=null?d.from:0,v=>d.from=v,{min:0,max:7,inputMode:'numeric'})))}
   if(['daily','avoid','time','amount'].includes(d.kind))f.appendChild(field('Which days',dayChips(d.days,renderEditor)));
   if(once){const n=document.createElement('p');n.className='he-note';n.textContent='Goes to Design your room. Doing it once gives an Extra Boost ⚡ that day.';f.appendChild(n)}
-  const full=!d.core&&cores()>=MAX_CORE&&!(SU.editId>=0&&SU.habits[SU.editId].core);
-  $('heCore').checked=!!d.core;$('heCore').disabled=full;$('heCoreNote').textContent=full?'You already have '+MAX_CORE+' CORE habits.':'Needed for a solid day. Keeps your streak alive.';
+  const full=false;
+  $('heCore').checked=!!d.core;$('heCore').disabled=false;$('heCoreNote').textContent='Needed for a solid day. Keeps your streak alive.';
 }
 const padT=t=>{const [h,m]=String(t).split(':');return String(+h||0).padStart(2,'0')+':'+String(+m||0).padStart(2,'0')};
 const normT=t=>{const [h,m]=String(t).split(':').map(Number);return (h||0)+':'+String(m||0).padStart(2,'0')};
