@@ -2038,13 +2038,6 @@ const HERO16=(function(){
     else if(f===2){r(10,by+1,12,1,K.brown);r(10,by+2,12,1,O);[[8,by],[23,by+2]].forEach(([x,y])=>p(x,y,WH))}
     else if(f===3){r(9,by+1,14,1,K.brownS);r(9,by+2,14,1,K.brown);r(11,by,2,1,O);r(19,by,2,1,O);[[7,by+3],[24,by-1]].forEach(([x,y])=>p(x,y,WH))}
     else{board(d,9,by+1,false);sparkle(d,27,by-2,K.sun);sparkle(d,4,by-1,K.sun)}};
-  // 10 Warming up: can't reach his toes, then touches them, then the splits
-  L[10]=(d,t)=>{const{p,r}=d,SH='#3F7BD9',sk=K.skin;
-    if(MOOD===2){const up=t%2;shadow(d,26,31);body(d,16,21,{shirt:SH,pants:'#8A93A8',legs:'split',armL:'reach',armR:'reach'});head(d,8,5,{hair:true});if(up){sparkle(d,4,20,K.sun);sparkle(d,28,19,K.sun)}else sparkle(d,16,2,WH);return}
-    const reach=MOOD===1,jig=!reach&&t%2,hy=reach?28:25+jig;shadow(d,16);
-    body(d,16,18,{shirt:SH,pants:'#8A93A8',armL:'none',armR:'none'});r(8,19,2,hy-19,SH);r(22,19,2,hy-19,SH);r(8,hy,2,2,sk);r(22,hy,2,2,sk);
-    head(d,8,reach?7:5,{hair:true,mouth:reach?'soft':'grit',brows:'fierce'});
-    if(!reach){p(5,9+(t%3),K.sweat);p(26,8+((t+1)%3),K.sweat)}else if(t%2){sparkle(d,6,29,K.sun);sparkle(d,25,29,K.sun)}};
   // 12 Pushing harder: a shaky plank, then push-ups, then clap push-ups
   function pushup(d,ty,clap,sh){const{p,r}=d,S2=sh||'#E2453C';
     for(let i=0;i<7;i++)r(24+i,ty+1+Math.round(i*(28-ty)/6),2,2,K.pants);r(30,29,2,2,K.shoe);
@@ -2114,21 +2107,6 @@ const HERO16=(function(){
     if(MOOD===0){if(t%3!==1){p(7,27,K.sun);p(10,26,E);p(21,27,E);p(24,26,K.sun)}}
     if(MOOD===1){const s=t%2;r(23-s,5-s,5+2*s,5+2*s,E);r(24,6,3,3,WH)}
     if(MOOD===2){[[7,7],[23,7]].forEach(([x,y])=>{r(x-1,y-1,4,4,E);r(x,y,2,2,WH)});[[11,1],[14,0],[17,0],[20,1]].forEach(([x,y])=>p(x,y,t%2?K.goldH:E))}};
-  // 27 Super strength: pushing a boulder, then lifting it, then throwing it into stars
-  function boulder(d,x,y,w,h){const{r}=d;r(x+1,y,w-2,h,'#8A8F9C');r(x,y+1,w,h-2,'#8A8F9C');r(x+1,y+1,w-3,2,'#B4B9C4');r(x+w-2,y+2,1,h-3,'#6A6F7C')}
-  L[27]=(d,t)=>{const{p,r}=d,su={shirt:K.suit,cape:K.cape},em=ty=>{r(14,ty+2,4,3,K.gold);r(15,ty+3,2,1,K.goldS)};
-    if(MOOD===0){const j=t%2;shadow(d,16);body(d,16,18,Object.assign({legs:'walkA',armL:'down',armR:'out'},su));em(18);head(d,8,2,{hair:true,eyes:'shades',mouth:'grit',brows:'fierce'});boulder(d,25+j,15,7,16);return}
-    const f=t%8,over=MOOD===1||f<3;shadow(d,16);
-    if(over){boulder(d,5,0,22,5);body(d,16,18,Object.assign({armL:'reach',armR:'reach',flap:t%2?1:-1},su));em(18);head(d,8,2,{hair:true,eyes:'shades',mouth:'soft'});return}
-    body(d,16,18,Object.assign({armL:'up',armR:'up',flap:t%2?1:-1},su));em(18);head(d,8,2,{hair:true,eyes:'shades'});
-    if(f===3)boulder(d,24,0,7,4);else{const k=f-3;[[27,2],[24,5],[30,6],[26,9]].forEach(([x,y],i)=>sparkle(d,x+(i%2?k:-k),y+k,K.fw[(i+k)%5]))}};
-  // 28 Famous: walking in the hero suit, then camera flashes, then the red carpet
-  L[28]=(d,t)=>{const{p,r}=d,a=t%2;
-    if(MOOD===2){r(0,29,32,3,K.red);r(0,29,32,1,'#E05A5A');r(1,22,1,7,K.gold);r(30,22,1,7,K.gold);for(let x=2;x<30;x+=3)p(x,23+((x>>2)%2),K.capeS)}
-    shadow(d,16,MOOD===2?29:31);body(d,16,18,{shirt:K.suit,cape:K.cape,flap:a?1:-1,legs:a?'walkA':'walkB',armR:MOOD?'wave':'down'});r(14,20,4,3,K.gold);r(15,21,2,1,K.goldS);
-    head(d,8,2,{hair:true,eyes:'shades'});
-    if(MOOD===1)flash(d,...[[3,5],[28,7],[4,21],[28,24]][t%4]);
-    if(MOOD===2){const F=[[3,5],[28,7],[4,15],[28,14],[26,2],[5,10]];flash(d,...F[t%6]);flash(d,...F[(t+3)%6])}};
   // 29 Almost there: bronze, then silver, then gold on the top step
   L[29]=(d,t)=>{const{p,r}=d,C=[['#CD7F32','#8C5320',3],[K.metal,K.metalS,2],[K.gold,K.goldS,1]][MOOD];
     shadow(d,16);body(d,16,18,{shirt:K.navy,armL:MOOD===2?'up':'down',armR:MOOD===2?'up':MOOD===1?'wave':'down'});medal(d,C[0]);head(d,8,2,{hair:true,eyes:blink(t,12)});
@@ -2141,26 +2119,110 @@ const HERO16=(function(){
     if(MOOD===1)pts.slice(0,1+(t%6)).forEach(([x,y])=>p(x,y,'#3F7BD9'));
     if(MOOD===2){pts.forEach(([x,y])=>p(x,y,K.cashS));[[7,6],[8,4],[9,2],[10,1]].forEach(([x,y])=>p(x,y,K.cashS));p(9,1,K.cashS);p(11,1,K.cashS);p(10,0,K.cashS);if(t%2)sparkle(d,12,4,K.sun)}
     shadow(d,16);body(d,16,18,{shirt:K.navy,armL:MOOD===0?'down':'out',armR:MOOD===2?'up':'down'});tie(d,18);head(d,8,2,{hair:true,eyes:blink(t,14)})};
-  // 32 Building an empire: one brick, then a wall, then a castle with a flag
-  L[32]=(d,t)=>{const{p,r}=d,hat=()=>{r(9,1,14,2,K.gold);r(8,3,16,1,K.goldS);p(15,0,K.gold);p(16,0,K.gold)};
-    if(MOOD===1)bricks(d,1+(t%5),0,7);
-    if(MOOD===2){bricks(d,7,0,7);[0,3,6].forEach(x=>r(x,16,2,2,'#C0573A'));r(3,6,1,10,O);const w=t%2;r(4,6,4,3,K.red);if(w)p(8,7,K.red);else p(7,9,K.red);if(t%3===0)sparkle(d,10,10,K.sun)}
-    shadow(d,16);body(d,16,18,{shirt:'#E8771A',armR:MOOD===2?'up':'down'});head(d,8,2,{hair:true,eyes:blink(t,13)});hat();
-    if(MOOD<2){r(21,27,4,2,'#C0573A');r(24,27,1,2,'#8E3A26')}};
-  // 33 Top of the world: at the foot of a mountain, then climbing through snow, then a flag on the summit
-  L[33]=(d,t)=>{const{p,r}=d,a=t%2;
-    if(MOOD<2){const pk=MOOD===0?10:4;for(let y=pk;y<32;y++){const half=Math.round((y-pk)*0.9);r(9-half,y,half*2+1,1,y<pk+4?WH:'#8A93A8')}}
-    if(MOOD===1)[[3,2],[12,6],[27,4],[20,11],[6,14]].forEach(([x,y],i)=>p((x+t*2)%32,(y+t)%32,WH));
-    if(MOOD===2){r(0,30,32,2,WH);r(3,29,26,1,WH);r(8,28,16,1,'#E6EAF2');r(26,8,1,20,O);r(27,8,5,4,K.red);if(a)p(31,12,K.red);else p(31,8,K.cloud);sun(d,t,1,1)}
-    if(MOOD<2)shadow(d,16);const ty=MOOD===2?16:18;
-    body(d,16,ty,{shirt:'#3CC98E',legs:MOOD===1?(a?'walkA':'walkB'):'stand',armR:MOOD===2?'up':'down'});head(d,8,ty-16,{hair:true,eyes:blink(t,13)});
-    if(MOOD===0)r(23,18,1,10,O);if(MOOD===1&&a)r(24,10,2,1,K.cloudH)};
   // 34 Royal: gold outfit without a crown, then the crown floats down, then crowned with a sceptre
   L[34]=(d,t)=>{const{p,r}=d;shadow(d,16);
     body(d,16,18,{shirt:K.gold,pants:K.goldS,cape:K.cape,flap:MOOD===2?(t%2?1:-1):0,armR:MOOD===2?'wave':'down'});
     head(d,8,2,{hair:true,eyes:'shades',mouth:'soft'});
     if(MOOD===1){const k=t%7;crown(d,[3,1,0,0,0,0,0][k]-3+[3,3,3,2,1,0,0][k],[14,12,9,6,3,1,0][k]);if(k===6)sparkle(d,25,0,WH)}
     if(MOOD===2){crown(d,0);r(25,4,1,10,K.goldS);r(24,1,3,3,K.red);p(24,1,K.tongue);if(t%3===0)sparkle(d,28,1,WH)}};
+  /* ---- redrawn looks ---- */
+  const flip=d=>({p:(x,y,c)=>d.p(x,31-y,c),r:(x,y,w,h,c)=>d.r(x,32-y-h,w,h,c)});
+  const shift=(d,dx)=>({p:(x,y,c)=>d.p(x+dx,y,c),r:(x,y,w,h,c)=>d.r(x+dx,y,w,h,c)});
+  const heart=(d,x,y,c)=>{c=c||'#F27B8B';d.p(x,y,c);d.p(x+2,y,c);d.r(x,y+1,3,1,c);d.p(x+1,y+2,c)};
+
+  // 10 Warming up: a handstand. Kicks up and topples over, then a wobbly handstand, then a steady one with the legs opening
+  L[10]=(d,t)=>{const{p,r}=d,SH='#3F7BD9',PA='#8A93A8',o=(legs)=>({shirt:SH,pants:PA,legs,armL:'reach',armR:'reach'});
+    if(MOOD===0){const f=t%6;
+      if(f<2){shadow(d,16);hero(d,18,{shirt:SH,pants:PA,armL:'reach',armR:'reach'},{mouth:'neutral'});return}
+      if(f<4){const g=shift(flip(d),f===2?-2:2);shadow(d,14);body(g,16,18,o('spread'));head(g,8,2,{hair:true,mouth:'grit',brows:'fierce'});return}
+      shadow(d,18);body(d,16,21,{shirt:SH,pants:PA,legs:'cross'});head(d,8,5,{hair:true,eyes:'blink',mouth:'neutral'});
+      for(let k=0;k<3;k++){const a=(t*70+k*120)*Math.PI/180;sparkle(d,Math.round(16+Math.cos(a)*10),Math.round(4+Math.sin(a)*2),K.sun)}return}
+    if(MOOD===1){const w=[0,1,0,-1][t%4];const g=shift(flip(d),w);shadow(d,20);body(g,16,18,o(t%2?'walkA':'walkB'));head(g,8,2,{hair:true,brows:'fierce'});p(4,19+(t%3),K.sweat);p(27,21+((t+1)%3),K.sweat);return}
+    const f=t%4,g=flip(d);shadow(d,20);body(g,16,18,o(f<2?'stand':'spread'));head(g,8,2,{hair:true});if(f>=2){sparkle(d,4,3,K.sun);sparkle(d,27,3,K.sun)}};
+
+  // 20 Team player: dribbles, then spins the ball on one finger, then a jump shot that swishes through the hoop
+  function bball(d,x,y,ph){const{p,r}=d;r(x+1,y,3,1,K.ball);r(x,y+1,5,3,K.ball);r(x+1,y+4,3,1,K.ball);p(x+1,y+1,'#F7A35C');
+    if(ph===0){r(x+2,y,1,5,K.ballS);r(x,y+2,5,1,K.ballS)}else if(ph===1){p(x+1,y+1,K.ballS);p(x+2,y+2,K.ballS);p(x+3,y+3,K.ballS);p(x,y+3,K.ballS);p(x+4,y+1,K.ballS)}else{p(x+3,y+1,K.ballS);p(x+2,y+2,K.ballS);p(x+1,y+3,K.ballS);p(x,y+1,K.ballS);p(x+4,y+3,K.ballS)}}
+  L[20]=(d,t)=>{const{p,r}=d,SH=K.jersey,jer=(cx,ty)=>{r(cx-2,ty+1,3,1,WH);p(cx,ty+2,WH);p(cx-1,ty+3,WH);p(cx-1,ty+4,WH)};
+    if(MOOD===0){const f=t%4,by=[22,24,26,24][f],hy=f===0?20:21;
+      shadow(d,16);body(d,16,18,{shirt:SH,legs:f===2?'walkA':'stand',armR:'none'});jer(16,18);head(d,8,2,{hair:true,mouth:'soft'});
+      r(22,19,2,2,SH);r(24,hy,2,2,SH);r(26,hy,2,2,K.skin);
+      r(25,31,5,1,'rgba(0,0,0,.25)');if(f===2){r(24,27,7,3,K.ball);r(25,26,5,1,K.ball);r(25,30,5,1,K.ball);r(27,26,1,5,K.ballS);r(24,28,7,1,K.ballS)}else bball(d,25,by,0);return}
+    if(MOOD===1){shadow(d,16);body(d,16,18,{shirt:SH,armR:'none'});jer(16,18);head(d,8,2,{hair:true,mouth:'soft'});
+      r(22,19,2,2,SH);r(24,12,2,8,SH);r(24,10,2,2,K.skin);p(25,9,K.skin);
+      bball(d,23,3,t%3);if(t%2){p(21,4,WH);p(21,5,WH);p(29,6,WH);p(29,7,WH)}else{p(29,4,WH);p(29,5,WH);p(21,6,WH);p(21,7,WH)}return}
+    const f=t%10,cx=20,up=f<3?2:0;
+    r(0,0,3,13,K.metalH);r(2,0,1,13,K.metalS);r(0,12,3,1,K.metalS);r(0,5,2,1,K.red);r(0,8,2,1,K.red);r(1,5,1,4,K.red);
+    shadow(d,16);
+    const armR=f<2?'up':f<4?'reach':'down',armL=f<2?'up':f>=7?'up':'down';
+    body(d,cx,18-up,{shirt:SH,armL,armR,legs:up?'stand':'stand'});jer(cx,18-up);head(d,cx-8,2-up,{hair:true});
+    const P=[[25,4],[25,4],[22,0],[16,-1],[10,1],[5,6],[4,10],[4,14],[4,20],[4,26]][f];
+    if(f===8)r(4,31,5,1,'rgba(0,0,0,.25)');
+    bball(d,P[0],P[1]-(f<2?up:0),f%3);
+    const sw=f===6||f===7;r(3,11,7,1,'#E2453C');for(let y=12;y<16;y++)for(let x=4+((y-12)>>1);x<9-((y-12)>>1);x+=2)p(x+(sw&&y%2?1:0),y,WH);
+    if(sw){sparkle(d,12,9,K.sun);sparkle(d,1,16,WH)}};
+
+  // 27 Saving the day: a cat stuck up a tree, then he flies up to it, then he holds it safe with hearts
+  function cat(d,x,y,happy){const{p,r}=d,C='#E8771A',CS='#B9560F';r(x,y+2,5,3,C);p(x+1,y+3,CS);p(x+3,y+3,CS);r(x+4,y,3,3,C);p(x+4,y-1,C);p(x+6,y-1,C);
+    if(happy){p(x+5,y+1,O);p(x+6,y+1,O)}else{p(x+5,y+1,WH);p(x+6,y+1,O)}p(x-1,y+1,C);p(x-1,y+2,C);p(x,y+5,C);p(x+3,y+5,C)}
+  function tree(d){const{p,r}=d,G='#2F8F4E',GH='#3CC98E';r(2,12,3,20,K.brown);r(4,12,1,20,K.brownS);r(4,18,7,2,K.brown);r(4,19,7,1,K.brownS);
+    r(1,2,10,10,G);r(0,4,12,6,G);r(2,3,4,2,GH);r(1,5,2,2,GH);p(8,4,GH);p(6,8,GH)}
+  L[27]=(d,t)=>{const{p,r}=d,cx=21,su={shirt:K.suit,cape:K.cape},em=(ty)=>{r(cx-2,ty+2,4,3,K.gold);r(cx-1,ty+3,2,1,K.goldS)};
+    tree(d);
+    if(MOOD===0){cat(d,6,13,false);if(t%2){r(9,8,1,3,WH);p(9,12,WH)}shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades',mouth:'neutral'});return}
+    if(MOOD===1){cat(d,6,13,false);const ty=15-(t%2);shadow(d,10);body(d,cx,ty,Object.assign({armL:'out',armR:'down',flap:t%2?1:-1,legs:'walkA'},su));em(ty);head(d,cx-8,ty-16,{hair:true,eyes:'shades'});
+      [[24,26,4],[26,29,3]].forEach(([x,y,w])=>r(x,y+(t%2),w,1,K.cloudH));return}
+    shadow(d,16);body(d,cx,18,Object.assign({armL:'guard',armR:'guard',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades'});
+    cat(d,cx-4,19,true);r(cx-6,21,2,2,K.skin);r(cx+4,21,2,2,K.skin);
+    [[13,8],[27,4],[11,1]].forEach(([x,y],i)=>heart(d,x,(y-(t+i*2)%6+6)%10,i%2?'#F27B8B':'#E2453C'))};
+
+  // 28 Famous: a fan turns up, then a few fans with hearts, then a cheering crowd under the spotlights
+  function fan(d,x,y,hair,shirt,up){const{p,r}=d;r(x,y+4,5,4,shirt);r(x,y,5,4,K.skin);r(x,y,5,1,hair);p(x,y+1,hair);p(x+4,y+1,hair);p(x+1,y+2,O);p(x+3,y+2,O);
+    if(up){r(x-1,y+1,1,4,K.skin);r(x+5,y+1,1,4,K.skin)}}
+  L[28]=(d,t)=>{const{p,r}=d,a=t%2,F=[[0,'#3A2A1E','#E2453C'],[5,'#C98A0B','#3F7BD9'],[10,'#1B1F2E','#3CC98E'],[16,'#7A4A22','#FFC531'],[21,'#3A2A1E','#9B59B6'],[26,'#E8771A','#1ABC9C']];
+    if(MOOD===2){for(let k=0;k<14;k++){p(2+k,k*2,'rgba(255,229,138,.5)');p(29-k,k*2,'rgba(255,229,138,.5)')}}
+    shadow(d,16);body(d,16,18,{shirt:K.suit,cape:K.cape,flap:a?1:-1,armL:MOOD===2?'up':'down',armR:'wave'});r(14,20,4,3,K.gold);r(15,21,2,1,K.goldS);head(d,8,2,{hair:true,eyes:'shades'});
+    const n=MOOD===0?1:MOOD===1?3:6,pick=MOOD===1?[0,3,5]:[0,1,2,3,4,5];
+    for(let i=0;i<n;i++){const [x,h,s]=F[MOOD===0?0:pick[i]],jump=MOOD>0&&(t+i)%2;fan(d,x,24-jump,h,s,MOOD>0&&(MOOD===2||(t+i)%2===0))}
+    if(MOOD>=1)[[4,14],[27,10],[12,6]].slice(0,MOOD===1?2:3).forEach(([x,y],i)=>heart(d,x,((y-t*2-i*3)%16+16)%16+4));
+    if(MOOD===2&&t%3===0)sparkle(d,[3,28,25][t%3],[3,4,16][(t>>1)%3],WH)};
+
+  // 30 Champion: medal, then holding a silver trophy with both hands, then lifting the gold one overhead with confetti
+  L[30]=(d,t)=>{const{p,r}=d;
+    if(MOOD===2)confetti(d,t);
+    shadow(d,16);
+    if(MOOD===0){body(d,16,18,{shirt:K.navy,armL:t%2?'out':'down',armR:t%2?'wave':'down'});medal(d,K.gold);head(d,8,2,{hair:true,eyes:blink(t,10)});return}
+    if(MOOD===1){body(d,16,18,{shirt:K.navy,armL:'guard',armR:'guard'});head(d,8,2,{hair:true});
+      const C=K.metal,CS=K.metalS,CH=K.metalH;r(12,16,8,1,CH);r(12,17,8,4,C);r(18,17,2,4,CS);r(13,21,6,1,C);r(15,22,2,1,CS);r(13,23,6,2,CS);r(10,17,2,1,C);r(20,17,2,1,C);p(10,18,C);p(21,18,C);
+      r(9,17,2,2,K.skin);r(21,17,2,2,K.skin);if(t%4===0)sparkle(d,25,13,WH);return}
+    body(d,16,18,{shirt:K.navy,armL:'reach',armR:'reach'});medal(d,K.gold);head(d,8,2,{hair:true});
+    r(10,0,12,1,K.goldH);r(10,1,12,4,K.gold);r(19,1,3,4,K.goldS);r(12,5,8,1,K.gold);r(15,6,2,1,K.goldS);r(13,7,6,1,K.goldS);r(8,1,2,2,K.gold);r(22,1,2,2,K.gold);
+    if(t%3===0)sparkle(d,16,1,WH)};
+
+  // 32 Building an empire: blueprint in hand with foundations, then the buildings rise, then a lit-up skyline
+  function bld(d,x,w,h,lit,t){const{p,r}=d,y=32-h;r(x,y,w,h,'#24365C');r(x+1,y+1,w-2,h-1,'#7FA3D9');r(x+w-2,y+1,1,h-1,'#5F84BE');
+    for(let yy=y+2;yy<31;yy+=3)for(let xx=x+2;xx<x+w-2;xx+=2)p(xx,yy,lit&&((xx*7+yy*3+(t>>1))%5)?'#FFE58A':'#24365C')}
+  L[32]=(d,t)=>{const{p,r}=d,hat=()=>{r(9,1,14,2,K.gold);r(8,3,16,1,K.goldS);p(15,0,K.gold);p(16,0,K.gold)};
+    if(MOOD===0){bld(d,0,9,5,false,t);bld(d,23,9,4,false,t);r(0,25,9,1,K.gold);r(23,26,9,1,K.gold)}
+    if(MOOD===1){const k=t%6;bld(d,0,9,9+k*2,false,t);bld(d,23,9,7+k*2,false,t);r(1,31-(9+k*2),7,1,K.sun);r(24,31-(7+k*2),7,1,K.sun);
+      const cy=32-(9+k*2)-6;r(28,cy,1,6,K.sunS);r(20,cy,12,1,K.sunS);p(21,cy+1,O);p(21,cy+2,O)}
+    if(MOOD===2){bld(d,0,9,27,true,t);bld(d,23,9,22,true,t);r(4,1,1,4,O);p(4,0,t%2?K.red:'#7A2020');r(27,6,1,4,O);r(28,6,3,2,K.red);if(t%3===0)sparkle(d,11,6,K.sun)}
+    shadow(d,16);body(d,16,18,{shirt:'#E8771A',armR:MOOD===2?'up':'down'});head(d,8,2,{hair:true,eyes:blink(t,13)});hat();
+    if(MOOD===0){r(20,26,7,2,'#7FB4FF');r(20,26,7,1,'#BFD9FF');p(21,27,WH);p(24,27,WH)}};
+
+  // 33 Top of the world: at the foot of a big mountain, then up the slope, then on the summit above the clouds with a flag
+  L[33]=(d,t)=>{const{p,r}=d,a=t%2,M='#7E879C',MS='#646D84';
+    if(MOOD===0){for(let y=1;y<32;y++){const h=Math.round((y-1)*0.85);for(let x=14-h;x<=14+h;x++)if(x>=0&&x<32)p(x,y,y<9?(x>14?'#DDE3EE':WH):(x>14?MS:M))}
+      shadow(d,16);body(d,16,18,{shirt:'#3CC98E'});head(d,8,2,{hair:true,eyes:blink(t,13)});r(23,15,1,13,O);r(24,15,2,4,K.red);return}
+    if(MOOD===1){for(let x=0;x<32;x++){const top=x<12?31:Math.max(3,Math.round(31-(x-12)*1.45));for(let y=top;y<32;y++)p(x,y,y<top+3&&top<14?WH:(y<12?'#DDE3EE':M))}
+      [[3,2],[12,6],[27,4],[20,11],[6,14],[17,20]].forEach(([x,y])=>p((x+t*2)%32,(y+t)%32,WH));
+      shadow(d,16);body(d,16,18,{shirt:'#3CC98E',legs:a?'walkA':'walkB',armL:a?'back':'fwd',armR:a?'fwd':'back'});head(d,8,2,{hair:true});if(a){p(5,13,K.cloudH);p(4,12,K.cloudH)}return}
+    sun(d,t,1,1);
+    for(let y=12;y<32;y++){const h=Math.round((y-12)*0.9);for(let x=4-h;x<=4+h;x++)if(x>=0)p(x,y,y<16?WH:'#9AA3B5');const h2=Math.round((y-14)*0.9);if(y>=14)for(let x=28-h2;x<=28+h2;x++)if(x<32)p(x,y,y<18?WH:'#9AA3B5')}
+    for(let x=0;x<32;x++){const c=(x+t)%8<5;r(x,23+(c?0:1),1,2,'#EEF2F8')}
+    r(9,29,14,1,WH);r(6,30,20,1,'#DDE3EE');r(3,31,26,1,M);
+    r(26,8,1,22,O);r(27,8,4,3,K.red);if(a)p(31,9,K.red);else p(31,11,K.red);
+    shadow(d,12,29);body(d,16,16,{shirt:'#3CC98E',armR:'up'});head(d,8,0,{hair:true})};
   const S=Array.from({length:35},(_,i)=>L[i+1]);
   function draw(ctx,i,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;S[i](api(ctx),t)}
   return{draw,n:S.length,floorShadow:v=>{FLOOR_SHADOW=v},setMood:m=>{MOOD=m},get mood(){return MOOD}};
