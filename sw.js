@@ -1,5 +1,5 @@
 // Level 35 offline cache. Bump VERSION when files change.
-const VERSION = 'level35-v10';
+const VERSION = 'level35-v11';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -17,6 +17,8 @@ self.addEventListener('fetch', e => {
   const own = url.origin === self.location.origin;
   const font = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (!own && !font) return;
+  // The beta lives in its own folder and is never cached.
+  if (own && url.pathname.includes('/beta/')) return;
   // The page itself: network first so updates arrive, cache when offline.
   if (req.mode === 'navigate') {
     // Always ask the server for the latest page (skip the browser's 10-minute cache).
