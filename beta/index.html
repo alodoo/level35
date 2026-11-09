@@ -388,6 +388,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .pv-row.on .tick{background:var(--accent);border-color:var(--accent)}
 .pv-row.on .tick svg{opacity:1}
 .pv-core{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--accent)}
+.daybar{display:flex;align-items:center;gap:10px;width:100%;padding:14px 16px;border-radius:18px;background:var(--surface);border:1px solid var(--line);font:inherit;font-size:14.5px;color:var(--ink);text-align:left;cursor:pointer}
+.daybar b{color:var(--good)}
+.daybar span{color:var(--muted)}
+.daybar .db-hint{margin-left:auto;font-size:13px}
+.folded{display:none!important}
+.spk-host{position:relative}
+.spk{position:absolute;pointer-events:none;color:#FFB800;text-shadow:0 0 1px #9A6400,0 0 2px #9A6400,0 0 10px rgba(255,190,40,.95);font-style:normal;line-height:1;z-index:3;transform:translate(-50%,-50%) scale(0);animation:spk 1s ease-out forwards}
+@keyframes spk{0%{transform:translate(-50%,-50%) scale(0) rotate(0);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25) rotate(45deg);opacity:1}100%{transform:translate(-50%,-50%) scale(0) rotate(120deg);opacity:0}}
+.spk-flash{animation:spkflash .9s ease-out}
+@keyframes spkflash{0%{filter:none}25%{filter:brightness(1.12) drop-shadow(0 0 10px rgba(255,197,49,.75))}100%{filter:none}}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -414,6 +424,7 @@ html{-webkit-tap-highlight-color:transparent}
   </section>
 
   <section style="display:flex;flex-direction:column;gap:12px" aria-label="Day">
+    <button class="daybar" id="dayBar" type="button" hidden></button>
     <div class="dayhead">
       <div><h2 id="dayTitle">Today</h2><div class="sub" id="daySub"></div></div>
       <div class="nav"><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></div>
@@ -1053,7 +1064,7 @@ function render(){
   $('streak').textContent=TL.streak;if(typeof SCENE!=='undefined')SCENE.frame(TL.streak,atRisk());
   renderChips();renderDay();renderWeek();renderQuests();renderRoom();renderCal();renderLb();
   if(!$('lookPanel').hidden)renderLadder();
-  renderAlert();checkDown();checkUp();checkPrev();
+  renderAlert();applyDayLayout();checkDown();checkUp();checkPrev();
 }
 function renderChips(){
   const t=today(),box=$('chips');box.innerHTML='';const e=TL.map[t]||{boost:1};
@@ -1221,13 +1232,14 @@ function afterChange(b){return lvNow()}
 function toggle(h,val){
   if(viewDate>today()){toast('You can tick this once the day starts');return}
   SND.unlock();recompute();
-  const before=lvNow(),wasSolid=isSolid(viewDate),xp0=totalXP();
+  const before=lvNow(),wasSolid=isSolid(viewDate),xp0=totalXP(),allB=allDone(viewDate);
   const d=ensure(viewDate);d.h=Object.assign({},d.h,{[h.id]:val});
   saveDay(viewDate);render();
   const after=afterChange(before),dx=totalXP()-xp0;
   if(after.s>before.s)return;
   const upT=val&&viewDate===today()&&!wasSolid&&isSolid(viewDate)&&levelPending();
   if(upT){SND.win();confetti()}else if(val)SND.blip();else SND.unblip();
+  if(val&&viewDate===today()&&!allB&&allDone(viewDate))setTimeout(()=>sparkle(secs().day),200);
   if(after.s<before.s)toast('Unmarked · back to level '+after.s);
   else if(!wasSolid&&isSolid(viewDate))toast(upT?'Solid day! Close the day to level up ⭐':'Solid day · streak '+TL.streak);
   else if(wasSolid&&!isSolid(viewDate))toast('Unmarked · no longer a solid day');
@@ -1377,12 +1389,12 @@ $('closeSheet').onclick=e=>{if(e.target.id==='closeSheet')$('closeSheet').hidden
 $('cdGo').onclick=()=>{
   const sel=$('cdFirst');let txt=sel.value==='__other'?$('cdOther').value.trim():sel.value;
   if(!txt){toast(sel.value==='__other'?'Write your first move':'Pick tomorrow’s first move');(sel.value==='__other'?$('cdOther'):sel).focus();return}
-  recompute();const before=lvNow(),t=today(),d=ensure(t);d.closed=true;
+  recompute();const before=lvNow(),t=today(),d=ensure(t),wasClosed=!!d.closed;d.closed=true;if(!wasClosed)moving=true;
   {const ph=habitsFor(t,lvOf(t)).find(h=>/^planned tomorrow$/i.test(h.title));if(ph)d.h=Object.assign({},d.h,{[ph.id]:true})}
   const tm=ensure(addDays(t,1));tm.first={text:txt.slice(0,100),done:false};
   saveDay(t);$('closeSheet').hidden=true;render();
   if(shownLevel()>before.s)return;
-  SND.win();confetti();
+  SND.win();confetti();if(moving)setTimeout(closeMove,700);
   {const tm=addDays(t,1),w=habitsFor(tm,curLevel()).find(h=>/^up by /i.test(h.name));toast(w?'Day closed. See you at '+w.name.replace(/^up by /i,'')+'.':'Day closed. See you tomorrow.')}
 };
 function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -1554,7 +1566,7 @@ function renderPlan(){
   if(SU.room.length)add('p','he-note','Your room: '+SU.room.length+(SU.room.length===1?' change':' changes')+' to clear.');
   {const n=levelStart(shownAtPlan(top))-levelStart(shownAtPlan(base));add('p','su-goal',top<=base?'You start at your full plan.':'Full plan at level '+shownAtPlan(top)+': about '+n+' solid days, roughly '+Math.ceil(n/5)+' weeks.')}
 }
-$('suStart').onclick=()=>{
+$('suStart').onclick=()=>{try{localStorage.setItem(LS+'-curve2','1')}catch(e){}
   const once=SU.habits.filter(h=>h.kind==='once');profile.name=SU.name;
   if(SU.mode==='edit'){
     const t=today(),from=addDays(t,1),cur=latestConfig();recompute();
@@ -1791,7 +1803,7 @@ function levelUp(b,a){
   luWait=true;setTimeout(()=>{luWait=false;$('lvlup').hidden=false;$('luOk').focus()},matchMedia('(prefers-reduced-motion: reduce)').matches?0:1400);
 }
 let luWait=false;
-$('luOk').onclick=()=>{$('lvlup').hidden=true;clearInterval(luTimer);setTimeout(checkPrev,300)};
+$('luOk').onclick=()=>{$('lvlup').hidden=true;clearInterval(luTimer);if(moving)setTimeout(closeMove,250);setTimeout(checkPrev,300)};
 $('lvlup').onclick=e=>{if(e.target.id==='lvlup')$('luOk').click()};
 function atRisk(){return !!TL&&TL.miss===1&&TL.streak>0&&!isSolid(today())}
 function renderAlert(){const el=$('alert');if(!el||!TL)return;const t=today(),e=TL.map[t]||{},L=shownLevel();let cls='',msg='';
@@ -1825,6 +1837,32 @@ function renderPrev(y){const d=day(y),hs=habitsFor(y,lvOf(y));
 $('pvGo').onclick=()=>{const y=$('pvGo').dataset.day;if(!y)return;SND.unlock();recompute();const before=lvNow();ensure(y).closed=true;saveDay(y);$('prevSheet').hidden=true;render();
   if(shownLevel()>before.s)return;SND.win();toast('Yesterday closed.')};
 $('pvLater').onclick=()=>{$('prevSheet').hidden=true};
+$('dayBar').onclick=()=>{dayOpen=!dayOpen;renderDayFold()};
+let layout='normal',moving=false,dayOpen=false;
+function secs(){const q=l=>document.querySelector('section[aria-label="'+l+'"]');return{day:q('Day'),tasks:q('Tasks'),room:q('Design your room')}}
+function placeSections(mode){if(layout===mode)return;const {day,tasks,room}=secs();if(!day||!tasks||!room)return;
+  if(mode==='closed'){day.parentNode.insertBefore(room,day);tasks.after(day)}else{room.parentNode.insertBefore(day,tasks);tasks.after(room)}
+  layout=mode}
+function dayClosed(){const t=today();return !!(days[t]&&days[t].closed)}
+function applyDayLayout(){if(!dayClosed())dayOpen=false;if(!moving)placeSections(dayClosed()?'closed':'normal');renderDayFold()}
+function renderDayFold(){const t=today(),on=dayClosed()&&layout==='closed'&&viewDate===t,fold=on&&!dayOpen,bar=$('dayBar');if(!bar)return;
+  bar.hidden=!on;
+  if(on){const xp=(TL&&TL.map[t]||{xp:0}).xp;bar.innerHTML='<b>Day closed ✓</b><span>+'+xp+' XP</span><span class="db-hint">'+(fold?'Tap to open':'Tap to fold')+'</span>';bar.setAttribute('aria-expanded',!fold)}
+  const s=secs().day;if(s)s.querySelectorAll('.dayhead,#yest,#habits').forEach(el=>el.classList.toggle('folded',fold))}
+function sparkle(el){if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches)return;el.classList.add('spk-host');
+  for(let i=0;i<24;i++){const s=document.createElement('i');s.className='spk';s.textContent='✦';s.style.left=(4+Math.random()*92)+'%';s.style.top=(6+Math.random()*88)+'%';
+    s.style.animationDelay=(Math.random()*.5)+'s';s.style.fontSize=(14+Math.random()*14)+'px';el.appendChild(s);setTimeout(()=>s.remove(),1700)}
+  el.classList.remove('spk-flash');void el.offsetWidth;el.classList.add('spk-flash')}
+function allDone(s){const d=day(s),hs=habitsFor(s,lvOf(s));return hs.length>0&&hs.every(h=>d.h&&d.h[h.id])}
+function closeMove(){if(!moving)return;moving=false;const S=secs(),list=[S.day,S.tasks,S.room].filter(Boolean),rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const go=()=>{const first=new Map(list.map(e=>[e,e.getBoundingClientRect().top]));dayOpen=false;placeSections('closed');renderDayFold();
+    const hud=$('hud'),toRoom=()=>{if(S.room)window.scrollTo({top:S.room.getBoundingClientRect().top+scrollY-(hud?hud.offsetHeight:0)-12,behavior:rm?'auto':'smooth'})};
+    if(rm){toRoom();return}
+    list.forEach(e=>{const dy=first.get(e)-e.getBoundingClientRect().top;e.style.transition='none';e.style.transform='translateY('+dy+'px)'});
+    requestAnimationFrame(()=>requestAnimationFrame(()=>list.forEach(e=>{e.style.transition='transform .65s cubic-bezier(.2,.8,.2,1)';e.style.transform=''})));
+    setTimeout(()=>{list.forEach(e=>{e.style.transition='';e.style.transform=''});toRoom()},700)};
+  if(rm){go();return}
+  sparkle(S.day);setTimeout(go,950)}
 function checkDown(){const d=TL&&TL.downNow;if(!d||!$('lvlup').hidden)return;let seen='';try{seen=localStorage.getItem(LS+'-down')||''}catch(e){}
   if(d.date<=seen)return;try{localStorage.setItem(LS+'-down',d.date)}catch(e){}showDown(d)}
 function showDown(d){SND.down();const st=lv=>{let i=0;STAGES.forEach((s,k)=>{if(lv>=s[0])i=k});return i},si=st(d.to);
