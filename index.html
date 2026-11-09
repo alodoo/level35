@@ -370,6 +370,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .login .su-step{min-height:70vh;justify-content:center}
 .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;border-radius:14px;border:1px solid var(--line);background:#FFFFFF;color:#1F1F1F;font:inherit;font-weight:600;font-size:16px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .gbtn:active{transform:translateY(1px)}
+.boostpop{position:absolute;left:50%;top:18%;transform:translateX(-50%);font-family:var(--display);font-weight:800;font-size:26px;color:#FFD23F;text-shadow:0 2px 0 #7A5200,0 0 10px rgba(255,210,63,.8);pointer-events:none;animation:boostpop 1.4s ease-out forwards;z-index:3}
+@keyframes boostpop{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}15%{opacity:1;transform:translate(-50%,0) scale(1.15)}30%{transform:translate(-50%,-4px) scale(1)}100%{opacity:0;transform:translate(-50%,-28px) scale(1)}}
+#sceneCv.zap{animation:sceneflash .6s ease-out}
+.postit{width:22px;height:22px;margin-left:12px;border-radius:2px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15);transform:rotate(-4deg)}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -484,7 +488,7 @@ html{-webkit-tap-highlight-color:transparent}
     <p class="bk-note" id="lbNote"></p>
   </section>
 
-  <p class="rule">A solid day = all your CORE habits for that day. Level up after 3 solid days, then 4, then every 5. XP is your score: Streak boost: ×1.5 from day 3, ×2 from day 5. Early on you can miss 1 day without losing the streak; after 2 weeks, 2 in a row. Days with no CORE habit are rest days. An Extra Boost ⚡ gives ×1.5 XP all of the next day. Max ×3.</p>
+  <p class="rule">A solid day = all your CORE habits for that day. Level up after 3 solid days, then 4, then every 5. XP is your score: Streak boost: ×1.5 from day 3, ×2 from day 5. Early on you can miss 1 day without losing the streak; after 2 weeks, 2 in a row. Days with no CORE habit are rest days. An Extra Boost ⚡ multiplies that day’s XP: ×1.5 for a task, ×1.25 for a room change (never more than ×1.5). Max ×3.</p>
 </div>
 <div class="setup login" id="login" hidden>
   <div class="su-head"><span class="brand">Level 35</span></div>
@@ -497,7 +501,7 @@ html{-webkit-tap-highlight-color:transparent}
   </section>
 </div>
 <div class="setup" id="setup" hidden>
-  <div class="su-head"><span class="brand">Level 35</span><span class="label" id="suStepLbl">Step 1 of 4</span></div>
+  <div class="su-head"><span class="brand">Level 35</span><span class="label" id="suStepLbl">Step 1 of 5</span></div>
   <section class="su-step" id="su1">
     <h1 class="su-title">Build your plan</h1>
     <p class="su-lead">Start where you are, not where you want to be. Pick your habits, say where you are now and where you want to get to, and the app builds the levels for you.</p>
@@ -519,11 +523,19 @@ html{-webkit-tap-highlight-color:transparent}
     <h2 class="su-sub">Add habits</h2>
     <button class="btn" id="suCustom" type="button">+ Create your own</button>
     <div id="suLib"></div>
-    <div class="su-nav"><button class="tbtn" id="suBack2" type="button">Back</button><button class="tbtn" id="suCancel" type="button" hidden>Cancel</button><button class="btn primary" id="suNext2" type="button">Next: your room</button></div>
+    <div class="su-nav"><button class="tbtn" id="suBack2" type="button">Back</button><button class="tbtn" id="suCancel" type="button" hidden>Cancel</button><button class="btn primary" id="suNext2" type="button">Next: to-do list</button></div>
+  </section>
+  <section class="su-step" id="suT" hidden>
+    <h1 class="su-title">Your to-do list</h1>
+    <p class="su-lead">One-time things you want to get done, like booking an appointment or fixing something. Each one becomes a post-it on the board in your room. Finish one and that day gets a ×1.5 Extra Boost ⚡.</p>
+    <div class="su-list" id="suTList"></div>
+    <form class="su-radd" id="suTAdd"><input id="suTNew" type="text" maxlength="100" placeholder="e.g. Renew my passport" aria-label="New task"><button class="btn" type="submit">Add</button></form>
+    <p class="he-note">Optional. You can add more any time in Tasks.</p>
+    <div class="su-nav"><button class="tbtn" id="suBackT" type="button">Back</button><button class="btn primary" id="suNextT" type="button">Next: your room</button></div>
   </section>
   <section class="su-step" id="suR" hidden>
     <h1 class="su-title">Design your room</h1>
-    <p class="su-lead">One-time changes to your space that make the right thing the easy thing. Each one you pick shows up as clutter in your room. Do it once and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for the next day.</p>
+    <p class="su-lead">One-time changes to your space that make the right thing the easy thing. Each one you pick shows up as clutter in your room. Do it once and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for that day.</p>
     <div class="su-roomprev"><canvas id="suRoomCv" width="160" height="48" aria-label="Preview of your room"></canvas></div>
     <div class="su-list" id="suRList"></div>
     <div class="label" id="suRNote"></div>
@@ -785,7 +797,7 @@ function timeline(){
     if(sol){miss=0;streak++;sm=tier(streak)}
     else if(rest)sm=tier(streak);
     else if(s<t){miss++;if(miss>allowed(streak)){streak=0;miss=0;resets++}}
-    const boost=boostOf(days[addDays(s,-1)]&&days[addDays(s,-1)].extra);
+    const boost=boostOf(days[s]&&days[s].extra);
     const mult=Math.min(3,(sol||rest?sm:1)*boost);
     map[s]={sol,rest,streak,miss,sm,boost,mult,xp:Math.round(baseXP(s)*mult)};
   }
@@ -814,6 +826,12 @@ const SND=(function(){
     levelUp:()=>play((c,t)=>{let k=0;
       [[392,494,587],[440,554,659],[494,622,740],[523,659,784]].forEach(ch=>ch.forEach(f=>{tone(c,f,t+k*.065,.11,'square',.09);k++}));
       const e=t+k*.065;[1047,1319,1568].forEach(f=>tone(c,f,e,.7,'square',.05));tone(c,262,e,.7,'triangle',.14);tone(c,2093,e+.1,.25,'square',.03,4186)}),
+    bolt:()=>play((c,t)=>{
+      const n=Math.floor(c.sampleRate*.45),buf=c.createBuffer(1,n,c.sampleRate),dt=buf.getChannelData(0);for(let i=0;i<n;i++)dt[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.2);
+      const src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();src.buffer=buf;f.type='lowpass';f.frequency.setValueAtTime(5200,t);f.frequency.exponentialRampToValueAtTime(260,t+.4);
+      g.gain.setValueAtTime(.32,t);g.gain.exponentialRampToValueAtTime(.001,t+.45);src.connect(f);f.connect(g);g.connect(c.destination);src.start(t);src.stop(t+.46);
+      tone(c,1400,t,.12,'sawtooth',.06,70);
+      [523,659,784,1047].forEach((fr,i)=>tone(c,fr,t+.16+i*.07,.12,'square',.07));tone(c,1568,t+.46,.32,'triangle',.1,2093);tone(c,3136,t+.5,.2,'square',.025,4186)}),
     win:()=>play((c,t)=>{[523,659,784,1047,1319].forEach((f,i)=>tone(c,f,t+i*.08,.4,'triangle',.13))}),
     set:m=>{muted=m;try{localStorage.setItem('level35-mute',m?'1':'0')}catch(e){}},
     get muted(){return muted},
@@ -1052,7 +1070,7 @@ function boostRow(d){
   b.onclick=()=>{if(x&&x.kind!=='room')clearExtra(viewDate);else{const sel=row.querySelector('select');if(sel)sel.focus();toast('Pick what you did from the list')}};
   const txt=document.createElement('div');txt.className='txt';
   const n=document.createElement('div');n.className='name';n.textContent='Extra Boost ⚡';
-  const hn=document.createElement('div');hn.className='hint';const room=x&&x.kind==='room';hn.textContent=room?'✓ Room: '+x.text+' (×1.25). Do a task to make it ×1.5':x?'✓ '+x.text:'Do a task → ×1.5 XP all of the next day. A room change → ×1.25';
+  const hn=document.createElement('div');hn.className='hint';const room=x&&x.kind==='room';hn.textContent=room?'✓ Room: '+x.text+' (×1.25). Do a task to make it ×1.5':x?'✓ '+x.text:'Do a task → ×1.5 XP for the whole day. A room change → ×1.25';
   txt.append(n,hn);
   const tag=document.createElement('span');tag.className='xp';tag.textContent=room?'×1.25':'×1.5';
   row.append(b,txt,tag);
@@ -1075,7 +1093,7 @@ function boostRow(d){
     ex.appendChild(sel);row.appendChild(ex);
   }else{
     const ex=document.createElement('div');ex.className='extra';const l=document.createElement('span');l.className='linked boostnote';
-    l.textContent=viewDate===today()?'Tomorrow: ×'+boostOf(x)+' XP'+(x.kind==='task'?' · done in Tasks':''):(x.kind==='task'?'Done in Tasks':'Boosted the next day');ex.appendChild(l);row.appendChild(ex);
+    l.textContent=viewDate===today()?'Today: ×'+boostOf(x)+' XP'+(x.kind==='task'?' · done in Tasks':''):(x.kind==='task'?'Done in Tasks':'Boosted that day');ex.appendChild(l);row.appendChild(ex);
   }
   return row;
 }
@@ -1179,8 +1197,8 @@ function setExtra(s,x){
   if(s>today()){toast('You can tick this once the day starts');return}
   SND.unlock();const d=ensure(s);d.extra=x;
   if(x.kind==='task')quests=getQuests().map(q=>q.id===x.id?Object.assign({},q,{done:true,doneOn:s}):q);
-  saveDay(s);saveState();render();SND.boost();
-  toast(s===today()?'⚡ Extra Boost: ×1.5 XP all of tomorrow':'⚡ Extra Boost added');
+  saveDay(s);saveState();render();SND.bolt();if(s===today())SCENE.boostFX(boostOf(x));
+  toast('⚡ Extra Boost: ×'+boostOf(x)+' XP for '+(s===today()?'today':'that day'));
 }
 function clearExtra(s){
   const d=ensure(s),x=d.extra;if(!x)return;d.extra=null;
@@ -1188,14 +1206,14 @@ function clearExtra(s){
   saveDay(s);saveState();render();SND.unblip();toast('Extra Boost removed');
 }
 function toggleQuest(id){
-  SND.unlock();const t=today(),was=getQuests().find(q=>q.id===id);if(!was)return;
+  SND.unlock();const t=today(),was=getQuests().find(q=>q.id===id);if(!was)return;if(!was.done&&!was.room)SCENE.tear(id);
   quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?t:null}):q);
   let note='';
-  if(!was.done){const d=ensure(t),kind=was.room?'room':'task';if(!d.extra||(kind==='task'&&d.extra.kind==='room')){d.extra={kind,id,text:was.text};saveDay(t);note=kind==='room'?' · ⚡ ×1.25 XP tomorrow':' · ⚡ ×1.5 XP tomorrow'}}
+  if(!was.done){const d=ensure(t),kind=was.room?'room':'task';if(!d.extra||(kind==='task'&&d.extra.kind==='room')){d.extra={kind,id,text:was.text};saveDay(t);note=kind==='room'?' · ⚡ ×1.25 XP today':' · ⚡ ×1.5 XP today'}}
   else{for(const s in days){const d=days[s];if(d&&d.extra&&(d.extra.kind==='task'||d.extra.kind==='room')&&d.extra.id===id){days[s]=Object.assign({},d,{extra:null});saveDay(s)}}}
   saveState();render();
   if(!was.done&&was.room){SCENE.poof(id);const rq=getQuests().filter(q=>q.room);if(rq.length&&rq.every(q=>q.done)){setTimeout(()=>{SND.win();toast('Room cleared! New decor unlocked.')},700);return}}
-  if(!was.done){if(note)SND.boost();else SND.blip()}else SND.unblip();
+  if(!was.done){if(note){SND.bolt();SCENE.boostFX(boostOf(ensure(t).extra))}else SND.blip()}else SND.unblip();
   toast(!was.done?'Task done'+note:'Task reopened');
 }
 
@@ -1204,7 +1222,7 @@ function renderRoom(){
   const box=$('room');box.innerHTML='';const qs=getQuests().filter(q=>q.room);
   if(!qs.length){$('roomCount').textContent='';
     const w=document.createElement('div');w.className='room-intro';
-    w.innerHTML='<p>One-time changes to your space that make the right thing the easy thing. Each one adds clutter to your room up top. Do it and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for the next day. Clear it all to unlock new decor.</p>';
+    w.innerHTML='<p>One-time changes to your space that make the right thing the easy thing. Each one adds clutter to your room up top. Do it and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for that day. Clear it all to unlock new decor.</p>';
     box.appendChild(w)}
   else{const done=qs.filter(q=>q.done).length;$('roomCount').textContent=done+' of '+qs.length+' done';
     const pr=document.createElement('div');pr.className='roomprog';pr.style.margin='12px 16px 4px';pr.innerHTML='<i></i>';pr.firstChild.style.width=Math.round(done/qs.length*100)+'%';box.appendChild(pr);
@@ -1296,7 +1314,7 @@ function openClose(){
   $('cdTitle').textContent=wins.length?wins.length+(wins.length===1?' win':' wins'):'Day one of many';
   const ul=$('cdWins');ul.innerHTML='';
   (wins.length?wins:['Nothing ticked today. Opening the app and planning tomorrow still counts.']).forEach(w=>{const li=document.createElement('li');li.textContent=w;if(!wins.length)li.className='empty';ul.appendChild(li)});
-  const nextSm=tier(TL.streak+1),boostTmrw=boostOf(d.extra),tm=Math.min(3,nextSm*boostTmrw);
+  const nextSm=tier(TL.streak+1),boostTmrw=1,tm=Math.min(3,nextSm*boostTmrw);
   let st='<b>+'+e.xp+' XP</b> today'+(e.mult>1?' ('+fmtMult(e.mult)+')':'')+'. ';
   if(e.sol)st+='Solid day, streak <b>'+TL.streak+'</b>. Tomorrow a solid day is worth <b>'+fmtMult(tm)+'</b>.';
   else{const core=habitsFor(t,lvOf(t)).filter(h=>h.core&&!(d.h&&d.h[h.id])).map(h=>h.name.toLowerCase());
@@ -1332,30 +1350,40 @@ function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)re
   document.body.appendChild(c);setTimeout(()=>c.remove(),2800)}
 
 /* ---------- setup: build your plan, or edit it later ---------- */
-const SU={step:1,cons:'sometimes',name:'',habits:[],room:[],mode:'new',editId:null,draft:null};
+const SU={step:1,cons:'sometimes',name:'',habits:[],room:[],tasks:[],mode:'new',editId:null,draft:null};
 function openSetup(mode){
   SU.mode=mode||'new';
   if(SU.mode==='edit'){const c=latestConfig();SU.cons=c.consistency;SU.habits=clone(c.habits);SU.name=profile.name||''}
   else{SU.habits=[];SU.cons='sometimes';SU.name=profile.name||''}
+  SU.tasks=getQuests().filter(q=>!q.room&&!q.done).map(q=>({id:q.id,text:q.text}));
   SU.room=getQuests().filter(q=>q.room&&!q.done).map(q=>({qid:q.id,text:q.text,why:q.why||'',custom:!roomLib(q.id)}));
   $('suName').value=SU.name;SU.start=today();{const d=$('suStartDate');d.value=SU.start;d.max=SU.start;d.min=addDays(SU.start,-90)}$('suStart').textContent=SU.mode==='edit'?'Save changes (start tomorrow)':'Start Level 1';
   $('suCancel').hidden=SU.mode!=='edit';
   document.querySelector('.wrap').hidden=true;$('setup').hidden=false;suGo(SU.mode==='edit'?2:1);window.scrollTo(0,0);
 }
 function closeSetup(){$('setup').hidden=true;document.querySelector('.wrap').hidden=false;window.scrollTo(0,0)}
-const SU_STEPS=['su1','su2','suR','su3'];
-function suGo(n){SU.step=n;SU_STEPS.forEach((id,i)=>$(id).hidden=i+1!==n);$('suStepLbl').textContent='Step '+n+' of 4';
-  if(n===1)renderCons();if(n===2){renderSuList();renderLib()}if(n===3)renderSuRoom();if(n===4)renderPlan();window.scrollTo(0,0)}
+const SU_STEPS=['su1','su2','suT','suR','su3'];
+function suGo(n){SU.step=n;SU_STEPS.forEach((id,i)=>$(id).hidden=i+1!==n);$('suStepLbl').textContent='Step '+n+' of 5';
+  if(n===1)renderCons();if(n===2){renderSuList();renderLib()}if(n===3)renderSuTasks();if(n===4)renderSuRoom();if(n===5)renderPlan();window.scrollTo(0,0)}
 function renderCons(){[...$('suCons').children].forEach(b=>{b.classList.toggle('on',b.dataset.v===SU.cons);b.setAttribute('aria-pressed',b.dataset.v===SU.cons)})}
 $('suCons').onclick=e=>{const b=e.target.closest('button');if(!b)return;SU.cons=b.dataset.v;renderCons()};
 $('suNext1').onclick=()=>{SU.name=$('suName').value.trim().slice(0,30);
   const t=today(),v=$('suStartDate').value;SU.start=/^\d{4}-\d{2}-\d{2}$/.test(v)?(v>t?t:v<addDays(t,-90)?addDays(t,-90):v):t;suGo(2)};
-$('suBack2').onclick=()=>suGo(1);$('suBack3').onclick=()=>suGo(3);$('suBackR').onclick=()=>suGo(2);$('suNextR').onclick=()=>suGo(4);
+$('suBack2').onclick=()=>suGo(1);$('suBack3').onclick=()=>suGo(4);$('suBackR').onclick=()=>suGo(3);$('suNextR').onclick=()=>suGo(5);$('suBackT').onclick=()=>suGo(2);$('suNextT').onclick=()=>suGo(4);
 $('suCancel').onclick=()=>closeSetup();
 $('suNext2').onclick=()=>{const daily=SU.habits.filter(h=>h.kind!=='once');
   if(!daily.length){toast('Add at least one habit');return}
   if(!daily.some(h=>h.core)){toast('Mark at least one habit as CORE');return}
   suGo(3)};
+/* to-do step */
+function renderSuTasks(){const box=$('suTList');box.innerHTML='';
+  if(!SU.tasks.length){const e=document.createElement('div');e.className='empty';e.textContent='Nothing yet. Write the first thing on your list below.';box.appendChild(e)}
+  SU.tasks.forEach((x,i)=>{const row=document.createElement('div');row.className='su-row su-rrow';const pin=document.createElement('span');pin.className='postit';pin.style.background=['#FFE066','#FF9CC2','#8BE3A8','#9CC8FF','#FFB870'][i%5];
+    const txt=document.createElement('div');txt.className='su-rowtxt';const b=document.createElement('b');b.textContent=x.text;txt.appendChild(b);
+    const del=document.createElement('button');del.type='button';del.className='del';del.textContent='×';del.setAttribute('aria-label','Remove '+x.text);del.onclick=()=>{SU.tasks.splice(i,1);renderSuTasks()};
+    row.append(pin,txt,del);box.appendChild(row)})}
+$('suTAdd').onsubmit=e=>{e.preventDefault();const v=$('suTNew').value.trim();if(!v){toast('Write the task first');return}
+  if(SU.tasks.some(x=>x.text.toLowerCase()===v.toLowerCase())){toast('Already on your list');return}SU.tasks.push({text:v.slice(0,100)});$('suTNew').value='';renderSuTasks();$('suTNew').focus()};
 /* room step */
 function renderSuRoom(){
   const box=$('suRList');box.innerHTML='';let ci=0;
@@ -1481,6 +1509,7 @@ function renderPlan(){
   if(later.length){add('span','label','Then one step at a time');const ol=add('ol','ladder','');
     later.slice(0,12).forEach(([l,ch])=>{const li=document.createElement('li');const b=document.createElement('b');b.textContent='LV '+l;const s=document.createElement('span');s.textContent=ch.join(' · ');li.append(b,s);ol.appendChild(li)});
     if(later.length>12)add('p','he-note','…and '+(later.length-12)+' more steps.')}
+  if(SU.tasks.length)add('p','he-note','To-do list: '+SU.tasks.length+(SU.tasks.length===1?' task':' tasks')+' on your board.');
   if(SU.room.length)add('p','he-note','Your room: '+SU.room.length+(SU.room.length===1?' change':' changes')+' to clear.');
   {let n=0;for(let l=base;l<top;l++)n+=daysFor(l);add('p','su-goal',top<=base?'You start at your full plan.':'Full plan at level '+top+': about '+n+' solid days, roughly '+Math.ceil(n/5)+' weeks.')}
 }
@@ -1493,6 +1522,8 @@ $('suStart').onclick=()=>{
   }else{
     const t=SU.start||today();configs=[newConfig(SU.habits,SU.cons,t,[])];start=t;days={};
   }
+  {const keepT=new Set(SU.tasks.filter(x=>x.id).map(x=>x.id));quests=getQuests().filter(q=>q.room||q.done||keepT.has(q.id));
+    quests=quests.concat(SU.tasks.filter(x=>!x.id).map((x,i)=>({id:'q'+Date.now().toString(36)+i,text:x.text,xp:20,done:false,date:null,time:null,dur:null,cal:null})))}
   {const keep=new Set(SU.room.map(r=>r.qid));
     quests=getQuests().filter(q=>!q.room||q.done||keep.has(q.id));
     const have=new Set(quests.map(q=>q.id));
@@ -1523,7 +1554,7 @@ const SCENE=(function(){
     bottles:{x:132,y:34,draw:(p,r)=>{r(132,40,3,4,C.can);p(133,39,C.metal);r(136,37,3,7,C.green);r(136,37,1,7,C.greenS);r(137,35,1,2,C.green);p(137,34,C.white);r(140,42,4,2,C.can);p(143,42,C.metal)}},
     bag:{x:6,y:40,draw:(p,r)=>{r(6,42,11,4,C.blanketD);r(6,42,11,1,C.blanketL);r(8,40,1,2,O);r(14,40,1,2,O);r(8,40,7,1,O);r(10,44,3,1,C.blanket);r(15,41,3,2,C.white);r(16,41,2,1,C.pillowS);r(4,44,3,2,C.red);r(4,45,3,1,C.white)}},
     papers:{x:132,y:25,draw:(p,r)=>{r(132,27,6,1,C.paper);r(139,26,5,1,C.paper);r(140,27,5,1,C.paperS);r(146,27,5,1,C.paper);r(114,45,6,1,C.paper);r(115,44,4,1,C.paperS)}},
-    notes:{x:50,y:6,draw:(p,r)=>{r(50,6,4,4,C.amber);r(51,7,2,1,'#B97B05');r(55,8,4,4,C.pink);r(56,9,2,1,'#C25BA6');r(60,6,4,4,C.green);r(61,7,2,1,C.greenS)}},
+    notes:{x:29,y:26,draw:(p,r,t)=>{r(28,26,10,6,O);r(29,27,8,4,'#2A3150');p(30,28,C.red);p(32,28,C.green);p(34,28,C.amber);p(36,28,C.pink);p(30,30,C.pink);p(32,30,C.amber);p(34,30,C.red);if(t%4<2){r(36,25,3,2,C.red);p(37,25,C.white)}}},
     monitor:{x:116,y:18,draw:(p,r,t)=>{r(116,18,12,8,O);r(117,19,10,6,C.screen);r(117,23,10,2,C.screenS);[[118,20],[121,20],[118,22]].forEach(([x,y])=>r(x,y,2,1,C.white));if(t%3){r(125,19,2,2,C.red)}r(121,26,2,1,O);r(119,27,6,1,O)}},
     console:{x:100,y:42,draw:(p,r,t)=>{r(100,43,6,3,O);r(101,43,4,1,C.trashL);p(104,45,t%2?C.red:C.green);r(107,44,5,2,C.trash);p(108,44,C.red);p(110,44,C.green);r(106,45,1,1,O)}},
     pizza:{x:28,y:42,draw:(p,r)=>{r(28,42,10,3,C.pizza);r(28,44,10,1,C.pizzaS);p(30,43,C.red);p(33,42,C.red);p(35,43,C.red)}},
@@ -1560,6 +1591,32 @@ const SCENE=(function(){
     return toItems(room);
   }
   const objFor=it=>it.key==='book'?book(it.idx):OBJ[it.key];
+  const PCOL=['#FFE066','#FF9CC2','#8BE3A8','#9CC8FF','#FFB870'],PDARK=['#D9B630','#D9739B','#5DB57D','#6E9DD6','#D98C45'];
+  const pcol=id=>{let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;return h%5};
+  const slotXY=i=>[36+(i%4)*6,4+Math.floor(i/4)*5];
+  const tears={};let boostAt=0,boostM=1.5;
+  function openTasks(){return getQuests().filter(q=>!q.room&&!q.done)}
+  function corkboard(p,r,g,A,now){g.globalAlpha=Math.max(A,.85);
+    r(34,2,26,13,'#6E4423');r(35,3,24,11,'#C08A55');[[37,12],[44,4],[52,11],[57,6],[40,8],[49,7]].forEach(([x,y])=>p(x,y,'#A8743F'));
+    const open=openTasks(),n=open.length>8?7:open.length;
+    for(let i=0;i<n;i++){const [x,y]=slotXY(i),k=pcol(open[i].id);r(x,y,4,4,PCOL[k]);r(x,y+3,4,1,PDARK[k]);p(x+1,y,'#C83A3A')}
+    if(open.length>8){const [x,y]=slotXY(7);r(x+1,y+1,1,3,C.white);r(x,y+2,3,1,C.white)}
+    if(!open.length&&getQuests().some(q=>!q.room&&q.done)){[[47,5],[46,6],[47,6],[48,6],[45,7],[46,7],[47,7],[48,7],[49,7],[46,8],[47,8],[48,8],[45,9],[46,9],[48,9],[49,9]].forEach(([x,y])=>p(x,y,C.yellow));p(47,6,C.white)}
+    for(const id in tears){const tr=tears[id],k=(now-tr.at)/1000;if(k>1){delete tears[id];continue}
+      const [x0,y0]=slotXY(tr.slot),x=Math.round(x0+k*6),y=Math.round(y0+k*k*32),s=k<.25?4:k<.6?3:2;r(x,y,s,s,PCOL[tr.col]);if(s>2)p(x+1,y+1,PDARK[tr.col])}
+    g.globalAlpha=A}
+  function tear(id){const open=openTasks(),i=open.findIndex(q=>q.id===id);if(i<0||i>7)return;tears[id]={slot:i,col:pcol(id),at:performance.now()}}
+  function boostFX(m){boostAt=performance.now();boostM=m;const hc=$('hero');if(!hc)return;
+    const el=document.createElement('span');el.className='boostpop';el.textContent='⚡×'+m;hc.appendChild(el);setTimeout(()=>el.remove(),1500);
+    const cvs=$('sceneCv');cvs.classList.remove('zap');void cvs.offsetWidth;cvs.classList.add('zap')}
+  function chev(p,x,y,c,ch){p(x+2,y,ch);p(x+1,y+1,c);p(x+2,y+1,c);p(x+3,y+1,c);p(x,y+2,c);p(x+1,y+2,c);p(x+3,y+2,c);p(x+4,y+2,c)}
+  function boostLayer(p,r,g,now){const ex=days[today()]&&days[today()].extra;
+    if(ex){const m=boostOf(ex),cols=m>1.25?[98,58]:[98];
+      cols.forEach((x,ci)=>{for(let k=0;k<2;k++){const ph=(t*2+k*13+ci*6)%26,y=40-ph;g.globalAlpha=ph>20?.45:1;chev(p,x,y,'#FFC531','#FFE58A')}});g.globalAlpha=1}
+    const k=(now-boostAt)/700;if(boostAt&&k<1){
+      if(k<.3){g.globalAlpha=.35*(1-k/.3);r(0,0,W,H,'#FFF7DB');g.globalAlpha=1}
+      if(k<.6){const B=[[83,0],[81,3],[84,6],[80,9],[83,12],[79,15]];for(let i=0;i<B.length-1;i++){const[a,b]=B[i],[c2,d2]=B[i+1];for(let s=0;s<=3;s++){const x=Math.round(a+(c2-a)*s/3),y=Math.round(b+(d2-b)*s/3);p(x,y,'#FFF7DB');p(x+1,y,'#FFC531');p(x-1,y,'#FFC531')}}
+        [[76,16],[87,15],[74,20],[89,21]].forEach(([x,y])=>{p(x,y,'#FFE58A');p(x+1,y-1,'#FFE58A')})}}}
   const toHsl=h=>{let [r,g,b]=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let hh=0,ss=0;
     if(mx!==mn){const d=mx-mn;ss=l>.5?d/(2-mx-mn):d/(mx+mn);hh=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;hh*=60}return[hh,ss,l]};
   const hsl=(h,s,l)=>'hsl('+(((h%360)+360)%360).toFixed(1)+','+(s*100).toFixed(1)+'%,'+(l*100).toFixed(1)+'%)';
@@ -1610,7 +1667,7 @@ const SCENE=(function(){
     const real=list.length&&!list[0].id.startsWith('teaser'),all=real&&list.every(i=>i.done);
     // the room gets more solid as you clear it: 40% messy, 80% when everything is done
     wallF=real?list.filter(i=>i.done).length/list.length:0;const A=preview?.75:.4+.4*wallF;
-    g.imageSmoothingEnabled=false;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.globalAlpha=A;base(p,r,night,!preview&&bedUnmade());
+    g.imageSmoothingEnabled=false;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.globalAlpha=A;base(p,r,night,!preview&&bedUnmade());if(!preview)corkboard(p,r,g,A,now);
     if(all)reward(p,r,t);
     for(const it of list){const o=objFor(it);if(!o)continue;
       const v=vanish[it.id];
@@ -1620,7 +1677,7 @@ const SCENE=(function(){
         if(k<.35){o.draw(p,r,t);g.globalAlpha=.85;r(o.x-2,o.y-2,16,10,C.white);g.globalAlpha=A}
         else{g.globalAlpha=1;const rad=Math.round(2+k*9);[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([dx,dy],i)=>{const c=i%2?C.yellow:C.white;p(o.x+4+dx*rad,o.y+2+dy*rad,c);p(o.x+5+dx*rad,o.y+2+dy*rad,c)});g.globalAlpha=A}}
     }
-    g.globalAlpha=1;if(preview)return;const hc=$('heroCv');const fly=typeof HERO!=='undefined'&&HERO.stage&&HERO.stage()===25&&HERO16.mood===2;if(fly){r(70,46,22,1,'rgba(0,0,0,.14)');}if(hc)g.drawImage(hc,64,fly?-4+(t%4<2?0:1):16);
+    g.globalAlpha=1;if(preview)return;const hc=$('heroCv');const fly=typeof HERO!=='undefined'&&HERO.stage&&HERO.stage()===25&&HERO16.mood===2;if(fly){r(70,46,22,1,'rgba(0,0,0,.14)');}if(hc)g.drawImage(hc,64,fly?-4+(t%4<2?0:1):16);if(!preview)boostLayer(p,r,g,now);
     if(cleanAt&&now-cleanAt<2500){for(let i=0;i<16;i++){const x=(i*23+t*5)%W,y=(i*7+t*2)%36;r(x,y,2,2,[C.yellow,C.white,C.pink,C.green][i%4])}}
   }
   const thumbs={};
@@ -1644,7 +1701,7 @@ const SCENE=(function(){
     setInterval(()=>{if(document.hidden)return;t++;draw()},RM?1000:150);draw()}
   function poof(id){vanish[id]=performance.now();
     const list=items();if(list.length&&list.every(i=>i.done))cleanAt=performance.now()+600}
-  return{init,draw,poof,frame,thumb,thumbFor};
+  return{init,draw,poof,frame,thumb,thumbFor,tear,boostFX};
 })();
 
 /* ---------- level-up screen ---------- */
