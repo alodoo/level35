@@ -488,7 +488,7 @@ html{-webkit-tap-highlight-color:transparent}
     <p class="bk-note" id="lbNote"></p>
   </section>
 
-  <p class="rule">A solid day = all your CORE habits for that day. Level up after 3 solid days, then 4, then every 5. XP is your score: Streak boost: ×1.5 from day 3, ×2 from day 5. Early on you can miss 1 day without losing the streak; after 2 weeks, 2 in a row. Days with no CORE habit are rest days. An Extra Boost ⚡ multiplies that day’s XP: ×1.5 for a task, ×1.25 for a room change (never more than ×1.5). Max ×3.</p>
+  <p class="rule">A solid day = all your CORE habits for that day. Level up after 3 solid days, then 4, then every 5. XP is your score: Streak boost: ×1.5 from day 3, ×2 from day 5. Early on you can miss 1 day without losing the streak; after 2 weeks, 2 in a row. Days with no CORE habit are rest days. An Extra Boost ⚡ multiplies that day’s XP: ×1.5 for a task, ×1.25 for clearing your whole room (never more than ×1.5). Max ×3.</p>
 </div>
 <div class="setup login" id="login" hidden>
   <div class="su-head"><span class="brand">Level 35</span></div>
@@ -535,7 +535,7 @@ html{-webkit-tap-highlight-color:transparent}
   </section>
   <section class="su-step" id="suR" hidden>
     <h1 class="su-title">Design your room</h1>
-    <p class="su-lead">One-time changes to your space that make the right thing the easy thing. Each one you pick shows up as clutter in your room. Do it once and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for that day.</p>
+    <p class="su-lead">One-time changes to your space that make the right thing the easy thing. Each one you pick shows up as clutter in your room. Do it once and the clutter disappears. Clear them all for a ×1.25 Extra Boost ⚡ that day.</p>
     <div class="su-roomprev"><canvas id="suRoomCv" width="160" height="48" aria-label="Preview of your room"></canvas></div>
     <div class="su-list" id="suRList"></div>
     <div class="label" id="suRNote"></div>
@@ -1067,7 +1067,7 @@ function boostRow(d){
   b.onclick=()=>{if(x&&x.kind!=='room')clearExtra(viewDate);else{const sel=row.querySelector('select');if(sel)sel.focus();toast('Pick what you did from the list')}};
   const txt=document.createElement('div');txt.className='txt';
   const n=document.createElement('div');n.className='name';n.textContent='Extra Boost ⚡';
-  const hn=document.createElement('div');hn.className='hint';const room=x&&x.kind==='room';hn.textContent=room?'✓ Room: '+x.text+' (×1.25). Do a task to make it ×1.5':x?'✓ '+x.text:'Do a task → ×1.5 XP for the whole day. A room change → ×1.25';
+  const hn=document.createElement('div');hn.className='hint';const room=x&&x.kind==='room';hn.textContent=room?'✓ Room cleared (×1.25). Do a task to make it ×1.5':x?'✓ '+x.text:'Do a task → ×1.5 XP for the whole day. Clear your whole room → ×1.25';
   txt.append(n,hn);
   const tag=document.createElement('span');tag.className='xp';tag.textContent=room?'×1.25':'×1.5';
   row.append(b,txt,tag);
@@ -1206,10 +1206,10 @@ function toggleQuest(id){
   SND.unlock();const t=today(),was=getQuests().find(q=>q.id===id);if(!was)return;if(!was.done&&!was.room)SCENE.tear(id);
   quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?t:null}):q);
   let note='';
-  if(!was.done){const d=ensure(t),kind=was.room?'room':'task';if(!d.extra||(kind==='task'&&d.extra.kind==='room')){d.extra={kind,id,text:was.text};saveDay(t);note=kind==='room'?' · ⚡ ×1.25 XP today':' · ⚡ ×1.5 XP today'}}
-  else{for(const s in days){const d=days[s];if(d&&d.extra&&(d.extra.kind==='task'||d.extra.kind==='room')&&d.extra.id===id){days[s]=Object.assign({},d,{extra:null});saveDay(s)}}}
+  if(!was.done){const d=ensure(t);if(was.room){const rq=getQuests().filter(q=>q.room);if(rq.length&&rq.every(q=>q.done)&&!d.extra){d.extra={kind:'room',id:'room-all',text:'Room cleared'};saveDay(t);note=' · ⚡ ×1.25 XP today'}}else if(!d.extra||d.extra.kind==='room'){d.extra={kind:'task',id,text:was.text};saveDay(t);note=' · ⚡ ×1.5 XP today'}}
+  else{for(const s in days){const d=days[s];if(d&&d.extra&&(was.room?d.extra.kind==='room':(d.extra.kind==='task'&&d.extra.id===id))){days[s]=Object.assign({},d,{extra:null});saveDay(s)}}}
   saveState();render();
-  if(!was.done&&was.room){SCENE.poof(id);const rq=getQuests().filter(q=>q.room);if(rq.length&&rq.every(q=>q.done)){setTimeout(()=>{SND.win();toast('Room cleared! New decor unlocked.')},700);return}}
+  if(!was.done&&was.room){SCENE.poof(id);const rq=getQuests().filter(q=>q.room);if(rq.length&&rq.every(q=>q.done)){setTimeout(()=>{if(note){SND.bolt();SCENE.boostFX(1.25);toast('Room cleared! ⚡ ×1.25 XP today. New decor unlocked.')}else{SND.win();toast('Room cleared! New decor unlocked.')}},700);return}}
   if(!was.done){if(note){SND.bolt();SCENE.boostFX(boostOf(ensure(t).extra))}else SND.blip()}else SND.unblip();
   toast(!was.done?'Task done'+note:'Task reopened');
 }
@@ -1219,7 +1219,7 @@ function renderRoom(){
   const box=$('room');box.innerHTML='';const qs=getQuests().filter(q=>q.room);
   if(!qs.length){$('roomCount').textContent='';
     const w=document.createElement('div');w.className='room-intro';
-    w.innerHTML='<p>One-time changes to your space that make the right thing the easy thing. Each one adds clutter to your room up top. Do it and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for that day. Clear it all to unlock new decor.</p>';
+    w.innerHTML='<p>One-time changes to your space that make the right thing the easy thing. Each one adds clutter to your room up top. Do it and the clutter disappears. Clear them all for a ×1.25 Extra Boost ⚡ that day and new decor.</p>';
     box.appendChild(w)}
   else{const done=qs.filter(q=>q.done).length;$('roomCount').textContent=done+' of '+qs.length+' done';
     const pr=document.createElement('div');pr.className='roomprog';pr.style.margin='12px 16px 4px';pr.innerHTML='<i></i>';pr.firstChild.style.width=Math.round(done/qs.length*100)+'%';box.appendChild(pr);
@@ -1605,13 +1605,13 @@ const SCENE=(function(){
     g.globalAlpha=A}
   function tear(id){const open=openTasks(),i=open.findIndex(q=>q.id===id);if(i<0||i>7)return;tears[id]={slot:i,col:pcol(id),at:performance.now()}}
   function boostFX(m){boostAt=performance.now();boostM=m;const hc=$('hero');if(!hc)return;
-    const el=document.createElement('span');el.className='boostpop';el.textContent='⚡×'+m;hc.appendChild(el);setTimeout(()=>el.remove(),1500);
+    hc.querySelectorAll('.boostpop').forEach(o=>o.remove());const el=document.createElement('span');el.className='boostpop';el.textContent='⚡×'+m;hc.appendChild(el);setTimeout(()=>el.remove(),1500);
     }
   function arrow(p,x,y){const c='#FFC531',h='#FFF1B0',o='#D9861A';
     for(let j=0;j<4;j++)for(let i=3-j;i<=3+j;i++)p(x+i,y+j,(i===3-j||i===3+j)?o:i===3?h:c);
     for(let k=4;k<9;k++){p(x+2,y+k,c);p(x+3,y+k,h);p(x+4,y+k,o)}
     p(x+3,y+9,'rgba(255,197,49,.55)');p(x+3,y+10,'rgba(255,197,49,.3)');p(x+3,y+11,'rgba(255,197,49,.12)')}
-  function boostAura(p,g,now,hc,hy){if(!boostAt||!hc)return;const e=now-boostAt;if(e>1600)return;
+  function boostAura(p,g,now,hc,hy){if(!boostAt||!hc||boostM<1.5)return;const e=now-boostAt;if(e>1600)return;
     let m;try{m=hc.getContext('2d').getImageData(0,0,32,32).data}catch(_){return}
     const on=(x,y)=>x>=0&&y>=0&&x<32&&y<32&&m[(y*32+x)*4+3]>40,f=t,lift=f%2;
     g.globalAlpha=e>1200?1-(e-1200)/400:1;const top=new Array(40).fill(99);
