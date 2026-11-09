@@ -523,7 +523,7 @@ html{-webkit-tap-highlight-color:transparent}
   </section>
   <section class="su-step" id="suR" hidden>
     <h1 class="su-title">Design your room</h1>
-    <p class="su-lead">One-time changes to your space that make the right thing the easy thing. Each one you pick shows up as clutter in your room. Do it once and the clutter disappears, plus an Extra Boost ⚡ for that day.</p>
+    <p class="su-lead">One-time changes to your space that make the right thing the easy thing. Each one you pick shows up as clutter in your room. Do it once and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for the next day.</p>
     <div class="su-roomprev"><canvas id="suRoomCv" width="160" height="48" aria-label="Preview of your room"></canvas></div>
     <div class="su-list" id="suRList"></div>
     <div class="label" id="suRNote"></div>
@@ -776,6 +776,7 @@ function baseMax(s){const d=days[s];return (habitsFor(s,lvOf(s)).length?100:0)+(
 const tier=n=>n>=5?2:n>=3?1.5:1;
 const allowed=n=>n>=14?2:1;
 const hasExtra=s=>!!(days[s]&&days[s].extra);
+const boostOf=x=>!x?1:x.kind==='room'?1.25:1.5;
 // Walk every day from the start: who is solid, the streak, misses, and each day's multiplier.
 function timeline(){
   const map={},t=today();let streak=0,miss=0,resets=0;
@@ -784,7 +785,7 @@ function timeline(){
     if(sol){miss=0;streak++;sm=tier(streak)}
     else if(rest)sm=tier(streak);
     else if(s<t){miss++;if(miss>allowed(streak)){streak=0;miss=0;resets++}}
-    const boost=hasExtra(addDays(s,-1))?1.5:1;
+    const boost=boostOf(days[addDays(s,-1)]&&days[addDays(s,-1)].extra);
     const mult=Math.min(3,(sol||rest?sm:1)*boost);
     map[s]={sol,rest,streak,miss,sm,boost,mult,xp:Math.round(baseXP(s)*mult)};
   }
@@ -1047,22 +1048,22 @@ function renderDay(){
 function boostRow(d){
   const x=d.extra,row=document.createElement('div');row.className='row boostrow'+(x?' on':'');
   const b=document.createElement('button');b.className='tick';b.innerHTML=x?CHECK:BOLT;b.setAttribute('aria-pressed',!!x);b.setAttribute('aria-label','Extra Boost');
-  b.onclick=()=>{if(x)clearExtra(viewDate);else{const sel=row.querySelector('select');if(sel)sel.focus();toast('Pick what you did from the list')}};
+  b.onclick=()=>{if(x&&x.kind!=='room')clearExtra(viewDate);else{const sel=row.querySelector('select');if(sel)sel.focus();toast('Pick what you did from the list')}};
   const txt=document.createElement('div');txt.className='txt';
   const n=document.createElement('div');n.className='name';n.textContent='Extra Boost ⚡';
-  const hn=document.createElement('div');hn.className='hint';hn.textContent=x?'✓ '+x.text:'Do a task or sign up → ×1.5 XP all of the next day';
+  const hn=document.createElement('div');hn.className='hint';const room=x&&x.kind==='room';hn.textContent=room?'✓ Room: '+x.text+' (×1.25). Do a task to make it ×1.5':x?'✓ '+x.text:'Do a task → ×1.5 XP all of the next day. A room change → ×1.25';
   txt.append(n,hn);
-  const tag=document.createElement('span');tag.className='xp';tag.textContent='×1.5';
+  const tag=document.createElement('span');tag.className='xp';tag.textContent=room?'×1.25':'×1.5';
   row.append(b,txt,tag);
-  if(!x){
+  if(!x||room){
     const ex=document.createElement('div');ex.className='extra';
     const sel=document.createElement('select');sel.id='boost-'+viewDate;sel.setAttribute('aria-label','What did you do?');
     const opt=(v,t)=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)};
     opt('','Pick what you did…');
     const used=new Set(Object.values(days).map(v=>v&&v.extra&&v.extra.kind==='signup'?v.extra.id:null));
-    for(const s of signupsNow())if(!used.has(s.id))opt('s:'+s.id,s.text);
+    
     for(const q of getQuests().filter(q=>!q.done&&!q.room))opt('t:'+q.id,q.text);
-    opt('other','Something else…');
+    if(sel.options.length===1)opt('','No open tasks. Add one in Tasks');
     sel.onchange=()=>{const v=sel.value;if(!v)return;
       if(v==='other'){ex.innerHTML='';const inp=document.createElement('input');inp.type='text';inp.id='boostTxt-'+viewDate;inp.maxLength=100;inp.placeholder='What did you do?';
         const go=document.createElement('button');go.type='button';go.className='tbtn primary';go.textContent='Boost';
@@ -1073,7 +1074,7 @@ function boostRow(d){
     ex.appendChild(sel);row.appendChild(ex);
   }else{
     const ex=document.createElement('div');ex.className='extra';const l=document.createElement('span');l.className='linked boostnote';
-    l.textContent=viewDate===today()?'Tomorrow: ×1.5 XP'+(x.kind==='task'?' · done in Tasks':''):(x.kind==='task'?'Done in Tasks':'Boosted the next day');ex.appendChild(l);row.appendChild(ex);
+    l.textContent=viewDate===today()?'Tomorrow: ×'+boostOf(x)+' XP'+(x.kind==='task'?' · done in Tasks':''):(x.kind==='task'?'Done in Tasks':'Boosted the next day');ex.appendChild(l);row.appendChild(ex);
   }
   return row;
 }
@@ -1189,8 +1190,8 @@ function toggleQuest(id){
   SND.unlock();const t=today(),was=getQuests().find(q=>q.id===id);if(!was)return;
   quests=getQuests().map(q=>q.id===id?Object.assign({},q,{done:!q.done,doneOn:!q.done?t:null}):q);
   let note='';
-  if(!was.done){const d=ensure(t);if(!d.extra){d.extra={kind:'task',id,text:was.text};saveDay(t);note=' · ⚡ ×1.5 XP tomorrow'}}
-  else{for(const s in days){const d=days[s];if(d&&d.extra&&d.extra.kind==='task'&&d.extra.id===id){days[s]=Object.assign({},d,{extra:null});saveDay(s)}}}
+  if(!was.done){const d=ensure(t),kind=was.room?'room':'task';if(!d.extra||(kind==='task'&&d.extra.kind==='room')){d.extra={kind,id,text:was.text};saveDay(t);note=kind==='room'?' · ⚡ ×1.25 XP tomorrow':' · ⚡ ×1.5 XP tomorrow'}}
+  else{for(const s in days){const d=days[s];if(d&&d.extra&&(d.extra.kind==='task'||d.extra.kind==='room')&&d.extra.id===id){days[s]=Object.assign({},d,{extra:null});saveDay(s)}}}
   saveState();render();
   if(!was.done&&was.room){SCENE.poof(id);const rq=getQuests().filter(q=>q.room);if(rq.length&&rq.every(q=>q.done)){setTimeout(()=>{SND.win();toast('Room cleared! New decor unlocked.')},700);return}}
   if(!was.done){if(note)SND.boost();else SND.blip()}else SND.unblip();
@@ -1202,7 +1203,7 @@ function renderRoom(){
   const box=$('room');box.innerHTML='';const qs=getQuests().filter(q=>q.room);
   if(!qs.length){$('roomCount').textContent='';
     const w=document.createElement('div');w.className='room-intro';
-    w.innerHTML='<p>One-time changes to your space that make the right thing the easy thing. Each one adds clutter to your room up top. Do it and the clutter disappears, plus an Extra Boost ⚡ for that day. Clear it all to unlock new decor.</p>';
+    w.innerHTML='<p>One-time changes to your space that make the right thing the easy thing. Each one adds clutter to your room up top. Do it and the clutter disappears, plus a ×1.25 Extra Boost ⚡ for the next day. Clear it all to unlock new decor.</p>';
     box.appendChild(w)}
   else{const done=qs.filter(q=>q.done).length;$('roomCount').textContent=done+' of '+qs.length+' done';
     const pr=document.createElement('div');pr.className='roomprog';pr.style.margin='12px 16px 4px';pr.innerHTML='<i></i>';pr.firstChild.style.width=Math.round(done/qs.length*100)+'%';box.appendChild(pr);
@@ -1294,7 +1295,7 @@ function openClose(){
   $('cdTitle').textContent=wins.length?wins.length+(wins.length===1?' win':' wins'):'Day one of many';
   const ul=$('cdWins');ul.innerHTML='';
   (wins.length?wins:['Nothing ticked today. Opening the app and planning tomorrow still counts.']).forEach(w=>{const li=document.createElement('li');li.textContent=w;if(!wins.length)li.className='empty';ul.appendChild(li)});
-  const nextSm=tier(TL.streak+1),boostTmrw=d.extra?1.5:1,tm=Math.min(3,nextSm*boostTmrw);
+  const nextSm=tier(TL.streak+1),boostTmrw=boostOf(d.extra),tm=Math.min(3,nextSm*boostTmrw);
   let st='<b>+'+e.xp+' XP</b> today'+(e.mult>1?' ('+fmtMult(e.mult)+')':'')+'. ';
   if(e.sol)st+='Solid day, streak <b>'+TL.streak+'</b>. Tomorrow a solid day is worth <b>'+fmtMult(tm)+'</b>.';
   else{const core=habitsFor(t,lvOf(t)).filter(h=>h.core&&!(d.h&&d.h[h.id])).map(h=>h.name.toLowerCase());
