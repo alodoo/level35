@@ -1061,7 +1061,7 @@ function boostRow(d){
     opt('','Pick what you did…');
     const used=new Set(Object.values(days).map(v=>v&&v.extra&&v.extra.kind==='signup'?v.extra.id:null));
     for(const s of signupsNow())if(!used.has(s.id))opt('s:'+s.id,s.text);
-    for(const q of getQuests().filter(q=>!q.done))opt('t:'+q.id,(q.room?'Room: ':'')+q.text);
+    for(const q of getQuests().filter(q=>!q.done&&!q.room))opt('t:'+q.id,q.text);
     opt('other','Something else…');
     sel.onchange=()=>{const v=sel.value;if(!v)return;
       if(v==='other'){ex.innerHTML='';const inp=document.createElement('input');inp.type='text';inp.id='boostTxt-'+viewDate;inp.maxLength=100;inp.placeholder='What did you do?';
