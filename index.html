@@ -401,6 +401,24 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .board .bar-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .perfect{color:var(--good);font-weight:800}
 .chip2.perf{background:color-mix(in srgb,var(--good) 14%,var(--surface));color:var(--good)}
+.hrow{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .15s ease,background .15s;position:relative;background:var(--surface)}
+.hrow.held{background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+.hrow.dragging{transition:none;z-index:5;box-shadow:0 10px 26px rgba(20,26,43,.22);border-radius:12px}
+#reorder{width:auto;min-width:40px;padding:0 10px;font-size:16px}
+#reorder.on{background:var(--ink);color:var(--surface);border-color:var(--ink);font-size:14px}
+.list.reordering>:not(.hrow):not(.ordhint){display:none}
+.list.reordering .hrow .tick,.list.reordering .hrow .txt{pointer-events:none}
+.list.reordering .hrow .tick{opacity:.35}
+.ordhint{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;font-size:13px;color:var(--muted);background:var(--soft)}
+.ord{display:flex;gap:6px}
+.ord button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:12px;color:var(--ink)}
+.ord button:disabled{opacity:.3}
+.ho-card h2{font-size:24px;line-height:1.15}
+.ho-acts{width:100%;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.ho-act{padding:14px 16px;border:0;border-top:1px solid var(--line);background:var(--surface);font:inherit;font-size:15.5px;text-align:left;color:var(--ink)}
+.ho-act:first-child{border-top:0}
+.ho-act:disabled{color:var(--muted);opacity:.5}
+.ho-act.strong{font-weight:700}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -430,7 +448,7 @@ html{-webkit-tap-highlight-color:transparent}
     <button class="daybar" id="dayBar" type="button" hidden></button>
     <div class="dayhead">
       <div><h2 id="dayTitle">Today</h2><div class="sub" id="daySub"></div></div>
-      <div class="nav"><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></div>
+      <div class="nav"><button id="reorder" type="button" aria-label="Reorder habits" aria-pressed="false">⇅</button><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></div>
     </div>
     <div class="yest" id="yest" hidden></div>
     <div class="list" id="habits"></div>
@@ -604,6 +622,14 @@ html{-webkit-tap-highlight-color:transparent}
     <div class="cd-stat" id="cdStat"></div>
     <button class="btn primary" id="cdGo" type="button">Close the day</button>
     <button class="tbtn" id="cdCancel" type="button">Not yet</button>
+  </div>
+</div>
+<div class="lvlup" id="hoSheet" hidden role="dialog" aria-modal="true" aria-labelledby="hoTitle">
+  <div class="lu-card ho-card">
+    <span class="label" id="hoLabel">Habit</span>
+    <h2 id="hoTitle">Habit</h2>
+    <div class="ho-acts" id="hoActs"></div>
+    <button class="tbtn" id="hoCancel" type="button">Cancel</button>
   </div>
 </div>
 <div class="lvlup" id="prevSheet" hidden role="dialog" aria-modal="true" aria-labelledby="pvTitle">
@@ -1140,9 +1166,9 @@ function renderDay(){
     const n=document.createElement('div');n.className='name';n.textContent=fm.text;const c=document.createElement('span');c.className='core';c.textContent='first move';n.appendChild(c);
     const h=document.createElement('div');h.className='hint';h.textContent='You picked this last night. Do it before anything else.';txt.append(n,h);
     const xp=document.createElement('span');xp.className='xp';xp.textContent='+5';row.append(b,txt,xp);box.appendChild(row)}
-  for(const h of habitsFor(viewDate,lv)){
+  for(const h of orderHabits(habitsFor(viewDate,lv))){
     const on=!!(d.h&&d.h[h.id]);
-    const row=document.createElement('div');row.className='row'+(on?' on':'');
+    const row=document.createElement('div');row.className='row hrow'+(on?' on':'');row.dataset.hid=h.id;
     const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',h.name);b.onclick=()=>toggle(h,!on);
     const txt=document.createElement('div');txt.className='txt';txt.innerHTML='<div class="name"></div><div class="hint"></div>';
     txt.querySelector('.name').textContent=h.name;
@@ -1168,6 +1194,7 @@ function renderDay(){
       const re=document.createElement('button');re.type='button';re.className='tbtn';re.textContent='Edit';re.onclick=openClose;bar.appendChild(re)}
     else{const b=document.createElement('button');b.type='button';const pend=levelPending();b.className='closebtn'+(pend||new Date().getHours()>=21?' glow':'');b.textContent=pend?'Close the day → level up ⭐':'Close the day →';b.onclick=openClose;bar.appendChild(b)}
     box.appendChild(bar)}
+  decorateOrder(box);
 }
 function boostRow(d){
   const x=d.extra,row=document.createElement('div');row.className='row boostrow'+(x?' on':'');
@@ -1877,12 +1904,12 @@ function prevDay(){const t=today(),y=addDays(t,-1);if(!configs.length||!start||s
   return habitsFor(y,lvOf(y)).length?y:null}
 function checkPrev(){const y=prevDay();if(!y||luWait)return;let asked='';try{asked=sessionStorage.getItem(LS+'-prev')||''}catch(e){}
   if(asked===y)return;
-  for(const id of ['lvlup','closeSheet','prevSheet','setup','login']){const el=$(id);if(el&&!el.hidden)return}
+  for(const id of ['lvlup','closeSheet','prevSheet','hoSheet','setup','login']){const el=$(id);if(el&&!el.hidden)return}
   try{sessionStorage.setItem(LS+'-prev',y)}catch(e){}renderPrev(y);$('prevSheet').hidden=false}
 function renderPrev(y){const d=day(y),hs=habitsFor(y,lvOf(y));
   $('pvTitle').textContent=parse(y).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
   const box=$('pvList');box.innerHTML='';
-  hs.forEach(h=>{const on=!!(d.h&&d.h[h.id]),row=document.createElement('div');row.className='pv-row'+(on?' on':'');
+  orderHabits(hs).forEach(h=>{const on=!!(d.h&&d.h[h.id]),row=document.createElement('div');row.className='pv-row'+(on?' on':'');
     const b=document.createElement('button');b.type='button';b.className='tick';b.innerHTML=CHECK;b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',h.name);
     const n=document.createElement('span');n.textContent=h.name;n.style.cursor='pointer';const c=document.createElement('span');c.className='pv-core';c.textContent=h.core?'CORE':'';
     const flip=()=>{SND.unlock();const dd=ensure(y);dd.h=Object.assign({},dd.h,{[h.id]:!on});saveDay(y);recompute();renderPrev(y);render();if(!on)SND.blip();else SND.unblip()};
@@ -1894,6 +1921,62 @@ $('pvGo').onclick=()=>{const y=$('pvGo').dataset.day;if(!y)return;SND.unlock();r
   if(shownLevel()>before.s)return;SND.win();toast('Yesterday closed.')};
 $('pvLater').onclick=()=>{$('prevSheet').hidden=true};
 $('dayBar').onclick=()=>{dayOpen=!dayOpen;renderDayFold()};
+let reorderMode=false,suppressClick=false;
+function orderHabits(hs){const o=(profile&&profile.hOrder)||[],ix=id=>{const i=o.indexOf(id);return i<0?1e6:i};
+  return hs.map((h,i)=>({h,i})).sort((a,b)=>ix(a.h.id)-ix(b.h.id)||((b.h.core?1:0)-(a.h.core?1:0))||a.i-b.i).map(x=>x.h)}
+function fullOrder(){const c=latestConfig();return orderHabits(((c&&c.habits)||[]).filter(h=>h.kind!=='once').map(h=>({id:h.id,core:!!h.core}))).map(h=>h.id)}
+function placeHabit(id,beforeId,afterId){const o=fullOrder().filter(x=>x!==id);let i=beforeId?o.indexOf(beforeId):afterId?o.indexOf(afterId)+1:o.length;if(i<0)i=o.length;o.splice(i,0,id);profile.hOrder=o;saveState();renderDay()}
+function visIds(){return [...$('habits').querySelectorAll('.hrow')].map(r=>r.dataset.hid)}
+function moveBy(id,k){const v=visIds(),i=v.indexOf(id),j=i+k;if(i<0||j<0||j>=v.length)return;if(k<0)placeHabit(id,v[j]);else placeHabit(id,null,v[j])}
+function decorateOrder(box){box.classList.toggle('reordering',reorderMode);const rb=$('reorder');if(rb){rb.textContent=reorderMode?'Done':'⇅';rb.classList.toggle('on',reorderMode);rb.setAttribute('aria-pressed',reorderMode)}
+  if(!reorderMode)return;
+  const hint=document.createElement('div');hint.className='ordhint';hint.innerHTML='<span>Drag a habit or use the arrows. Your order stays.</span>';
+  const rs=document.createElement('button');rs.type='button';rs.className='tbtn';rs.textContent='CORE first';rs.onclick=()=>{profile.hOrder=[];saveState();renderDay();toast('Back to CORE first')};hint.appendChild(rs);box.prepend(hint);
+  const rows=[...box.querySelectorAll('.hrow')];rows.forEach((row,i)=>{const id=row.dataset.hid,ctl=document.createElement('span');ctl.className='ord';
+    const up=document.createElement('button');up.type='button';up.textContent='▲';up.setAttribute('aria-label','Move up');up.disabled=i===0;up.onclick=e=>{e.stopPropagation();moveBy(id,-1)};
+    const dn=document.createElement('button');dn.type='button';dn.textContent='▼';dn.setAttribute('aria-label','Move down');dn.disabled=i===rows.length-1;dn.onclick=e=>{e.stopPropagation();moveBy(id,1)};
+    ctl.append(up,dn);const xp=row.querySelector('.xp');if(xp)xp.replaceWith(ctl);else row.appendChild(ctl)})}
+$('reorder').onclick=()=>{reorderMode=!reorderMode;renderDay()};
+// press and hold: move = drag, no move = options
+{const box=$('habits'),HG={row:null,timer:0,x:0,y:0,state:'',pid:0,rows:[],from:0,to:0,h:0};
+  const reset=()=>{clearTimeout(HG.timer);HG.rows.forEach(r=>{r.style.transform='';r.classList.remove('dragging','held')});if(HG.row)HG.row.classList.remove('held','dragging');HG.row=null;HG.state='';HG.rows=[]};
+  box.addEventListener('click',e=>{if(suppressClick){e.stopPropagation();e.preventDefault();suppressClick=false}},true);
+  box.addEventListener('contextmenu',e=>{if(e.target.closest('.hrow'))e.preventDefault()});
+  box.addEventListener('pointerdown',e=>{const row=e.target.closest('.hrow');if(!row||e.target.closest('.counter,.ord')||(e.pointerType==='mouse'&&e.button!==0))return;
+    reset();HG.row=row;HG.x=e.clientX;HG.y=e.clientY;HG.state='wait';HG.pid=e.pointerId;
+    HG.timer=setTimeout(()=>{if(HG.state!=='wait')return;HG.state='held';row.classList.add('held');try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}},450)});
+  box.addEventListener('pointermove',e=>{if(!HG.row||e.pointerId!==HG.pid)return;const dx=e.clientX-HG.x,dy=e.clientY-HG.y;
+    if(HG.state==='wait'){if(Math.hypot(dx,dy)>10)reset();return}
+    if(HG.state==='held'&&Math.abs(dy)>6){HG.state='drag';HG.rows=[...box.querySelectorAll('.hrow')];HG.from=HG.rows.indexOf(HG.row);HG.to=HG.from;HG.h=HG.row.offsetHeight;
+      HG.row.classList.add('dragging');try{HG.row.setPointerCapture(e.pointerId)}catch(_){}}
+    if(HG.state==='drag'){const tops=HG.rows.map(r=>r.offsetTop+r.offsetHeight/2),c=tops[HG.from]+dy;
+      let to=0;HG.rows.forEach((r,j)=>{if(j!==HG.from&&tops[j]<c)to++});HG.to=to;HG.row.style.transform='translateY('+dy+'px)';
+      HG.rows.forEach((r,j)=>{if(j===HG.from)return;r.style.transform=(j>HG.from&&j<=to)?'translateY(-'+HG.h+'px)':(j<HG.from&&j>=to)?'translateY('+HG.h+'px)':''})}});
+  const end=()=>{if(!HG.row)return;const st=HG.state,row=HG.row,id=row.dataset.hid;
+    if(st==='drag'){const v=HG.rows.map(r=>r.dataset.hid),from=HG.from,to=HG.to;reset();suppressClick=true;setTimeout(()=>{suppressClick=false},400);
+      if(to!==from){v.splice(from,1);v.splice(to,0,id);if(to<v.length-1)placeHabit(id,v[to+1]);else placeHabit(id,null,v[to-1])}return}
+    if(st==='held'){reset();suppressClick=true;setTimeout(()=>{suppressClick=false},400);openHabitMenu(id);return}
+    reset()};
+  window.addEventListener('pointerup',end);window.addEventListener('pointercancel',()=>{if(HG.state==='drag')end();else reset()});
+  document.addEventListener('touchmove',e=>{if(HG.state==='held'||HG.state==='drag')e.preventDefault()},{passive:false});}
+function setCoreFrom(id,val){const t=today(),from=addDays(t,1),cur=latestConfig();if(!cur)return;recompute();
+  const hs=clone(cur.habits),h=hs.find(x=>x.id===id);if(!h)return;h.core=val;
+  configs=configs.filter(c=>c.from<from);configs.push(Object.assign({},cur,{from,habits:hs,v3:true}));saveState();render()}
+function openHabitMenu(id){const c=latestConfig(),h=c&&c.habits.find(x=>x.id===id);if(!h)return;SND.unlock();
+  const v=visIds(),i=v.indexOf(id),name=(habitsFor(viewDate,lvOf(viewDate)).find(x=>x.id===id)||{}).name||h.title;
+  $('hoTitle').textContent=name;$('hoLabel').textContent=h.core?'CORE habit':'Habit';
+  const box=$('hoActs');box.innerHTML='';const close=()=>{$('hoSheet').hidden=true};
+  const act=(txt,fn,dis,cls)=>{const b=document.createElement('button');b.type='button';b.className='ho-act'+(cls?' '+cls:'');b.textContent=txt;b.disabled=!!dis;b.onclick=()=>{close();fn()};box.appendChild(b)};
+  act('Move up',()=>moveBy(id,-1),i<=0);
+  act('Move down',()=>moveBy(id,1),i<0||i>=v.length-1);
+  act('Move to the top',()=>placeHabit(id,v[0]),i<=0);
+  act('Reorder all…',()=>{reorderMode=true;renderDay()});
+  const tm=configs.find(x=>x.from===addDays(today(),1)),nc=tm?(tm.habits.find(x=>x.id===id)||h).core:h.core;
+  act(nc?'Make it optional (from tomorrow)':'Make it CORE (from tomorrow)',()=>{setCoreFrom(id,!nc);toast(nc?'From tomorrow: '+h.title+' is optional':'From tomorrow: '+h.title+' is CORE')});
+  act('Edit habit…',()=>{openSetup('edit');const k=SU.habits.findIndex(x=>x.id===id);if(k>=0)openEditor(k)},false,'strong');
+  $('hoSheet').hidden=false}
+$('hoCancel').onclick=()=>{$('hoSheet').hidden=true};
+$('hoSheet').onclick=e=>{if(e.target.id==='hoSheet')$('hoSheet').hidden=true};
 let layout='normal',moving=false,dayOpen=false;
 function secs(){const q=l=>document.querySelector('section[aria-label="'+l+'"]');return{day:q('Day'),tasks:q('Tasks'),room:q('Design your room')}}
 function placeSections(mode){if(layout===mode)return;const {day,tasks,room}=secs();if(!day||!tasks||!room)return;
@@ -1928,7 +2011,7 @@ function showDown(d){SND.down();const st=lv=>{let i=0;STAGES.forEach((s,k)=>{if(
   const cv=$('luCv'),g=cv.getContext('2d');let t=1;HERO._draw(g,si,t);clearInterval(luTimer);
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches)luTimer=setInterval(()=>{t++;HERO._draw(g,si,t)},260);
   $('lvlup').hidden=false;$('luOk').focus()}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('lvlup').hidden)$('luOk').click();else if(!$('closeSheet').hidden)$('closeSheet').hidden=true;else if(!$('prevSheet').hidden)$('prevSheet').hidden=true}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('lvlup').hidden)$('luOk').click();else if(!$('closeSheet').hidden)$('closeSheet').hidden=true;else if(!$('prevSheet').hidden)$('prevSheet').hidden=true;else if(!$('hoSheet').hidden)$('hoSheet').hidden=true;else if(reorderMode){reorderMode=false;renderDay()}}});
 function renderMute(){const m=SND.muted;$('mute').innerHTML=m?
   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13 7.5l4 5M17 7.5l-4 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>':
   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path d="M13.2 7a4 4 0 010 6M15.4 5a7 7 0 010 10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>';
