@@ -1,5 +1,5 @@
 // Level 35 offline cache. Bump VERSION when files change.
-const VERSION = 'level35-v28';
+const VERSION = 'level35-v29';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'supabase.js'];
 
 self.addEventListener('install', e => {

@@ -228,8 +228,8 @@ textarea.bk{width:100%;min-height:90px;padding:10px;border:1px solid var(--line)
 .cell.sel.bz{box-shadow:inset 0 0 0 2px var(--accent),inset 0 -5px 0 var(--boost)}
 .lookpanel{display:flex;flex-direction:column;gap:8px}
 .ladder{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
-.ladder li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;font-size:13px;color:var(--muted);align-items:baseline}
-.ladder li b{font-family:var(--mono);font-size:11.5px}
+.ladder li{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:10px;font-size:13px;color:var(--muted);align-items:baseline}
+.ladder li b{font-family:var(--mono);font-size:11.5px;white-space:nowrap}
 .ladder li.done{color:var(--ink)}.ladder li.done b{color:var(--good)}
 .ladder li.nextup{color:var(--ink)}.ladder li.nextup b{color:var(--accent)}
 .nav button:disabled{opacity:.3}
@@ -398,6 +398,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @keyframes spk{0%{transform:translate(-50%,-50%) scale(0) rotate(0);opacity:0}30%{transform:translate(-50%,-50%) scale(1.25) rotate(45deg);opacity:1}100%{transform:translate(-50%,-50%) scale(0) rotate(120deg);opacity:0}}
 .spk-flash{animation:spkflash .9s ease-out}
 @keyframes spkflash{0%{filter:none}25%{filter:brightness(1.12) drop-shadow(0 0 10px rgba(255,197,49,.75))}100%{filter:none}}
+.board .bar-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.perfect{color:var(--good);font-weight:800}
+.chip2.perf{background:color-mix(in srgb,var(--good) 14%,var(--surface));color:var(--good)}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -416,7 +419,7 @@ html{-webkit-tap-highlight-color:transparent}
     <div class="barwrap" id="barWrap"><div class="bar" aria-hidden="true"><i id="bar" style="width:0%"></i><b id="barToday" style="left:0%;width:0%"></b></div><div class="bar-meta hud-meta"><span id="xpToday">+0 XP today</span><span id="xpNext"></span></div></div>
   </div>
   <section class="board" aria-label="Progress">
-    <div class="bar-meta"><span id="xpNow">0 XP</span></div>
+    <div class="bar-meta"><span id="xpNow">0 XP</span><span class="perfect" id="perfN"></span></div>
     <div class="next" id="nextLook"></div>
     <div class="chips" id="chips"></div>
     <div class="lookpanel" id="lookPanel" hidden><span class="label">Your looks</span><div class="looks" id="looks"></div><span class="label">Your path</span><ol class="ladder" id="ladder"></ol></div>
@@ -514,7 +517,7 @@ html{-webkit-tap-highlight-color:transparent}
     <p class="bk-note" id="lbNote"></p>
   </section>
 
-  <p class="rule">A solid day = all your CORE habits for that day. Solid days level you up when you close the day: 1 solid day per level until LV 6, then 2, 3 from LV 16 and 4 from LV 26. Forgot to close it? The app asks you the next day. XP is your score. Streak boost: ×1.5 from day 3, ×2 from day 5. Miss 1 day and your streak survives (you’ll get a warning). Miss 2 in a row and it resets. Miss 3 in a row and you drop a level and get ×0.75 XP until your next solid day. Days with no CORE habit are rest days. An Extra Boost ⚡ multiplies that day’s XP: ×1.5 for a task, ×1.25 for clearing your whole room (never more than ×1.5). Max ×3.</p>
+  <p class="rule">Each day is worth up to 100 XP: 80 for your CORE habits, 20 for the rest (CORE alone is worth 100). XP levels you up when you close the day, one level at most per day. Levels cost 100 XP up to LV 10, then grow slowly up to 650 for the last one. Each habit is worth the same every day, so a light day (like a weekend) earns less, but it still counts for your streak. A solid day = all your CORE habits; a good day = at least 75% of them. Solid days grow your streak, good days keep it. Streak boost: ×1.25 from day 3, ×1.5 from day 7. Extra Boost ⚡: ×1.5 for a task, ×1.25 for clearing your whole room. Max ×2. 5 solid days in a week = +50 XP on Sunday. A perfect day (every habit ticked, at least 5 that day) adds to your Perfect days count and gives ×1.25 XP the next day. Miss 1 day and your streak survives (you’ll get a warning). Miss 2 in a row and it resets. Miss 3 in a row and you drop a level and get ×0.75 XP until your next solid day. Forgot to close a day? The app asks you the next day. Days with no CORE habit are rest days.</p>
 </div>
 <div class="setup login" id="login" hidden>
   <div class="su-head"><span class="brand">Level 35</span></div>
@@ -599,11 +602,6 @@ html{-webkit-tap-highlight-color:transparent}
     <h2 id="cdTitle">3 wins</h2>
     <ul class="cd-wins" id="cdWins"></ul>
     <div class="cd-stat" id="cdStat"></div>
-    <div class="cd-pick">
-      <span class="label">Tomorrow starts with</span>
-      <select id="cdFirst" aria-label="Tomorrow's first move"></select>
-      <input id="cdOther" type="text" maxlength="100" placeholder="Your first move tomorrow" aria-label="Your first move tomorrow" hidden>
-    </div>
     <button class="btn primary" id="cdGo" type="button">Close the day</button>
     <button class="tbtn" id="cdCancel" type="button">Not yet</button>
   </div>
@@ -666,12 +664,28 @@ function hName(h,lv){const v=valueAt(h,lv);
 function hHint(h,lv){if(h.kind==='weekly'){const ds=daysAt(h,lv);return ds.length+(ds.length===1?' day':' days')+' a week: '+dayList(ds)+(h.hint?' · '+h.hint:'')}return h.hint||''}
 function isWeekend(s){const w=parse(s).getDay();return w===0||w===6}
 // The habits due on a date, with each one's share of a perfect 100-XP day.
+const RATES=new Map();
+function rates(c,lv){const k=c.from+'|'+lv+'|'+c.habits.length;if(RATES.has(k))return RATES.get(k);let mc=0,mo=0;
+  for(let d=0;d<7;d++){let ce=0,oe=0;for(const h of c.habits){if(!isActive(h,lv)||!daysAt(h,lv).includes(d))continue;const e=+h.effort||1;if(h.core)ce+=e;else oe+=e}mc=Math.max(mc,ce);mo=Math.max(mo,oe)}
+  const r={c:mc?(mo?80:100)/mc:0,o:mo?(mc?20:100)/mo:0};RATES.set(k,r);return r}
 function habitsFor(s,lv){
   const c=configFor(s);if(!c)return[];const w=parse(s).getDay();
   const list=c.habits.filter(h=>isActive(h,lv)&&daysAt(h,lv).includes(w));
   const sum=list.reduce((a,h)=>a+(+h.effort||1),0)||1;
-  return list.map(h=>({id:h.id,title:h.title,name:hName(h,lv),hint:hHint(h,lv),core:!!h.core,w:+h.effort||1,xp:Math.round(100*(+h.effort||1)/sum),counter:!!h.counter,unit:h.unit||''}));
+  const R=rates(c,lv),pt=h=>(h.core?R.c:R.o)*(+h.effort||1);
+  return list.map(h=>({id:h.id,title:h.title,name:hName(h,lv),hint:hHint(h,lv),core:!!h.core,w:+h.effort||1,pts:pt(h),xp:Math.round(pt(h)),counter:!!h.counter,unit:h.unit||'',target:h.kind==='amount'?(+valueAt(h,lv)||0):0}));
 }
+// one-time: turn an old plan into the v3 plan (everything visible, weekly at goal, times/amounts keep today's value)
+function migrateV3(){const c=latestConfig();if(!c||c.v3)return false;recompute();
+  let oldP=1;{const ks=Object.keys(days).filter(s=>days[s]&&days[s].lv).sort();if(ks.length)oldP=+days[ks[ks.length-1]].lv||1}
+  const P0=curLevel(),pace=PACE[c.consistency]||PACE.sometimes,t=today();
+  const hs=clone(c.habits).map(h=>{if(h.kind==='once')return h;
+    if(h.kind==='weekly'){h.startLv=1;h.steps=[{lv:1,v:(h.goalDays||[]).slice().sort((a,b)=>a-b)}];return h}
+    if(h.kind==='time'||h.kind==='amount'){const act=h.startLv!=null&&oldP>=h.startLv;const cur=act?valueAt(h,oldP):(h.steps&&h.steps.length?h.steps[0].v:h.from);
+      const p=valuePath(Object.assign({},h,{from:cur==null?h.from:cur}),pace);h.startLv=1;h.steps=[{lv:1,v:p[0]}].concat(p.slice(1).map((v,i)=>({lv:P0+1+i,v})));return h}
+    h.startLv=1;h.steps=[{lv:1,v:null}];return h});
+  const nc={from:t,consistency:c.consistency,habits:hs,signups:c.signups||[],v3:true};
+  configs=configs.filter(x=>x.from<t);configs.push(nc);if(days[t])days[t].lv=P0;return true}
 function changesAt(lv,c){c=c||latestConfig();if(!c||lv<=1)return[];const out=[];
   for(const h of c.habits){if(h.kind==='once')continue;
     if(h.startLv===lv)out.push('New: '+hName(h,lv));
@@ -705,6 +719,16 @@ function valuePath(h,pace){
 }
 // base=1 builds a fresh plan. base>1 (an edit) keeps what already happened up to `base` and plans the rest.
 function buildLadder(habits,consistency,base,edit){
+  base=base||1;const pace=PACE[consistency]||PACE.sometimes;
+  for(const h of habits){if(h.kind==='once')continue;
+    const had=!!(edit&&h.steps&&h.steps.length&&h.startLv!=null);
+    if(h.kind==='weekly'){h.startLv=1;h.steps=[{lv:1,v:(h.goalDays||[]).slice().sort((a,b)=>a-b)}];continue}
+    if(h.kind==='time'||h.kind==='amount'){const from=had?valueAt(h,base):h.from;const p=valuePath(Object.assign({},h,{from:from==null?h.from:from}),pace);
+      h.startLv=1;h.steps=[{lv:1,v:p[0]}].concat(p.slice(1).map((v,i)=>({lv:base+1+i,v})));continue}
+    h.startLv=1;h.steps=[{lv:1,v:null}]}
+  return habits;
+}
+function buildLadderOld(habits,consistency,base,edit){
   base=base||1;edit=!!edit;const pace=PACE[consistency]||PACE.sometimes;
   const daily=habits.filter(h=>h.kind!=='once');
   for(const h of daily){
@@ -735,7 +759,7 @@ function buildLadder(habits,consistency,base,edit){
   for(const h of daily){delete h._q;delete h._p}
   return habits;
 }
-function newConfig(habits,consistency,from,signups){const hs=buildLadder(clone(habits),consistency,1);return{from,consistency,habits:hs,signups:signups||[]}}
+function newConfig(habits,consistency,from,signups){const hs=buildLadder(clone(habits),consistency,1);return{from,consistency,habits:hs,signups:signups||[],v3:true}}
 
 /* ---------- habit library ---------- */
 const LIB=[
@@ -820,31 +844,51 @@ function levelInfo(xp){let lv=1,base=0;while(xp>=base+need(lv)){base+=need(lv);l
 function rankFor(lv){let r=STAGES[0][1];for(const [l,n] of STAGES)if(lv>=l)r=n;return r}
 function coreDue(s){return habitsFor(s,lvOf(s)).filter(h=>h.core)}
 function isSolid(s){const d=days[s];const c=coreDue(s);if(!d||!d.h||!c.length)return false;return c.every(h=>d.h[h.id])}
-function baseXP(s){const d=days[s];if(!d||!d.h)return 0;const hs=habitsFor(s,lvOf(s)),sum=hs.reduce((a,h)=>a+h.w,0);return (sum?Math.round(100*hs.reduce((a,h)=>a+(d.h[h.id]?h.w:0),0)/sum):0)+(d.first&&d.first.done?5:0)}
-function baseMax(s){const d=days[s];return (habitsFor(s,lvOf(s)).length?100:0)+(d&&d.first?5:0)||100}
-const tier=n=>n>=5?2:n>=3?1.5:1;
+function credit(d,h){if(d&&d.h&&d.h[h.id])return 1;if(h.counter&&h.target>0&&d)return Math.min(1,(d.apps||0)/h.target);return 0}
+function dayPts(s){const d=days[s],hs=habitsFor(s,lvOf(s));let core=0,other=0,cMax=0,oMax=0;
+  for(const h of hs){const g=credit(d,h)*h.pts;if(h.core){cMax+=h.pts;core+=g}else{oMax+=h.pts;other+=g}}
+  return{core,other,cMax,oMax}}
+// a perfect day: every habit of the day ticked, with at least 5 habits that day (tasks and the boost don't count)
+function isPerfect(s){return habitsFor(s,lvOf(s)).length>=5&&allDone(s)}
+function baseXP(s){if(!days[s])return 0;const p=dayPts(s);return Math.round(p.core+p.other)}
+function baseMax(s){const p=dayPts(s);return (p.cMax+p.oMax)||100}
+// a good day: at least 75% of the CORE points, not all of them. Not a strike: the streak holds but doesn't grow.
+function isGood(s){if(isSolid(s))return false;const p=dayPts(s);return p.cMax>0&&p.core>=.75*p.cMax-1e-9}
+const okDay=s=>isSolid(s)||isGood(s);
+const tier=n=>n>=7?1.5:n>=3?1.25:1;
+const MAXM=2;
 const allowed=()=>1;
 const SLOW=.75;
 const hasExtra=s=>!!(days[s]&&days[s].extra);
 const boostOf=x=>!x?1:x.kind==='room'?1.25:1.5;
 // Walk every day from the start: who is solid, the streak, misses, and each day's multiplier.
 // 1 miss: streak kept. 2 in a row: streak resets. 3 in a row: drop to the start of the previous level, x0.75 XP until a solid day (that day included).
+const MAXLV=35;
+function lvCost(n){return n<=10?100:n<=20?100+10*(n-10):n<=30?200+20*(n-20):400+50*(n-30)}
 function timeline(){
-  const map={},t=today();let streak=0,miss=0,resets=0,pen=0,slow=false,solid=0,lost=0,downNow=null;
+  const map={},t=today();let streak=0,miss=0,resets=0,slow=false,lost=0,downNow=null,lv=1,into=0,pending=0,solidN=0,perfect=0,wk=0,lastPerf=false;
   if(start)for(let s=start;s<=t;s=addDays(s,1)){
-    const sol=isSolid(s),rest=!coreDue(s).length,slowDay=slow;let sm=1;
-    if(sol){miss=0;streak++;solid++;sm=tier(streak);slow=false;downNow=null;lost=0}
-    else if(rest)sm=tier(streak);
+    const sol=isSolid(s),good=!sol&&isGood(s),rest=!coreDue(s).length,slowDay=slow,dow=parse(s).getDay();let sm=1,down=null;
+    if(dow===1)wk=0;
+    if(sol){miss=0;streak++;sm=tier(streak);slow=false;downNow=null;lost=0;wk++}
+    else if(good||rest)sm=tier(streak);
     else if(s<t){miss++;
       if(miss===2){lost=streak;if(streak>0)resets++;streak=0}
-      if(miss===3){const E=solid-pen,from=levelByDays(E).lv,to=Math.max(1,from-1),E2=levelStart(to);
-        if(E>E2)pen+=E-E2;downNow=from>1?{date:s,from,to}:null;slow=true}}
-    const boost=boostOf(days[s]&&days[s].extra);
-    const mult=Math.min(3,(sol||rest?sm:1)*boost*(slowDay?SLOW:1));
-    map[s]={sol,rest,streak,miss,sm,boost,slow:slowDay,mult,xp:Math.round(baseXP(s)*mult)};
+      if(miss===3){const from=lv;lv=Math.max(1,lv-1);into=0;down=from>1?{date:s,from,to:lv}:null;downNow=down;slow=true}}
+    if(good)miss=0;
+    const boost=boostOf(days[s]&&days[s].extra),pb=lastPerf?1.25:1;
+    const mult=Math.min(MAXM,(sol||good||rest?sm:1)*boost*pb*(slowDay?SLOW:1));
+    const bonus=dow===0&&wk>=5?50:0,xp=Math.round(baseXP(s)*mult)+bonus,perf=isPerfect(s);if(perf)perfect++;lastPerf=perf;
+    const st=settled(s);let up=false;
+    if(st){if(sol)solidN++;into+=xp;if(lv<MAXLV&&xp>0&&into>=lvCost(lv+1)){into-=lvCost(lv+1);lv++;up=true}}else pending+=xp;
+    map[s]={sol,good,rest,streak,miss,sm,boost,pb,slow:slowDay,mult,bonus,perfect:perf,settled:st,up,lv,xp};
   }
-  return{map,streak,miss,resets,pen,slow,lost,downNow};
+  return{map,streak,miss,resets,slow,lost,downNow,lv,into,pending,solidN,perfect};
 }
+function lvInfo(){const lv=TL?TL.lv:1;return{lv,into:TL?TL.into:0,need:lv>=MAXLV?0:lvCost(lv+1),pending:TL?TL.pending:0}}
+function planStart(p){let n=0;for(let l=1;l<p;l++)n+=planDaysFor(l);return n}
+function planIn(p){return Math.max(0,planStart(p)-(TL?TL.solidN:0))}
+function avgXP(){if(!TL)return 90;const ks=Object.keys(TL.map).filter(s=>TL.map[s].settled).sort().slice(-7);if(!ks.length)return 90;return Math.max(40,ks.reduce((a,s)=>a+TL.map[s].xp,0)/ks.length)}
 function dayXP(s){const e=TL&&TL.map[s];return e?e.xp:0}
 function totalXP(){let x=0;for(const s in TL.map)x+=TL.map[s].xp;return x}
 const daysFor=lv=>lv<=5?1:lv<=15?2:lv<=25?3:4;          // shown level: solid days from lv to lv+1
@@ -856,14 +900,14 @@ function solidCount(){let n=0;if(TL)for(const s in TL.map)if(TL.map[s].sol)n++;r
 function settled(s){const t=today(),y=addDays(t,-1),cl=x=>!!(days[x]&&days[x].closed);return s<y||(s===y&&(cl(y)||cl(t)))||(s===t&&cl(t))}
 function effSolid(){if(!TL)return 0;let n=0;for(const s in TL.map)if(TL.map[s].sol&&settled(s))n++;return Math.max(0,n-(TL.pen||0))}
 function pendingSolid(){if(!TL)return 0;const t=today(),y=addDays(t,-1);return [y,t].filter(s=>TL.map[s]&&TL.map[s].sol&&!settled(s)).length}
-function levelPending(){if(!TL)return false;const n=pendingSolid(),L=levelByDays(effSolid());return n>0&&L.into+n>=L.need}
-function shownLevel(){return levelByDays(effSolid()).lv}
+function levelPending(){if(!TL)return false;const L=lvInfo();return L.lv<MAXLV&&L.pending>0&&L.into+L.pending>=L.need}
+function shownLevel(){return TL?TL.lv:1}
 // the plan level is read at the start of the shown level, so a habit change always lands on a level-up
 function planAt(shown){return planByDays(levelStart(shown))}
-function curLevel(){return TL?planAt(shownLevel()):1}
+function curLevel(){return TL?planByDays(TL.solidN||0):1}
 function shownAtPlan(p){let L=1;while(planAt(L)<p&&L<300)L++;return L}
 function lvNow(){return{s:shownLevel(),p:curLevel()}}
-function recompute(){TL={map:{},streak:0,miss:0,pen:0};TL=timeline()}
+function recompute(){RATES.clear();TL={map:{},streak:0,miss:0,lv:1,into:0,pending:0,solidN:0,perfect:0};TL=timeline()}
 
 /* ---------- sound: original 8-bit jingles, made in the browser ---------- */
 const SND=(function(){
@@ -912,9 +956,10 @@ async function initStore(){
   lsLoad();
   const hasCloud=!!(window.supabase&&window.supabase.createClient);let localOnly=false;try{localOnly=localStorage.getItem(LOCAL_ONLY)==='1'}catch(e){}
   if(!configs.length){if(hasCloud&&!localOnly)showLogin();else openSetup('new')}
+  if(configs.length&&migrateV3())saveState();
   render();SCENE.init();SCENE.frame(TL?TL.streak:0,atRisk());renderAccount();setSync();cloud.init();
   if(wasReset)toast('Fresh start: Level 1, day one');
-  try{if(configs.length&&start&&start<'2026-11-10'&&!localStorage.getItem(LS+'-curve2')){localStorage.setItem(LS+'-curve2','1');if(shownLevel()>1)setTimeout(()=>toast('Levels come faster now. You’re LV '+shownLevel()+'!'),900)}}catch(e){}
+  try{if(configs.length&&!localStorage.getItem(LS+'-xp3')){localStorage.setItem(LS+'-xp3','1');localStorage.setItem(LS+'-curve2','1');checkUp();setTimeout(()=>toast('New: levels now come from XP, and all your habits show from day one. You’re LV '+shownLevel()+'.'),900)}}catch(e){}
   try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist()}catch(e){}
 }
 function setSync(){$('sync').textContent=cloud.on()?'Saved on this phone and synced to your account.':standalone?'Saved on this phone. Works offline.':'Tip: Share → Add to Home Screen to install, then use it from there.'}
@@ -930,7 +975,7 @@ const cloud=(function(){
   function show(kind,text){msg={kind,text};renderAccount();setSync()}
   const payload=()=>({schema:SCHEMA,start,days,quests:getQuests(),updated,configs,profile});
   function apply(d,stamp){const m=migrate(d);days=m.days;quests=m.quests;start=m.start;configs=m.configs;profile=m.profile;updated=stamp||m.updated||Date.now();lsWrite();
-    viewDate=today();lastXP=null;hideLogin();if(configs.length){if(!$('setup').hidden&&SU.mode==='new')closeSetup()}else openSetup('new');render()}
+    viewDate=today();lastXP=null;hideLogin();if(configs.length){if(!$('setup').hidden&&SU.mode==='new')closeSetup()}else openSetup('new');if(configs.length&&migrateV3())saveState();render()}
   async function pushProfile(){
     if(!profile.code){profile.code=genCode();lsWrite()}
     for(let i=0;i<4;i++){
@@ -1047,20 +1092,21 @@ function xpFloat(n){const w=$('barWrap');if(!w)return;const f=document.createEle
 const fmtMult=m=>'×'+(Math.round(m*100)/100);
 function render(){
   if(!configs.length)return;
+  rollTasks();
   recompute();
-  const xp=totalXP(),L=levelByDays(effSolid());
+  const xp=totalXP(),L=lvInfo();
   if(lastXP!==null&&xp!==lastXP)xpFloat(xp-lastXP);lastXP=xp;
   $('lvlNum').innerHTML='<small>LV</small>'+L.lv;
   $('rank').textContent=rankFor(L.lv);
   HERO.set(L.lv);
-  {const t=today(),d=days[t],hs=habitsFor(t,lvOf(t));const E=effSolid(),upNow=!!(d&&d.closed)&&isSolid(t)&&E>0&&levelByDays(E).lv>levelByDays(E-1).lv;HERO.setMood(upNow?0:isSolid(t)?2:(d&&d.h&&hs.some(h=>d.h[h.id]))?1:0)}
+  {const t=today(),d=days[t],hs=habitsFor(t,lvOf(t));const upNow=!!(d&&d.closed)&&!!(TL.map[t]&&TL.map[t].up);HERO.setMood(upNow?0:isSolid(t)?2:(d&&d.h&&hs.some(h=>d.h[h.id]))?1:0)}
   const nx=nextChange(curLevel());
-  $('nextLook').textContent=nx?'LV '+shownAtPlan(nx.lv)+' adds: '+nx.list.join(' · '):'Full plan unlocked';
-  {const t=today(),e=TL.map[t]||{xp:0},part=isSolid(t)?0:Math.min(1,baseXP(t)/100),done=Math.min(L.need,L.into+pendingSolid());
-    const sw=done/L.need*100;$('bar').style.width=sw+'%';const bt=$('barToday');bt.style.left=sw+'%';bt.style.width=(part/L.need*100)+'%';
+  $('nextLook').textContent=nx?'Next step in '+planIn(nx.lv)+(planIn(nx.lv)===1?' solid day: ':' solid days: ')+nx.list.join(' · '):'Full plan reached';
+  {const t=today(),e=TL.map[t]||{xp:0},need=L.need||1,sw=L.lv>=MAXLV?100:Math.min(100,L.into/need*100),pw=L.lv>=MAXLV?0:Math.min(100-sw,L.pending/need*100);
+    $('bar').style.width=sw+'%';const bt=$('barToday');bt.style.left=sw+'%';bt.style.width=pw+'%';
     $('xpToday').textContent='+'+e.xp+' XP today';}
-  $('xpNow').textContent=xp+' XP total';
-  {const left=L.need-L.into-pendingSolid();$('xpNext').textContent=left<=0?'Close the day → LV '+(L.lv+1)+' ⭐':left+(left===1?' solid day':' solid days')+' to level '+(L.lv+1)}
+  $('xpNow').textContent=xp+' XP total';$('perfN').textContent='✦ Perfect days: '+TL.perfect;
+  {const left=L.need-L.into-L.pending,dd=Math.max(1,Math.ceil(left/avgXP()));$('xpNext').textContent=L.lv>=MAXLV?'Final level 🏆':left<=0?(L.pending>0?'Close the day → LV ':'Tick a habit → LV ')+(L.lv+1)+' ⭐':left+' XP to LV '+(L.lv+1)+' · ≈'+dd+(dd===1?' day':' days')}
   $('streak').textContent=TL.streak;if(typeof SCENE!=='undefined')SCENE.frame(TL.streak,atRisk());
   renderChips();renderDay();renderWeek();renderQuests();renderRoom();renderCal();renderLb();
   if(!$('lookPanel').hidden)renderLadder();
@@ -1072,6 +1118,9 @@ function renderChips(){
   const sm=tier(TL.streak+(isSolid(t)?0:1));
   add(sm>1?'hot':'', isSolid(t)?'Solid day · '+fmtMult(sm)+' XP':'Solid today = '+fmtMult(sm)+' XP');
   if(e.boost>1)add('boost','⚡ '+fmtMult(e.boost)+' boost today');
+  if(e.good)add('','Good day · streak holds');
+  if(e.pb>1)add('perf','✦ Perfect yesterday · ×1.25 today');
+  if(e.bonus)add('hot','Weekly bonus +'+e.bonus+' XP');
   if(e.slow)add('warn','XP ×0.75 until a solid day');
   if(TL.streak>0){const left=allowed(TL.streak)-TL.miss;add(left<=0?'warn':'',left<=0?'0 misses left':left+(left===1?' miss left':' misses left'))}
 }
@@ -1083,7 +1132,7 @@ function renderDay(){
   $('next').disabled=viewDate>=addDays(t,1);$('prev').disabled=!!start&&viewDate<=start;
   renderYest();
   const box=$('habits');box.innerHTML='';
-  if(d.first){const fm=d.first,row=document.createElement('div');row.className='row firstrow'+(fm.done?' on':'');
+  if(false){const fm=d.first,row=document.createElement('div');row.className='row firstrow'+(fm.done?' on':'');
     const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;b.setAttribute('aria-pressed',!!fm.done);b.setAttribute('aria-label','First move: '+fm.text);
     const flip=()=>{SND.unlock();const before=(recompute(),lvNow());ensure(viewDate).first=Object.assign({},fm,{done:!fm.done});saveDay(viewDate);render();afterChange(before);if(!fm.done){SND.blip();toast('First move done. Momentum.')}else SND.unblip()};
     b.onclick=flip;const txt=document.createElement('div');txt.className='txt';txt.style.cursor='pointer';txt.onclick=flip;
@@ -1108,13 +1157,13 @@ function renderDay(){
   box.appendChild(boostRow(d));
   const core=habitsFor(viewDate,lv).filter(h=>h.core),done=core.filter(h=>d.h&&d.h[h.id]).length;
   const ban=document.createElement('div');ban.className='solid-banner';
-  ban.innerHTML=isSolid(viewDate)?'<b>Solid day.</b> Streak keeps growing.':!core.length?'No CORE habits today. Your streak rests, and anything you do still counts.':'Core: '+done+' of '+core.length+' done. All '+core.length+' make a solid day.';
+  ban.innerHTML=isSolid(viewDate)?'<b>Solid day.</b> Streak keeps growing.':isGood(viewDate)?'<b>Good day.</b> Your streak holds. All '+core.length+' CORE make it solid.':!core.length?'No CORE habits today. Your streak rests, and anything you do still counts.':'Core: '+done+' of '+core.length+' done. All '+core.length+' make a solid day.';
   if(future)ban.innerHTML='<b>Preview of tomorrow.</b> You can tick these once the day starts.';
   box.classList.toggle('preview',future);box.onclick=future?(()=>toast('You can tick this once the day starts')):null;
   box.appendChild(ban);
   if(viewDate===t){const bar=document.createElement('div');bar.className='closebar';
     if(d.closed){const n=document.createElement('span');n.className='closed-note';const tm=days[addDays(t,1)];
-      n.textContent='Day closed ✓'+(tm&&tm.first?' · Tomorrow starts with: '+tm.first.text:'');bar.appendChild(n);
+      n.textContent='Day closed ✓';bar.appendChild(n);
       const re=document.createElement('button');re.type='button';re.className='tbtn';re.textContent='Edit';re.onclick=openClose;bar.appendChild(re)}
     else{const b=document.createElement('button');b.type='button';const pend=levelPending();b.className='closebtn'+(pend||new Date().getHours()>=21?' glow':'');b.textContent=pend?'Close the day → level up ⭐':'Close the day →';b.onclick=openClose;bar.appendChild(b)}
     box.appendChild(bar)}
@@ -1222,8 +1271,8 @@ function renderLadder(){
   const box=$('ladder'),lv=curLevel(),top=fullLevel();box.innerHTML='';let marked=false;
   for(let l=1;l<=top;l++){const ch=l===1?latestConfig().habits.filter(h=>h.startLv===1).map(h=>hName(h,1)):changesAt(l);if(!ch.length)continue;
     const li=document.createElement('li');const nx=!marked&&l>lv;if(nx)marked=true;li.className=l<=lv?'done':nx?'nextup':'';
-    const b=document.createElement('b');b.textContent='LV '+shownAtPlan(l);const sp=document.createElement('span');sp.textContent=ch.join(' · ');li.append(b,sp);box.appendChild(li)}
-  $('planLv').textContent=lv>=top?'Full plan reached':'Full plan at LV '+shownAtPlan(top);
+    const b=document.createElement('b');b.textContent=l===1?'Day one':l<=lv?'Done':'In '+planIn(l)+(planIn(l)===1?' solid day':' solid days');const sp=document.createElement('span');sp.textContent=ch.join(' · ');li.append(b,sp);box.appendChild(li)}
+  $('planLv').textContent=lv>=top?'Full plan reached':'Full plan in '+planIn(top)+' solid days';
 }
 
 /* ---------- actions ---------- */
@@ -1232,20 +1281,24 @@ function afterChange(b){return lvNow()}
 function toggle(h,val){
   if(viewDate>today()){toast('You can tick this once the day starts');return}
   SND.unlock();recompute();
-  const before=lvNow(),wasSolid=isSolid(viewDate),xp0=totalXP(),allB=allDone(viewDate);
+  const before=lvNow(),wasSolid=isSolid(viewDate),xp0=totalXP(),allB=allDone(viewDate),pend0=levelPending();
   const d=ensure(viewDate);d.h=Object.assign({},d.h,{[h.id]:val});
   saveDay(viewDate);render();
   const after=afterChange(before),dx=totalXP()-xp0;
   if(after.s>before.s)return;
-  const upT=val&&viewDate===today()&&!wasSolid&&isSolid(viewDate)&&levelPending();
+  const upT=val&&viewDate===today()&&!pend0&&levelPending();
   if(upT){SND.win();confetti()}else if(val)SND.blip();else SND.unblip();
   if(val&&viewDate===today()&&!allB&&allDone(viewDate))setTimeout(()=>sparkle(secs().day),200);
   if(after.s<before.s)toast('Unmarked · back to level '+after.s);
-  else if(!wasSolid&&isSolid(viewDate))toast(upT?'Solid day! Close the day to level up ⭐':'Solid day · streak '+TL.streak);
+  else if(upT)toast('Enough XP for LV '+(shownLevel()+1)+'! Close the day to level up ⭐');
+  else if(val&&viewDate===today()&&!allB&&isPerfect(viewDate))toast('Perfect day ✦ ×1.25 XP tomorrow');
+  if(val&&viewDate===today()&&!allB&&isPerfect(viewDate))setTimeout(()=>SCENE.perfectFX(),150);
+  else if(!wasSolid&&isSolid(viewDate))toast('Solid day · streak '+TL.streak);
   else if(wasSolid&&!isSolid(viewDate))toast('Unmarked · no longer a solid day');
   else toast((dx>=0?'+':'−')+Math.abs(dx)+' XP');
 }
-function bump(n){if(viewDate>today())return;const d=ensure(viewDate);d.apps=Math.max(0,(d.apps||0)+n);saveDay(viewDate);renderDay();renderWeek()}
+function bump(n){if(viewDate>today())return;const d=ensure(viewDate);d.apps=Math.max(0,(d.apps||0)+n);saveDay(viewDate);
+  const hc=habitsFor(viewDate,lvOf(viewDate)).find(h=>h.counter);if(hc&&n>0&&hc.target>0&&d.apps>=hc.target&&!(d.h&&d.h[hc.id])){toggle(hc,true);return}render()}
 function setExtra(s,x){
   if(s>today()){toast('You can tick this once the day starts');return}
   SND.unlock();const d=ensure(s);d.extra=x;
@@ -1361,37 +1414,28 @@ $('lbAddBox').onsubmit=async e=>{e.preventDefault();const c=cleanCode($('lbCode'
 function openClose(){
   SND.unlock();recompute();const t=today(),d=day(t),e=TL.map[t]||{xp:0,mult:1,sol:false};
   const wins=habitsFor(t,lvOf(t)).filter(h=>d.h&&d.h[h.id]).map(h=>h.name);
-  if(d.first&&d.first.done)wins.unshift('First move: '+d.first.text);
   if(d.extra)wins.push('Extra Boost: '+d.extra.text);
   getQuests().filter(q=>q.done&&q.doneOn===t&&!(d.extra&&d.extra.id===q.id)).forEach(q=>wins.push((q.room?'Room: ':'Task: ')+q.text));
   $('cdTitle').textContent=wins.length?wins.length+(wins.length===1?' win':' wins'):'Day one of many';
   const ul=$('cdWins');ul.innerHTML='';
   (wins.length?wins:['Nothing ticked today. Opening the app and planning tomorrow still counts.']).forEach(w=>{const li=document.createElement('li');li.textContent=w;if(!wins.length)li.className='empty';ul.appendChild(li)});
-  const nextSm=tier(TL.streak+1),boostTmrw=1,tm=Math.min(3,nextSm*boostTmrw);
+  const nextSm=tier(TL.streak+1),boostTmrw=1,tm=Math.min(MAXM,nextSm*boostTmrw);
   let st='<b>+'+e.xp+' XP</b> today'+(e.mult>1?' ('+fmtMult(e.mult)+')':'')+'. ';
+  if(e.bonus)st+='Weekly bonus <b>+'+e.bonus+' XP</b>. ';
+  if(e.perfect)st+='Perfect day ✦ <b>×1.25</b> tomorrow. ';
   if(e.sol)st+='Solid day, streak <b>'+TL.streak+'</b>. Tomorrow a solid day is worth <b>'+fmtMult(tm)+'</b>.';
-  else{const core=habitsFor(t,lvOf(t)).filter(h=>h.core&&!(d.h&&d.h[h.id])).map(h=>h.name.toLowerCase());
+  else if(e.good)st+='Good day: your streak of <b>'+TL.streak+'</b> holds.';
+  if(!e.sol&&!e.good){const core=habitsFor(t,lvOf(t)).filter(h=>h.core&&!(d.h&&d.h[h.id])).map(h=>h.name.toLowerCase());
     st+=core.length?'Still open for a solid day: '+core.join(', ')+'. ':'';
     if(TL.streak>0){const left=allowed(TL.streak)-TL.miss;st+=left>0?'Your streak survives one miss.':'Your streak needs today.'}}
   $('cdStat').innerHTML=st;
-  const sel=$('cdFirst');sel.innerHTML='';const tmrw=addDays(t,1),opt=(v,x)=>{const o=document.createElement('option');o.value=v;o.textContent=x;sel.appendChild(o)};
-  opt('','Pick one…');
-  habitsFor(tmrw,curLevel()).sort((a,b)=>(b.core?1:0)-(a.core?1:0)||b.w-a.w).slice(0,4).forEach(h=>opt('Start with: '+h.name,'Start with: '+h.name));
-  getQuests().filter(q=>!q.done).forEach(q=>opt((q.room?'Room: ':'')+q.text,(q.room?'Room: ':'Task: ')+q.text));
-  opt('__other','Something else…');
-  const cur=days[tmrw]&&days[tmrw].first;if(cur){if(![...sel.options].some(o=>o.value===cur.text))opt(cur.text,cur.text);sel.value=cur.text}
-  $('cdOther').hidden=true;$('cdOther').value='';
-  sel.onchange=()=>{$('cdOther').hidden=sel.value!=='__other';if(sel.value==='__other')$('cdOther').focus()};
   $('closeSheet').hidden=false;
 }
 $('cdCancel').onclick=()=>{$('closeSheet').hidden=true};
 $('closeSheet').onclick=e=>{if(e.target.id==='closeSheet')$('closeSheet').hidden=true};
 $('cdGo').onclick=()=>{
-  const sel=$('cdFirst');let txt=sel.value==='__other'?$('cdOther').value.trim():sel.value;
-  if(!txt){toast(sel.value==='__other'?'Write your first move':'Pick tomorrow’s first move');(sel.value==='__other'?$('cdOther'):sel).focus();return}
   recompute();const before=lvNow(),t=today(),d=ensure(t),wasClosed=!!d.closed;d.closed=true;if(!wasClosed)moving=true;
   {const ph=habitsFor(t,lvOf(t)).find(h=>/^planned tomorrow$/i.test(h.title));if(ph)d.h=Object.assign({},d.h,{[ph.id]:true})}
-  const tm=ensure(addDays(t,1));tm.first={text:txt.slice(0,100),done:false};
   saveDay(t);$('closeSheet').hidden=true;render();
   if(shownLevel()>before.s)return;
   SND.win();confetti();if(moving)setTimeout(closeMove,700);
@@ -1556,22 +1600,22 @@ function renderPlan(){
   const add=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;e.textContent=txt;box.appendChild(e);return e};
   const top=fullLevel(c);
   if(SU.mode==='edit')add('p','su-lead','You are on level '+base+'. These changes start tomorrow; everything you have done so far stays.');
-  add('span','label',SU.mode==='edit'?'From tomorrow (level '+base+')':'Level 1 starts with');
+  add('span','label',SU.mode==='edit'?'From tomorrow':'Day one: everything on your list');
   const ul=add('ul','plan-l1','');hs.filter(h=>isActive(h,base)).forEach(h=>{const li=document.createElement('li');li.textContent=hName(h,base)+(h.core?' · CORE':'');ul.appendChild(li)});
   const later=[];for(let l=base+1;l<=top;l++){const ch=changesAt(l,c);if(ch.length)later.push([l,ch])}
-  if(later.length){add('span','label','Then one step at a time');const ol=add('ol','ladder','');
-    later.slice(0,12).forEach(([l,ch])=>{const li=document.createElement('li');const b=document.createElement('b');b.textContent='LV '+shownAtPlan(l);const s=document.createElement('span');s.textContent=ch.join(' · ');li.append(b,s);ol.appendChild(li)});
+  if(later.length){add('span','label','Then it grows, step by step');const ol=add('ol','ladder','');
+    later.slice(0,12).forEach(([l,ch])=>{const li=document.createElement('li');const b=document.createElement('b');b.textContent='After '+(planStart(l)-planStart(base))+' solid days';const s=document.createElement('span');s.textContent=ch.join(' · ');li.append(b,s);ol.appendChild(li)});
     if(later.length>12)add('p','he-note','…and '+(later.length-12)+' more steps.')}
   if(SU.tasks.length)add('p','he-note','To-do list: '+SU.tasks.length+(SU.tasks.length===1?' task':' tasks')+' on your board.');
   if(SU.room.length)add('p','he-note','Your room: '+SU.room.length+(SU.room.length===1?' change':' changes')+' to clear.');
-  {const n=levelStart(shownAtPlan(top))-levelStart(shownAtPlan(base));add('p','su-goal',top<=base?'You start at your full plan.':'Full plan at level '+shownAtPlan(top)+': about '+n+' solid days, roughly '+Math.ceil(n/5)+' weeks.')}
+  {const n=planStart(top)-planStart(base);add('p','su-goal',top<=base?'You start at your full plan.':'Full plan after about '+n+' solid days, roughly '+Math.ceil(n/5)+' weeks.')}
 }
-$('suStart').onclick=()=>{try{localStorage.setItem(LS+'-curve2','1')}catch(e){}
+$('suStart').onclick=()=>{try{localStorage.setItem(LS+'-curve2','1');localStorage.setItem(LS+'-xp3','1')}catch(e){}
   const once=SU.habits.filter(h=>h.kind==='once');profile.name=SU.name;
   if(SU.mode==='edit'){
     const t=today(),from=addDays(t,1),cur=latestConfig();recompute();
     const hs=buildLadder(clone(SU.habits),SU.cons,curLevel(),true);
-    configs=configs.filter(c=>c.from<from);configs.push({from,consistency:SU.cons,habits:hs,signups:cur.signups||[]});
+    configs=configs.filter(c=>c.from<from);configs.push({from,consistency:SU.cons,habits:hs,signups:cur.signups||[],v3:true});
   }else{
     const t=SU.start||today();configs=[newConfig(SU.habits,SU.cons,t,[])];start=t;days={};
   }
@@ -1647,7 +1691,7 @@ const SCENE=(function(){
   const PCOL=['#FFE066','#FF9CC2','#8BE3A8','#9CC8FF','#FFB870'],PDARK=['#D9B630','#D9739B','#5DB57D','#6E9DD6','#D98C45'];
   const pcol=id=>{let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;return h%5};
   const slotXY=i=>[36+(i%4)*6,4+Math.floor(i/4)*5];
-  const tears={};let boostAt=0,boostM=1.5;
+  const tears={};let boostAt=0,boostM=1.5,perfAt=0;
   function openTasks(){return getQuests().filter(q=>!q.room&&!q.done)}
   function corkboard(p,r,g,A,now){g.globalAlpha=Math.max(A,.85);
     r(34,2,26,13,'#6E4423');r(35,3,24,11,'#C08A55');[[37,12],[44,4],[52,11],[57,6],[40,8],[49,7]].forEach(([x,y])=>p(x,y,'#A8743F'));
@@ -1665,10 +1709,12 @@ const SCENE=(function(){
   function boostFX(m){boostAt=performance.now();boostM=m;const hc=$('hero');if(!hc)return;
     hc.querySelectorAll('.boostpop').forEach(o=>o.remove());const el=document.createElement('span');el.className='boostpop';el.textContent='⚡×'+m;hc.appendChild(el);setTimeout(()=>el.remove(),1500);
     }
-  function arrow(p,x,y){const c='#FFC531',h='#FFF1B0',o='#D9861A';
+  function arrow(p,x,y,pal){const P=pal||['#FFC531','#FFF1B0','#D9861A','255,197,49'],c=P[0],h=P[1],o=P[2];
     for(let j=0;j<4;j++)for(let i=3-j;i<=3+j;i++)p(x+i,y+j,(i===3-j||i===3+j)?o:i===3?h:c);
     for(let k=4;k<9;k++){p(x+2,y+k,c);p(x+3,y+k,h);p(x+4,y+k,o)}
-    p(x+3,y+9,'rgba(255,197,49,.55)');p(x+3,y+10,'rgba(255,197,49,.3)');p(x+3,y+11,'rgba(255,197,49,.12)')}
+    p(x+3,y+9,'rgba('+P[3]+',.55)');p(x+3,y+10,'rgba('+P[3]+',.3)');p(x+3,y+11,'rgba('+P[3]+',.12)')}
+  const GREEN=['#3CC98E','#C4F7DE','#178A5C','60,201,142'];
+  function perfectFX(){perfAt=performance.now()}
   function boostAura(p,g,now,hc,hy){if(!boostAt||!hc||boostM<1.5)return;const e=now-boostAt;if(e>1600)return;
     let m;try{m=hc.getContext('2d').getImageData(0,0,32,32).data}catch(_){return}
     const on=(x,y)=>x>=0&&y>=0&&x<32&&y<32&&m[(y*32+x)*4+3]>40,f=t,lift=f%2;
@@ -1688,7 +1734,12 @@ const SCENE=(function(){
     const e=now-boostAt,charging=boostAt&&e<1400;
     if(charging){if(Math.floor((now-boostAt)/90)%2===0&&hc){g.globalAlpha=.75;g.drawImage(silhouette(hc,Math.floor((now-boostAt)/180)%2?'#FFFFFF':'#FFD23F'),64,hy);g.globalAlpha=1}}
     if(ex){const m=boostOf(ex),cols=m>1.25?[98,55]:[98];
-      cols.forEach((x,ci)=>{for(let n=0;n<2;n++){const ph=(t*2+n*15+ci*8)%30,y=44-ph;g.globalAlpha=ph>24?.45:1;arrow(p,x,y)}});g.globalAlpha=1}}
+      cols.forEach((x,ci)=>{for(let n=0;n<2;n++){const ph=(t*2+n*15+ci*8)%30,y=44-ph;g.globalAlpha=ph>24?.45:1;arrow(p,x,y)}});g.globalAlpha=1}
+    const tm=typeof TL!=='undefined'&&TL&&TL.map[today()];
+    if(tm&&tm.pb>1){[47,108].forEach((x,ci)=>{for(let n=0;n<2;n++){const ph=(t*2+n*15+ci*8+4)%30,y=44-ph;g.globalAlpha=ph>24?.45:1;arrow(p,x,y,GREEN)}});g.globalAlpha=1}
+    const pe=now-perfAt;
+    if(perfAt&&pe<1400&&hc){if(Math.floor(pe/90)%2===0){g.globalAlpha=.75;g.drawImage(silhouette(hc,Math.floor(pe/180)%2?'#FFFFFF':'#3CC98E'),64,hy);g.globalAlpha=1}
+      for(let i=0;i<10;i++){const a=i/10*Math.PI*2+pe/300,rr=10+pe/90,x=Math.round(80+Math.cos(a)*rr),y=Math.round(hy+16+Math.sin(a)*rr*.7);if(y>=0&&y<48){p(x,y,'#C4F7DE');p(x+1,y,'#3CC98E');p(x,y+1,'#3CC98E')}}}}
   const toHsl=h=>{let [r,g,b]=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let hh=0,ss=0;
     if(mx!==mn){const d=mx-mn;ss=l>.5?d/(2-mx-mn):d/(mx+mn);hh=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;hh*=60}return[hh,ss,l]};
   const hsl=(h,s,l)=>'hsl('+(((h%360)+360)%360).toFixed(1)+','+(s*100).toFixed(1)+'%,'+(l*100).toFixed(1)+'%)';
@@ -1781,7 +1832,7 @@ const SCENE=(function(){
     setInterval(()=>{if(document.hidden)return;t++;draw()},RM?1000:150);draw()}
   function poof(id){vanish[id]=performance.now();
     const list=items();if(list.length&&list.every(i=>i.done))cleanAt=performance.now()+600}
-  return{init,draw,poof,frame,thumb,thumbFor,tear,boostFX};
+  return{init,draw,poof,frame,thumb,thumbFor,tear,boostFX,perfectFX};
 })();
 
 /* ---------- level-up screen ---------- */
@@ -1796,7 +1847,7 @@ function levelUp(b,a){
   const ul=$('luNew');ul.innerHTML='';let ch=[];for(let l=b.p+1;l<=a.p;l++)ch=ch.concat(changesAt(l));
   $('luHead').textContent=ch.length?(days[today()]&&days[today()].closed?'Starting tomorrow':'Starting today'):'Keep it going';
   const nx=nextChange(a.p);
-  (ch.length?ch:[nx?'Same habits, more XP. Your next change is at LV '+shownAtPlan(nx.lv)+'.':'Same habits, more XP.']).forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li)});
+  (ch.length?ch:[nx?'Same habits. Next step in '+planIn(nx.lv)+(planIn(nx.lv)===1?' solid day.':' solid days.'):'Same habits. Full plan reached.']).forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li)});
   const cv=$('luCv'),g=cv.getContext('2d');let t=1;HERO._draw(g,si,t);clearInterval(luTimer);
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches)luTimer=setInterval(()=>{t++;HERO._draw(g,si,t)},260);
   {const hb=$('hero');hb.classList.remove('evolve');void hb.offsetWidth;hb.classList.add('evolve')}
@@ -1805,17 +1856,21 @@ function levelUp(b,a){
 let luWait=false;
 $('luOk').onclick=()=>{$('lvlup').hidden=true;clearInterval(luTimer);if(moving)setTimeout(closeMove,250);setTimeout(checkPrev,300)};
 $('lvlup').onclick=e=>{if(e.target.id==='lvlup')$('luOk').click()};
-function atRisk(){return !!TL&&TL.miss===1&&TL.streak>0&&!isSolid(today())}
+function atRisk(){return !!TL&&TL.miss===1&&TL.streak>0&&!okDay(today())}
 function renderAlert(){const el=$('alert');if(!el||!TL)return;const t=today(),e=TL.map[t]||{},L=shownLevel();let cls='',msg='';
   if(isSolid(t)){if(e.slow){cls='ok';msg='Solid day! Full XP is back tomorrow.'}}
+  else if(isGood(t)&&!e.slow){}
   else if(e.slow){cls='down';msg=(TL.downNow?'You dropped to LV '+L+'. ':'')+'XP ×0.75 until your next solid day.'}
   else if(TL.miss===2)msg=(TL.lost>0?'You lost your '+TL.lost+'-day streak. ':'')+(L>1?'Miss today too and you drop to LV '+(L-1)+'.':'');
-  else if(TL.miss===1&&TL.streak>0)msg='You missed yesterday. Do a solid day today to keep your '+TL.streak+'-day streak.';
+  else if(TL.miss===1&&TL.streak>0)msg='You missed yesterday. Do a good day today (75% of your CORE) to keep your '+TL.streak+'-day streak.';
   el.className='alert'+(cls?' '+cls:'');el.textContent=msg;el.hidden=!msg}
 function checkUp(){if(!TL)return;const now=lvNow();let seen=null;try{seen=JSON.parse(localStorage.getItem(LS+'-seen')||'null')}catch(e){}
   const save=()=>{try{localStorage.setItem(LS+'-seen',JSON.stringify(now))}catch(e){}};
-  if(!seen||typeof seen.s!=='number'||now.s<seen.s){save();return}
-  if(now.s>seen.s&&$('lvlup').hidden&&!luWait){save();levelUp(seen,now)}}
+  let fresh=false;try{fresh=!localStorage.getItem(LS+'-xp3')}catch(e){}
+  if(fresh||!seen||typeof seen.s!=='number'||now.s<seen.s){save();return}
+  if(now.s>seen.s&&$('lvlup').hidden&&!luWait){save();levelUp(seen,now);return}
+  if(now.s===seen.s&&now.p>(seen.p||1)){save();let ch=[];for(let l=(seen.p||1)+1;l<=now.p;l++)ch=ch.concat(changesAt(l));if(ch.length)setTimeout(()=>toast('Next step from tomorrow: '+ch.join(' · ')),900);return}
+  if(now.p!==seen.p)save()}
 function prevDay(){const t=today(),y=addDays(t,-1);if(!configs.length||!start||start>y)return null;
   if((days[y]&&days[y].closed)||(days[t]&&days[t].closed))return null;
   return habitsFor(y,lvOf(y)).length?y:null}
@@ -1910,6 +1965,7 @@ async function dropCal(q){if(q.cal!=='ok')return;const mcp=await getMcp();
 function dueText(q){if(!q.date)return '';const t=today();
   const w=q.date===t?'Today':q.date===addDays(t,1)?'Tomorrow':q.date===addDays(t,-1)?'Yesterday':parse(q.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
   return w+(q.time?' · '+q.time:'')}
+function rollTasks(){const t=today();let ch=false;for(const q of getQuests())if(!q.room&&!q.done&&q.date&&q.date<t&&!q.time){if(!q.from0)q.from0=q.date;q.date=t;ch=true}if(ch){quests=getQuests();saveState()}return ch}
 function renderQuests(){
   const box=$('quests');box.innerHTML='';const qs=getQuests().filter(q=>!q.room),t=today();
   const key=q=>(q.date||'9999-12-31')+(q.time||'99:99');
@@ -1926,7 +1982,7 @@ function renderQuests(){
     const meta=document.createElement('div');meta.className='meta';
     if(q.done){if(q.doneOn){const w=document.createElement('span');w.textContent='Done '+parse(q.doneOn).toLocaleDateString('en-GB',{day:'numeric',month:'short'});meta.appendChild(w)}}
     else{
-      if(q.date){const d=document.createElement('span');const late=q.date<t;d.className=late?'late':'';d.textContent=(late?'Overdue · ':'')+dueText(q);meta.appendChild(d)}
+      if(q.date){const d=document.createElement('span');const late=q.date<t;d.className=late?'late':'';d.textContent=(late?'Overdue · ':'')+dueText(q)+(q.from0&&q.from0<q.date?' · carried over from '+parse(q.from0).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}):'');meta.appendChild(d)}
       if(q.time){
         if(q.cal==='ok'){const c=document.createElement('span');c.className='calchip ok';c.textContent='In calendar';meta.appendChild(c)}
         else if(inflight.has(q.id)){const c=document.createElement('span');c.className='calchip';c.textContent='Adding to calendar…';meta.appendChild(c)}
