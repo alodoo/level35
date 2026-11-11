@@ -545,7 +545,7 @@ html{-webkit-tap-highlight-color:transparent}
     <p class="bk-note" id="lbNote"></p>
   </section>
 
-  <p class="rule">Each day is worth up to 100 XP: 80 for your CORE habits, 20 for the rest (CORE alone is worth 100). XP levels you up when you close the day, one level at most per day. Levels cost 100 XP up to LV 10, then grow slowly up to 650 for the last one. Each habit is worth the same every day, so a light day (like a weekend) earns less, but it still counts for your streak. A solid day = all your CORE habits; a good day = at least 75% of them. Solid days grow your streak, good days keep it. Streak boost: ×1.25 from day 3, ×1.5 from day 7. Extra Boost ⚡: ×1.5 for a task, ×1.25 for clearing your whole room. Max ×2. 5 solid days in a week = +50 XP on Sunday. A perfect day (every habit ticked, at least 5 that day) adds to your Perfect days count and gives ×1.25 XP the next day. Miss 1 day and your streak survives (you’ll get a warning). Miss 2 in a row and it resets. Miss 3 in a row and you drop a level and get ×0.75 XP until your next solid day. Forgot to close a day? The app asks you the next day. Days with no CORE habit are rest days.</p>
+  <p class="rule">Each day is worth up to 100 XP: 80 for your CORE habits, 20 for the rest (CORE alone is worth 100). XP levels you up when you close the day, one level at most per day. Levels cost 100 XP up to LV 10, then grow slowly up to 650 for the last one. Each habit is worth the same every day, so a light day (like a weekend) earns less, but it still counts for your streak. A solid day = all your CORE habits; a good day = at least 75% of them. Solid days grow your streak, good days keep it. Streak boost: ×1.25 from day 3, ×1.5 from day 7. Extra Boost ⚡: ×1.5 for a task, ×1.25 for clearing your whole room. Max ×2. 5 solid days in a week = +50 XP on Sunday. A perfect day (every habit ticked, at least 3 that day with 2 CORE) adds to your Perfect days count and gives ×1.25 XP the next day. Miss 1 day and your streak survives (you’ll get a warning). Miss 2 in a row and it resets. Miss 3 in a row and you drop a level and get ×0.75 XP until your next solid day. Forgot to close a day? The app asks you the next day. Days with no CORE habit are rest days.</p>
 </div>
 <div class="setup login" id="login" hidden>
   <div class="su-head"><span class="brand">Level 35</span></div>
@@ -884,8 +884,8 @@ function credit(d,h){if(d&&d.h&&d.h[h.id])return 1;if(h.counter&&h.target>0&&d)r
 function dayPts(s){const d=days[s],hs=habitsFor(s,lvOf(s));let core=0,other=0,cMax=0,oMax=0;
   for(const h of hs){const g=credit(d,h)*h.pts;if(h.core){cMax+=h.pts;core+=g}else{oMax+=h.pts;other+=g}}
   return{core,other,cMax,oMax}}
-// a perfect day: every habit of the day ticked, with at least 5 habits that day (tasks and the boost don't count)
-function isPerfect(s){return habitsFor(s,lvOf(s)).length>=5&&allDone(s)}
+// a perfect day: every habit of the day ticked, with at least 3 habits that day, 2 of them CORE (tasks and the boost don't count)
+function isPerfect(s){const hs=habitsFor(s,lvOf(s));return hs.length>=3&&hs.filter(h=>h.core).length>=2&&allDone(s)}
 function baseXP(s){if(!days[s])return 0;const p=dayPts(s);return Math.round(p.core+p.other)}
 function baseMax(s){const p=dayPts(s);return (p.cMax+p.oMax)||100}
 // a good day: at least 75% of the CORE points, not all of them. Not a strike: the streak holds but doesn't grow.
@@ -899,7 +899,7 @@ const hasExtra=s=>!!(days[s]&&days[s].extra);
 const boostOf=x=>!x?1:x.kind==='room'?1.25:1.5;
 // Walk every day from the start: who is solid, the streak, misses, and each day's multiplier.
 // 1 miss: streak kept. 2 in a row: streak resets. 3 in a row: drop to the start of the previous level, x0.75 XP until a solid day (that day included).
-const MAXLV=35;
+const MAXLV=35,PB_FROM='2026-11-11';  // the x1.25 after a perfect day starts here: past perfect days count, but don't add XP to old days
 function lvCost(n){return n<=10?100:n<=20?100+10*(n-10):n<=30?200+20*(n-20):400+50*(n-30)}
 function timeline(){
   const map={},t=today();let streak=0,miss=0,resets=0,slow=false,lost=0,downNow=null,lv=1,into=0,pending=0,solidN=0,perfect=0,wk=0,lastPerf=false;
@@ -912,7 +912,7 @@ function timeline(){
       if(miss===2){lost=streak;if(streak>0)resets++;streak=0}
       if(miss===3){const from=lv;lv=Math.max(1,lv-1);into=0;down=from>1?{date:s,from,to:lv}:null;downNow=down;slow=true}}
     if(good)miss=0;
-    const boost=boostOf(days[s]&&days[s].extra),pb=lastPerf?1.25:1;
+    const boost=boostOf(days[s]&&days[s].extra),pb=lastPerf&&s>=PB_FROM?1.25:1;
     const mult=Math.min(MAXM,(sol||good||rest?sm:1)*boost*pb*(slowDay?SLOW:1));
     const bonus=dow===0&&wk>=5?50:0,xp=Math.round(baseXP(s)*mult)+bonus,perf=isPerfect(s);if(perf)perfect++;lastPerf=perf;
     const st=settled(s);let up=false;
