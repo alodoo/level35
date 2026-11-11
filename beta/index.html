@@ -419,6 +419,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .ho-act:first-child{border-top:0}
 .ho-act:disabled{color:var(--muted);opacity:.5}
 .ho-act.strong{font-weight:700}
+.perfframe{position:absolute;left:66%;top:5%;width:12.5%;height:31%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  background:#F4FBF7;border:2px solid #178A5C;box-shadow:inset 0 0 0 1px #C4F7DE,0 2px 0 rgba(0,0,0,.2);color:#178A5C;transform-origin:50% -5px;transform:rotate(3deg)}
+.perfframe::before{content:"";position:absolute;top:-5px;left:50%;width:4px;height:4px;margin-left:-2px;background:#2B2F3A;border-radius:50%}
+.perfframe b{font-family:var(--display);font-weight:800;font-size:clamp(12px,4.2vw,18px);line-height:.95;font-variant-numeric:tabular-nums;white-space:nowrap}
+.perfframe .of{font-size:.55em;opacity:.7;margin-left:1px}
+.perfframe small{font-size:clamp(5px,1.45vw,6.5px);line-height:1;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.perfframe .pbar{display:block;flex:none;width:70%;height:3px;border-radius:2px;background:#CDEBDC;overflow:hidden;margin-top:2px}
+.perfframe .pbar i{display:block;height:100%;background:#2FB57E;border-radius:2px}
+.perfframe.pop{animation:framepop .9s ease-out}
+@media (min-width:560px){.perfframe b{font-size:18px}.perfframe small{font-size:6.5px}}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -427,7 +437,7 @@ html{-webkit-tap-highlight-color:transparent}
 <div class="wrap">
   <div class="hud" id="hud">
     <div class="alert" id="alert" role="status" hidden></div>
-    <button class="scene" id="hero" type="button" aria-label="Your room and character. Tap to see every look and your path." aria-expanded="false" aria-controls="lookPanel"><canvas id="sceneCv" width="160" height="48"></canvas><span class="streakframe t0" id="streakFrame"><b id="streak">0</b><small>day streak</small></span></button>
+    <button class="scene" id="hero" type="button" aria-label="Your room and character. Tap to see every look and your path." aria-expanded="false" aria-controls="lookPanel"><canvas id="sceneCv" width="160" height="48"></canvas><span class="streakframe t0" id="streakFrame"><b id="streak">0</b><small>day streak</small></span><span class="perfframe" id="perfFrame" hidden><b><span id="perfCount">0</span><span class="of" id="perfOf">/5</span></b><small>perfect</small><i class="pbar"><i id="perfBar"></i></i></span></button>
     <canvas id="heroCv" width="32" height="32" hidden></canvas>
     <div class="hud-row">
       <span class="lvl-num" id="lvlNum"><small>LV</small>1</span>
@@ -1131,7 +1141,11 @@ function render(){
   {const t=today(),e=TL.map[t]||{xp:0},need=L.need||1,sw=L.lv>=MAXLV?100:Math.min(100,L.into/need*100),pw=L.lv>=MAXLV?0:Math.min(100-sw,L.pending/need*100);
     $('bar').style.width=sw+'%';const bt=$('barToday');bt.style.left=sw+'%';bt.style.width=pw+'%';
     $('xpToday').textContent='+'+e.xp+' XP today';}
-  $('xpNow').textContent=xp+' XP total';$('perfN').textContent='✦ Perfect days: '+TL.perfect;
+  $('xpNow').textContent=xp+' XP total';
+  {const n=TL.perfect,M=[5,10,25,50,100,200,365,500,1000,2000],nx=M.find(m=>m>n)||n+1,pv=[0].concat(M).filter(m=>m<=n).pop()||0,fr=$('perfFrame');
+    $('perfN').textContent='✦ Perfect days: '+n+' · next '+nx;
+    if(fr){fr.hidden=n<1;$('perfCount').textContent=n;$('perfOf').textContent='/'+nx;$('perfBar').style.width=Math.round((n-pv)/(nx-pv)*100)+'%';fr.setAttribute('aria-label',n+' perfect days, next milestone '+nx);
+      if(fr.dataset.n&&+fr.dataset.n<n){fr.classList.remove('pop');void fr.offsetWidth;fr.classList.add('pop')}fr.dataset.n=n}}
   {const left=L.need-L.into-L.pending,dd=Math.max(1,Math.ceil(left/avgXP()));$('xpNext').textContent=L.lv>=MAXLV?'Final level 🏆':left<=0?(L.pending>0?'Close the day → LV ':'Tick a habit → LV ')+(L.lv+1)+' ⭐':left+' XP to LV '+(L.lv+1)+' · ≈'+dd+(dd===1?' day':' days')}
   $('streak').textContent=TL.streak;if(typeof SCENE!=='undefined')SCENE.frame(TL.streak,atRisk());
   renderChips();renderDay();renderWeek();renderQuests();renderRoom();renderCal();renderLb();
@@ -1742,6 +1756,9 @@ const SCENE=(function(){
     p(x+3,y+9,'rgba('+P[3]+',.55)');p(x+3,y+10,'rgba('+P[3]+',.3)');p(x+3,y+11,'rgba('+P[3]+',.12)')}
   const GREEN=['#3CC98E','#C4F7DE','#178A5C','60,201,142'];
   function perfectFX(){perfAt=performance.now()}
+  function perfGlow(g,now,hc,hy){const tm=typeof TL!=='undefined'&&TL&&TL.map[today()];if(!tm||!(tm.pb>1)||!hc)return;
+    const s=silhouette(hc,'#3CC98E');g.globalAlpha=.3+.45*(.5+.5*Math.sin(now/650));
+    [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dx,dy])=>g.drawImage(s,64+dx,hy+dy));g.globalAlpha=1}
   function boostAura(p,g,now,hc,hy){if(!boostAt||!hc||boostM<1.5)return;const e=now-boostAt;if(e>1600)return;
     let m;try{m=hc.getContext('2d').getImageData(0,0,32,32).data}catch(_){return}
     const on=(x,y)=>x>=0&&y>=0&&x<32&&y<32&&m[(y*32+x)*4+3]>40,f=t,lift=f%2;
@@ -1763,7 +1780,8 @@ const SCENE=(function(){
     if(ex){const m=boostOf(ex),cols=m>1.25?[98,55]:[98];
       cols.forEach((x,ci)=>{for(let n=0;n<2;n++){const ph=(t*2+n*15+ci*8)%30,y=44-ph;g.globalAlpha=ph>24?.45:1;arrow(p,x,y)}});g.globalAlpha=1}
     const tm=typeof TL!=='undefined'&&TL&&TL.map[today()];
-    if(tm&&tm.pb>1){[47,108].forEach((x,ci)=>{for(let n=0;n<2;n++){const ph=(t*2+n*15+ci*8+4)%30,y=44-ph;g.globalAlpha=ph>24?.45:1;arrow(p,x,y,GREEN)}});g.globalAlpha=1}
+    if(tm&&tm.pb>1)for(let i=0;i<3;i++){const ph=(t+i*7)%14;if(ph>3)continue;const k=Math.floor((t+i*7)/14)*3+i,x=62+((k*37)%38),y=hy+4+((k*23)%26);if(y<1||y>46)continue;
+      const c=ph===1||ph===2?'#C4F7DE':'#3CC98E';p(x,y,c);if(ph===1||ph===2){p(x-1,y,'#3CC98E');p(x+1,y,'#3CC98E');p(x,y-1,'#3CC98E');p(x,y+1,'#3CC98E')}}
     const pe=now-perfAt;
     if(perfAt&&pe<1400&&hc){if(Math.floor(pe/90)%2===0){g.globalAlpha=.75;g.drawImage(silhouette(hc,Math.floor(pe/180)%2?'#FFFFFF':'#3CC98E'),64,hy);g.globalAlpha=1}
       for(let i=0;i<10;i++){const a=i/10*Math.PI*2+pe/300,rr=10+pe/90,x=Math.round(80+Math.cos(a)*rr),y=Math.round(hy+16+Math.sin(a)*rr*.7);if(y>=0&&y<48){p(x,y,'#C4F7DE');p(x+1,y,'#3CC98E');p(x,y+1,'#3CC98E')}}}}
@@ -1835,7 +1853,7 @@ const SCENE=(function(){
         if(k<.35){o.draw(p,r,t);g.globalAlpha=.85;r(o.x-2,o.y-2,16,10,C.white);g.globalAlpha=A}
         else{g.globalAlpha=1;const rad=Math.round(2+k*9);[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([dx,dy],i)=>{const c=i%2?C.yellow:C.white;p(o.x+4+dx*rad,o.y+2+dy*rad,c);p(o.x+5+dx*rad,o.y+2+dy*rad,c)});g.globalAlpha=A}}
     }
-    g.globalAlpha=1;if(preview)return;const hc=$('heroCv');const fly=typeof HERO!=='undefined'&&HERO.stage&&HERO.stage()===25&&HERO16.mood===2;if(fly){r(70,46,22,1,'rgba(0,0,0,.14)');}if(!preview)boostAura(p,g,now,hc,fly?-4+(t%4<2?0:1):16);if(hc)g.drawImage(hc,64,fly?-4+(t%4<2?0:1):16);if(!preview)boostLayer(p,r,g,now,hc,fly?-4+(t%4<2?0:1):16);
+    g.globalAlpha=1;if(preview)return;const hc=$('heroCv');const fly=typeof HERO!=='undefined'&&HERO.stage&&HERO.stage()===25&&HERO16.mood===2;if(fly){r(70,46,22,1,'rgba(0,0,0,.14)');}if(!preview)boostAura(p,g,now,hc,fly?-4+(t%4<2?0:1):16);if(!preview)perfGlow(g,now,hc,fly?-4+(t%4<2?0:1):16);if(hc)g.drawImage(hc,64,fly?-4+(t%4<2?0:1):16);if(!preview)boostLayer(p,r,g,now,hc,fly?-4+(t%4<2?0:1):16);
     if(cleanAt&&now-cleanAt<2500){for(let i=0;i<16;i++){const x=(i*23+t*5)%W,y=(i*7+t*2)%36;r(x,y,2,2,[C.yellow,C.white,C.pink,C.green][i%4])}}
   }
   const thumbs={};
