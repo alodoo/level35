@@ -465,6 +465,43 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .howto-body h3 span{font-weight:600;letter-spacing:0;text-transform:none}
 .howto-body ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 .howto-body .btn{margin-top:16px}
+.trbar{display:flex;align-items:center;gap:4px 10px;flex-wrap:wrap;width:100%;text-align:left;padding:10px 14px;border-radius:12px;border:1px solid color-mix(in srgb,#2C8FD8 45%,var(--line));background:color-mix(in srgb,#2C8FD8 12%,var(--surface));color:var(--ink);font:inherit;font-size:13.5px}
+.trbar b{font-weight:800}.trbar span{color:var(--muted)}.trbar i{margin-left:auto;font-style:normal;font-weight:700;text-decoration:underline}
+.nav #travel{font-size:17px}.nav #travel.on{background:color-mix(in srgb,#2C8FD8 16%,var(--surface));border-color:#2C8FD8}
+.awayhead{padding:10px 16px 8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);background:var(--soft)}
+.awayhead b{color:var(--ink);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:11px;margin-right:6px}
+.row.awayrow{background:var(--soft)}
+.row.awayrow:not(.on) .name,.row.awayrow:not(.on) .hint,.row.awayrow:not(.on) .xp{opacity:.6}
+.row .core.triptag{background:color-mix(in srgb,#2C8FD8 16%,transparent);color:#2C7FB8}
+.roomaway{margin:14px 16px!important}
+.roomoff .sec-head h3{opacity:.55}.roomoff .roomlist{background:var(--soft)}
+.tr-card{max-width:420px;max-height:calc(100dvh - 32px);overflow-y:auto;align-items:stretch;text-align:left;gap:8px;overscroll-behavior:contain}
+.tr-card>*{flex-shrink:0}
+.tr-card h2{margin:0;font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:.02em;text-transform:uppercase}
+.tr-l{margin-top:8px}
+.tr-chips{display:flex;flex-wrap:wrap;gap:6px}.tr-chips .chip{font-size:13px;padding:7px 11px}.tr-chips .chip.sm{font-size:12.5px;padding:6px 10px}
+.tr-dates{display:flex;gap:8px}
+.tr-dl{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600}
+.tr-dl input{font:inherit;font-size:15px;color:var(--ink);padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);min-width:0;width:100%;box-sizing:border-box}
+.tr-dl input:disabled{opacity:.45}
+.tr-pack{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tr-row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}
+.tr-row:first-child{border-top:0}.tr-row:not(.on) .tr-nm{opacity:.5}
+.tr-cb{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0;color:#fff}
+.tr-cb svg{width:14px;height:14px;opacity:0}.tr-row.on .tr-cb{background:#2C8FD8;border-color:#2C8FD8}.tr-row.on .tr-cb svg{opacity:1}
+.tr-nm{display:flex;flex-direction:column;min-width:0;cursor:pointer}
+.tr-nm b{font-size:14.5px;font-weight:700}.tr-nm span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr-core{font-size:10.5px;font-weight:800;letter-spacing:.08em;padding:5px 8px;border-radius:7px;border:1px dashed var(--line);background:transparent;color:var(--muted)}
+.tr-core.on{border-style:solid;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.tr-core:disabled{opacity:.35}
+.tr-del{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-size:12px;padding:0;color:var(--muted)}
+.tr-selw select,.tr-place{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.tr-addrow{display:flex;gap:8px}.tr-addrow input{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.tr-sum{margin:6px 0 0;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:13.5px;font-weight:600}
+.tr-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.tr-btns .btn.primary{flex:1 1 100%;padding:13px;font-size:15.5px}.tr-btns .btn.danger{color:#C2362B}
+.scene.travel .streakframe::before{display:none}
+.scene.travel .streakframe::after{content:"";position:absolute;left:50%;top:100%;width:4px;margin-left:-2px;height:95%;background:linear-gradient(90deg,#9A6A44 0 50%,#6B4528 50%)}
+.wb.trip .d{color:#2C8FD8}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -473,7 +510,7 @@ html{-webkit-tap-highlight-color:transparent}
 <div class="wrap">
   <div class="hud" id="hud">
     <div class="alert" id="alert" role="status" hidden></div>
-    <button class="scene" id="hero" type="button" aria-label="Your room and character. Tap to see every look and your path." aria-expanded="false" aria-controls="lookPanel"><canvas id="sceneCv" width="160" height="48"></canvas><span class="streakframe t0" id="streakFrame"><b id="streak">0</b><small>day streak</small></span><span class="perfframe" id="perfFrame" hidden><b><span id="perfCount">0</span><span class="of" id="perfOf">/5</span></b><small>perfect</small><i class="pbar"><i id="perfBar"></i></i></span></button>
+    <button class="scene" id="hero" type="button" aria-label="Your room and character. Tap to see every look and your path." aria-expanded="false" aria-controls="lookPanel"><canvas id="sceneCv" width="320" height="96"></canvas><span class="streakframe t0" id="streakFrame"><b id="streak">0</b><small>day streak</small></span><span class="perfframe" id="perfFrame" hidden><b><span id="perfCount">0</span><span class="of" id="perfOf">/5</span></b><small>perfect</small><i class="pbar"><i id="perfBar"></i></i></span></button>
     <canvas id="heroCv" width="32" height="32" hidden></canvas>
     <div class="hud-row">
       <span class="lvl-num" id="lvlNum"><small>LV</small>1</span>
@@ -494,8 +531,9 @@ html{-webkit-tap-highlight-color:transparent}
     <button class="daybar" id="dayBar" type="button" hidden></button>
     <div class="dayhead">
       <div><h2 id="dayTitle">Today</h2><div class="sub" id="daySub"></div></div>
-      <div class="nav"><button id="reorder" type="button" aria-label="Reorder habits" aria-pressed="false">⇅</button><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></div>
+      <div class="nav"><button id="travel" type="button" aria-label="Travel mode">✈️</button><button id="reorder" type="button" aria-label="Reorder habits" aria-pressed="false">⇅</button><button id="prev" aria-label="Previous day">‹</button><button id="next" aria-label="Next day">›</button></div>
     </div>
+    <button class="trbar" id="trBar" type="button" hidden></button>
     <div class="yest" id="yest" hidden></div>
     <div class="list" id="habits"></div>
   </section>
@@ -642,7 +680,7 @@ html{-webkit-tap-highlight-color:transparent}
   <section class="su-step" id="suR" hidden>
     <h1 class="su-title">Design your room</h1>
     <p class="su-lead">One-time changes to your space that make good habits easier, like leaving your gym bag by the door. Each one shows up as clutter until you do it, and your walls warm up as you go. Clear them all for a ×1.25 Extra Boost ⚡ that day and new decor.</p>
-    <div class="su-roomprev"><canvas id="suRoomCv" width="160" height="48" aria-label="Preview of your room"></canvas></div>
+    <div class="su-roomprev"><canvas id="suRoomCv" width="320" height="96" aria-label="Preview of your room"></canvas></div>
     <div class="su-list" id="suRList"></div>
     <div class="label" id="suRNote"></div>
     <h2 class="su-sub">Ideas</h2>
@@ -702,6 +740,9 @@ html{-webkit-tap-highlight-color:transparent}
     <button class="tbtn" id="hoCancel" type="button">Cancel</button>
   </div>
 </div>
+<div class="lvlup" id="trSheet" hidden role="dialog" aria-modal="true" aria-labelledby="trTitle">
+  <div class="lu-card tr-card" id="trCard"></div>
+</div>
 <div class="lvlup" id="prevSheet" hidden role="dialog" aria-modal="true" aria-labelledby="pvTitle">
   <div class="lu-card">
     <span class="label">Close yesterday</span>
@@ -759,6 +800,25 @@ function hName(h,lv){const v=valueAt(h,lv);
   return h.title}
 function hHint(h,lv){if(h.kind==='weekly'){const ds=daysAt(h,lv);return ds.length+(ds.length===1?' day':' days')+' a week: '+dayList(ds)+(h.hint?' · '+h.hint:'')}return h.hint||''}
 function isWeekend(s){const w=parse(s).getDay();return w===0||w===6}
+/* ---------- travel mode: trips live in profile.trips ---------- */
+const DESTS={beach:['🏖️','Beach'],mountain:['🏔️','Mountains'],city:['🏙️','City'],fields:['🐄','Countryside'],cottage:['🏡','Cottage'],snow:['🏂','Snow trip']};
+const VIAS={plane:['✈️','Plane'],train:['🚆','Train'],car:['🚗','Car'],none:['📍','Already there']};
+function trips(){return profile&&Array.isArray(profile.trips)?profile.trips:[]}
+function tripOn(s){for(const tr of trips())if(tr.from<=s&&(!tr.to||s<=tr.to))return tr;return null}
+function packFor(tr,s){const ps=(tr.packs||[]).slice().sort((a,b)=>a.from<b.from?-1:a.from>b.from?1:0);let p=ps[0]||null;for(const x of ps)if(x.from<=s)p=x;return p||{from:tr.from,ids:{},extra:[]}}
+function journeyOn(s){const tr=tripOn(s);if(!tr||!tr.via||tr.via==='none')return null;return s===tr.from||(tr.to&&s===tr.to)?tr.via:null}
+const FLAGS={"ES":"RRRRRRRYYYYYYYYPYYYYYYYYYYYYRRRRRRR","PT":"GGRRRRRGGRRRRRGYYRRRRGGRRRRRGGRRRRR","FR":"BBWWWRRBBWWWRRBBWWWRRBBWWWRRBBWWWRR","IT":"GGWWWRRGGWWWRRGGWWWRRGGWWWRRGGWWWRR","GB":"WNNRNNWNWNRNWNRRRRRRRNWNRNWNWNNRNNW","IE":"GGWWWOOGGWWWOOGGWWWOOGGWWWOOGGWWWOO","DE":"KKKKKKKKKKKKKKRRRRRRRYYYYYYYYYYYYYY","NL":"RRRRRRRRRRRRRRWWWWWWWBBBBBBBBBBBBBB","BE":"KKYYYRRKKYYYRRKKYYYRRKKYYYRRKKYYYRR","LU":"RRRRRRRRRRRRRRWWWWWWWLLLLLLLLLLLLLL","CH":"RRRRRRRRRRWRRRRRWWWRRRRRWRRRRRRRRRR","AT":"RRRRRRRRRRRRRRWWWWWWWRRRRRRRRRRRRRR","PL":"WWWWWWWWWWWWWWWWWWWWWRRRRRRRRRRRRRR","CZ":"BWWWWWWBBWWWWWBBBRRRRBBRRRRRBRRRRRR","HU":"RRRRRRRRRRRRRRWWWWWWWGGGGGGGGGGGGGG","GR":"BWBBBBBWWWWWWWBWBBBBBWWWWWWWBBBBBBB","HR":"RRRRRRRRRRRRRRWWRWRWWBBWRWBBBBBBBBB","MT":"AWWRRRRWWWRRRRWWWRRRRWWWRRRRWWWRRRR","DK":"RRWRRRRRRWRRRRWWWWWWWRRWRRRRRRWRRRR","SE":"BBYBBBBBBYBBBBYYYYYYYBBYBBBBBBYBBBB","FI":"WWBWWWWWWBWWWWBBBBBBBWWBWWWWWWBWWWW","NO":"RWNWRRRWWNWWWWNNNNNNNWWNWWWWRWNWRRR","IS":"BWRWBBBWWRWWWWRRRRRRRWWRWWWWBWRWBBB","EE":"BBBBBBBBBBBBBBKKKKKKKWWWWWWWWWWWWWW","LV":"MMMMMMMMMMMMMMWWWWWWWMMMMMMMMMMMMMM","LT":"YYYYYYYYYYYYYYGGGGGGGRRRRRRRRRRRRRR","RO":"BBYYYRRBBYYYRRBBYYYRRBBYYYRRBBYYYRR","BG":"WWWWWWWWWWWWWWGGGGGGGRRRRRRRRRRRRRR","UA":"BBBBBBBBBBBBBBBBBBBBBYYYYYYYYYYYYYY","RU":"WWWWWWWWWWWWWWBBBBBBBRRRRRRRRRRRRRR","TR":"RRRRRRRRWWRRRRRWRRWRRRWWRRRRRRRRRRR","MA":"RRRRRRRRRRGRRRRRGGGRRRRGRGRRRRRRRRR","TN":"RRRRRRRRRWWWRRRRWRWRRRRWWWRRRRRRRRR","EG":"RRRRRRRRRRRRRRWWWPWWWKKKKKKKKKKKKKK","ZA":"GWRRRRRKGWWWWWYKGGGGGKGWWWWWGWBBBBB","AE":"RGGGGGGRGGGGGGRWWWWWWRKKKKKKRKKKKKK","IL":"WWWWWWWBBBBBBBWWWBWWWBBBBBBBWWWWWWW","IN":"OOOOOOOOOOOOOOWWWNWWWGGGGGGGGGGGGGG","TH":"RRRRRRRWWWWWWWNNNNNNNWWWWWWWRRRRRRR","VN":"RRRRRRRRRRYRRRRRYYYRRRRYRYRRRRRRRRR","ID":"RRRRRRRRRRRRRRRRRRRRRWWWWWWWWWWWWWW","CN":"RYRRRRRYYYRYRRRYRRRRRRRRYRRRRRRRRRR","JP":"WWWWWWWWWWRWWWWWRRRWWWWWRWWWWWWWWWW","KR":"KWWWWWKWWRRRWWWWRBBWWWWBBBWWKWWWWWK","AU":"WRWNNWNRRRNNNNWRWNWNNNNNNNNWNWNNNNN","NZ":"WRWNNRNRRRNNNNWRWNNNRNNNNNRNNNNNNNN","US":"NWNRRRRWNWWWWWNWNRRRRWWWWWWWRRRRRRR","CA":"RRWWWRRRRWRWRRRRRRRRRRRWRWRRRRWWWRR","MX":"GGWWWRRGGWWWRRGGWPWRRGGWWWRRGGWWWRR","CU":"RBBBBBBRRWWWWWRWRBBBBRRWWWWWRBBBBBB","DO":"BBBWRRRBBBWRRRWWWWWWWRRRWBBBRRRWBBB","CO":"YYYYYYYYYYYYYYYYYYYYYBBBBBBBRRRRRRR","PE":"RRWWWRRRRWWWRRRRWWWRRRRWWWRRRRWWWRR","BR":"GGGYGGGGGYBYGGGYBBBYGGGYBYGGGGGYGGG","AR":"LLLLLLLWWWWWWWWWWYWWWWWWWWWWLLLLLLL","CL":"BBBWWWWBWBWWWWBBBWWWWRRRRRRRRRRRRRR","AD":"BBYYYRRBBYYYRRBBYPYRRBBYYYRRBBYYYRR","XX":"SSGGSSSSGGGSGSSSGSSGGSGSSSGSSSSSGSS"};
+const COUNTRIES=[["AD","Andorra"],["AR","Argentina"],["AU","Australia"],["AT","Austria"],["BE","Belgium"],["BR","Brazil"],["BG","Bulgaria"],["CA","Canada"],["CL","Chile"],["CN","China"],["CO","Colombia"],["HR","Croatia"],["CU","Cuba"],["CZ","Czechia"],["DK","Denmark"],["DO","Dominican Republic"],["EG","Egypt"],["EE","Estonia"],["FI","Finland"],["FR","France"],["DE","Germany"],["GR","Greece"],["HU","Hungary"],["IS","Iceland"],["IN","India"],["ID","Indonesia"],["IE","Ireland"],["IL","Israel"],["IT","Italy"],["JP","Japan"],["LV","Latvia"],["LT","Lithuania"],["LU","Luxembourg"],["MT","Malta"],["MX","Mexico"],["MA","Morocco"],["NL","Netherlands"],["NZ","New Zealand"],["NO","Norway"],["PE","Peru"],["PL","Poland"],["PT","Portugal"],["RO","Romania"],["RU","Russia"],["ZA","South Africa"],["KR","South Korea"],["ES","Spain"],["SE","Sweden"],["CH","Switzerland"],["TH","Thailand"],["TN","Tunisia"],["TR","Turkey"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["VN","Vietnam"]];
+const flagEmoji=c=>!c||c==='XX'?'🌍':String.fromCodePoint(...[...c].map(ch=>127397+ch.charCodeAt(0)));
+function countryName(c){const x=COUNTRIES.find(y=>y[0]===c);return x?x[1]:''}
+function tripPlace(tr){return tr.country==='XX'?(tr.place||'Somewhere new'):countryName(tr.country)}
+// your suitcase: one sticker per country, earned with your first solid day there (more days there add to its count)
+let STK=null,STKfor=null;
+function stickerList(){if(STK&&STKfor===TL)return STK;const m=new Map();if(TL)for(const s of Object.keys(TL.map).sort()){const tr=tripOn(s);if(!tr||!tr.country||!TL.map[s].sol)continue;
+  const k=tr.country==='XX'?'XX:'+(tr.place||'').toLowerCase():tr.country,e=m.get(k);if(e)e.n++;else m.set(k,{k,code:tr.country,name:tripPlace(tr),s,n:1})}
+  STK=[...m.values()];STKfor=TL;return STK}
+function travelNow(){if(!configs.length)return null;const t=today(),tr=tripOn(t);if(!tr)return null;const hs=habitsFor(t,lvOf(t)),d=day(t),done=hs.filter(h=>d.h&&d.h[h.id]).length;
+  return{dest:DESTS[tr.dest]?tr.dest:'beach',via:journeyOn(t),prog:hs.length?done/hs.length:1,stk:stickerList()}}
 // The habits due on a date, with each one's share of a perfect 100-XP day.
 const RATES=new Map();
 function rates(c,lv){const k=c.from+'|'+lv+'|'+c.habits.length;if(RATES.has(k))return RATES.get(k);let mc=0,mo=0;
@@ -766,11 +826,17 @@ function rates(c,lv){const k=c.from+'|'+lv+'|'+c.habits.length;if(RATES.has(k))r
   const r=mc?100/mc:0;RATES.set(k,r);return r}
 function habitsFor(s,lv){
   const c=configFor(s);if(!c)return[];const w=parse(s).getDay();
-  const list=c.habits.filter(h=>isActive(h,lv)&&daysAt(h,lv).includes(w));
+  let list=c.habits.filter(h=>isActive(h,lv)&&daysAt(h,lv).includes(w));
+  {const tr=tripOn(s);if(tr){const pk=packFor(tr,s),ids=pk.ids||{};
+    list=list.filter(h=>ids[h.id]).map(h=>Object.assign({},h,{core:!!ids[h.id].core})).concat((pk.extra||[]).map(x=>({id:x.id,title:x.title,kind:'daily',core:!!x.core,effort:+x.effort||2,hint:'Travel habit',steps:[{v:null,lv:1}],startLv:1,travel:true})))}}
   const sum=list.reduce((a,h)=>a+(+h.effort||1),0)||1;
   const R=rates(c,lv),pt=h=>R*(+h.effort||1)*(h.core?2:1);
-  return list.map(h=>({id:h.id,title:h.title,name:hName(h,lv),hint:hHint(h,lv),core:!!h.core,w:+h.effort||1,pts:pt(h),xp:Math.round(pt(h)),counter:!!h.counter,unit:h.unit||'',target:h.kind==='amount'?(+valueAt(h,lv)||0):0}));
+  return list.map(h=>({id:h.id,title:h.title,name:hName(h,lv),hint:hHint(h,lv),core:!!h.core,w:+h.effort||1,pts:pt(h),xp:Math.round(pt(h)),counter:!!h.counter,unit:h.unit||'',target:h.kind==='amount'?(+valueAt(h,lv)||0):0,travel:!!h.travel}));
 }
+// on a trip, the habits you didn't pack: optional, each worth its normal value as a bonus
+function awayFor(s,lv){const tr=tripOn(s);if(!tr)return[];const c=configFor(s);if(!c)return[];const w=parse(s).getDay(),ids=packFor(tr,s).ids||{},R=rates(c,lv);
+  return c.habits.filter(h=>isActive(h,lv)&&daysAt(h,lv).includes(w)&&!ids[h.id]).map(h=>{const pts=R*(+h.effort||1)*(h.core?2:1);
+    return{id:h.id,title:h.title,name:hName(h,lv),hint:hHint(h,lv),core:false,away:true,w:+h.effort||1,pts,xp:Math.round(pts),counter:!!h.counter,unit:h.unit||'',target:h.kind==='amount'?(+valueAt(h,lv)||0):0}})}
 // one-time: turn an old plan into the v3 plan (everything visible, weekly at goal, times/amounts keep today's value)
 function migrateV3(){const c=latestConfig();if(!c||c.v3)return false;recompute();
   let oldP=1;{const ks=Object.keys(days).filter(s=>days[s]&&days[s].lv).sort();if(ks.length)oldP=+days[ks[ks.length-1]].lv||1}
@@ -943,6 +1009,7 @@ function isSolid(s){const d=days[s];const c=coreDue(s);if(!d||!d.h||!c.length)re
 function credit(d,h){if(d&&d.h&&d.h[h.id])return 1;if(h.counter&&h.target>0&&d)return Math.min(1,(d.apps||0)/h.target);return 0}
 function dayPts(s){const d=days[s],hs=habitsFor(s,lvOf(s));let core=0,other=0,cMax=0,oMax=0;
   for(const h of hs){const g=credit(d,h)*h.pts;if(h.core){cMax+=h.pts;core+=g}else{oMax+=h.pts;other+=g}}
+  for(const h of awayFor(s,lvOf(s)))other+=credit(d,h)*h.pts;
   return{core,other,cMax,oMax}}
 // a perfect day: every habit of the day ticked, with at least 3 habits that day, 2 of them CORE (tasks and the boost don't count)
 function isPerfect(s){const hs=habitsFor(s,lvOf(s));return hs.length>=3&&hs.filter(h=>h.core).length>=2&&allDone(s)}
@@ -976,7 +1043,7 @@ function timeline(){
     const mult=Math.min(MAXM,(sol||good||rest?sm:1)*boost*pb*(slowDay?SLOW:1));
     const bonus=dow===0&&wk>=5?50:0,xp=Math.round(baseXP(s)*mult)+bonus,perf=isPerfect(s);if(perf)perfect++;lastPerf=perf;
     const st=settled(s);let up=false;
-    if(st){if(sol)solidN++;into+=xp;if(lv<MAXLV&&xp>0&&into>=lvCost(lv+1)){into-=lvCost(lv+1);lv++;up=true}}else pending+=xp;
+    if(st){if(sol&&!tripOn(s))solidN++;into+=xp;if(lv<MAXLV&&xp>0&&into>=lvCost(lv+1)){into-=lvCost(lv+1);lv++;up=true}}else pending+=xp;
     map[s]={sol,good,rest,streak,miss,sm,boost,pb,slow:slowDay,mult,bonus,perfect:perf,settled:st,up,lv,xp};
   }
   return{map,streak,miss,resets,slow,lost,downNow,lv,into,pending,solidN,perfect};
@@ -1197,10 +1264,12 @@ function render(){
   if(lastXP!==null&&xp!==lastXP)xpFloat(xp-lastXP);lastXP=xp;
   $('lvlNum').innerHTML='<small>LV</small>'+L.lv;
   $('rank').textContent=rankFor(L.lv);
-  HERO.set(L.lv);
+  HERO.set(L.lv);$('hero').classList.toggle('travel',!!tripOn(today()));
   {const t=today(),d=days[t],hs=habitsFor(t,lvOf(t));const upNow=!!(d&&d.closed)&&!!(TL.map[t]&&TL.map[t].up);HERO.setMood(upNow?0:isSolid(t)?2:(d&&d.h&&hs.some(h=>d.h[h.id]))?1:0)}
+  {const T=travelNow();HERO.setTravel(T?(T.via||T.dest):null)}
   const nx=nextChange(curLevel());
   $('nextLook').textContent=nx?'Next step in '+planIn(nx.lv)+(planIn(nx.lv)===1?' solid day: ':' solid days: ')+nx.list.join(' · '):'Full plan reached';
+  if(tripOn(today()))$('nextLook').textContent='✈️ Plan paused while you travel. Solid days still grow your streak.';
   {const t=today(),e=TL.map[t]||{xp:0},need=L.need||1,sw=L.lv>=MAXLV?100:Math.min(100,L.into/need*100),pw=L.lv>=MAXLV?0:Math.min(100-sw,L.pending/need*100);
     $('bar').style.width=sw+'%';const bt=$('barToday');bt.style.left=sw+'%';bt.style.width=pw+'%';
     $('xpToday').textContent='+'+e.xp+' XP today';}
@@ -1233,7 +1302,7 @@ function renderDay(){
   $('dayTitle').textContent=rel;
   $('daySub').textContent=dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' · '+dayXP(viewDate)+' XP'+(e&&e.mult!==1?' ('+fmtMult(e.mult)+')':'');
   $('next').disabled=viewDate>=addDays(t,1);$('prev').disabled=!!start&&viewDate<=start;
-  renderYest();
+  renderYest();renderTripBar();
   const box=$('habits');box.innerHTML='';
   if(false){const fm=d.first,row=document.createElement('div');row.className='row firstrow'+(fm.done?' on':'');
     const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;b.setAttribute('aria-pressed',!!fm.done);b.setAttribute('aria-label','First move: '+fm.text);
@@ -1242,21 +1311,24 @@ function renderDay(){
     const n=document.createElement('div');n.className='name';n.textContent=fm.text;const c=document.createElement('span');c.className='core';c.textContent='first move';n.appendChild(c);
     const h=document.createElement('div');h.className='hint';h.textContent='You picked this last night. Do it before anything else.';txt.append(n,h);
     const xp=document.createElement('span');xp.className='xp';xp.textContent='+5';row.append(b,txt,xp);box.appendChild(row)}
-  for(const h of orderHabits(habitsFor(viewDate,lv))){
+  const mkRow=(h,cls)=>{
     const on=!!(d.h&&d.h[h.id]);
-    const row=document.createElement('div');row.className='row hrow'+(on?' on':'');row.dataset.hid=h.id;
+    const row=document.createElement('div');row.className='row '+cls+(on?' on':'');row.dataset.hid=h.id;
     const b=document.createElement('button');b.className='tick';b.innerHTML=CHECK;b.setAttribute('aria-pressed',on);b.setAttribute('aria-label',h.name);b.onclick=()=>toggle(h,!on);
     const txt=document.createElement('div');txt.className='txt';txt.innerHTML='<div class="name"></div><div class="hint"></div>';
     txt.querySelector('.name').textContent=h.name;
     if(h.core){const s=document.createElement('span');s.className='core';s.textContent='core';txt.querySelector('.name').appendChild(s)}
+    if(h.travel){const s=document.createElement('span');s.className='core triptag';s.textContent='trip';txt.querySelector('.name').appendChild(s)}
     txt.querySelector('.hint').textContent=h.hint;txt.style.cursor='pointer';txt.onclick=()=>toggle(h,!on);
     const xp=document.createElement('span');xp.className='xp';xp.textContent='+'+h.xp;
     row.append(b,txt,xp);
     if(h.counter){const ex=document.createElement('div');ex.className='extra';
       ex.innerHTML='<div class="counter">'+((h.unit||'Done')+' today').replace(/^./,c=>c.toUpperCase())+' <button aria-label="One less">−</button><b></b><button aria-label="One more">+</button></div>';
       const [minus,plus]=ex.querySelectorAll('button');ex.querySelector('b').textContent=d.apps||0;minus.onclick=()=>bump(-1);plus.onclick=()=>bump(1);row.appendChild(ex)}
-    box.appendChild(row);
-  }
+    return row};
+  for(const h of orderHabits(habitsFor(viewDate,lv)))box.appendChild(mkRow(h,'hrow'));
+  {const aw=awayFor(viewDate,lv);if(aw.length){const hd=document.createElement('div');hd.className='awayhead';hd.innerHTML='<b>At home</b> Optional on this trip. Ticks still earn XP.';box.appendChild(hd);
+    for(const h of orderHabits(aw))box.appendChild(mkRow(h,'awayrow'))}}
   box.appendChild(boostRow(d));
   const core=habitsFor(viewDate,lv).filter(h=>h.core),done=core.filter(h=>d.h&&d.h[h.id]).length;
   const ban=document.createElement('div');ban.className='solid-banner';
@@ -1278,7 +1350,7 @@ function boostRow(d){
   b.onclick=()=>{if(x&&x.kind!=='room')clearExtra(viewDate);else{const sel=row.querySelector('select');if(sel)sel.focus();toast('Pick what you did from the list')}};
   const txt=document.createElement('div');txt.className='txt';
   const n=document.createElement('div');n.className='name';n.textContent='Extra Boost ⚡';
-  const hn=document.createElement('div');hn.className='hint';const room=x&&x.kind==='room';hn.textContent=room?'✓ Room cleared (×1.25). Do a task to make it ×1.5':x?'✓ '+x.text:'Do a task → ×1.5 XP for the whole day. Clear your whole room → ×1.25';
+  const hn=document.createElement('div');hn.className='hint';const room=x&&x.kind==='room';hn.textContent=room?'✓ Room cleared (×1.25). Do a task to make it ×1.5':x?'✓ '+x.text:(tripOn(viewDate)?'Do a task → ×1.5 XP for the whole day':'Do a task → ×1.5 XP for the whole day. Clear your whole room → ×1.25');
   txt.append(n,hn);
   const tag=document.createElement('span');tag.className='xp';tag.textContent=room?'×1.25':'×1.5';
   row.append(b,txt,tag);
@@ -1334,7 +1406,7 @@ function renderWeek(){
   {const ch=(latestConfig().habits.find(h=>h.counter));stat(ch?apps:boostsWk(mon,elapsed),ch?(ch.unit||'done')+' this week':'Extra Boosts','')}
   const bars=$('wkBars');bars.innerHTML='';
   ['M','T','W','T','F','S','S'].forEach((L,i)=>{const s=addDays(mon,i),e=document.createElement('button');e.type='button';
-    e.className='wb'+(s>t?' fut':'')+(s===t?' today':'')+(isSolid(s)?' solid':'');
+    e.className='wb'+(s>t?' fut':'')+(s===t?' today':'')+(isSolid(s)?' solid':'')+(tripOn(s)?' trip':'');
     const x=dayXP(s),mx=baseMax(s)*2;e.innerHTML='<div class="col"><i></i></div><span class="d"></span><span class="v"></span>';
     e.querySelector('i').style.height=(s>t?0:Math.min(100,Math.round(x/mx*100)))+'%';
     e.querySelector('.d').textContent=L;e.querySelector('.v').textContent=s>t?'':x;
@@ -1402,7 +1474,7 @@ function toggle(h,val){
   else toast((dx>=0?'+':'−')+Math.abs(dx)+' XP');
 }
 function bump(n){if(viewDate>today())return;const d=ensure(viewDate);d.apps=Math.max(0,(d.apps||0)+n);saveDay(viewDate);
-  const hc=habitsFor(viewDate,lvOf(viewDate)).find(h=>h.counter);if(hc&&n>0&&hc.target>0&&d.apps>=hc.target&&!(d.h&&d.h[hc.id])){toggle(hc,true);return}render()}
+  const hc=habitsFor(viewDate,lvOf(viewDate)).concat(awayFor(viewDate,lvOf(viewDate))).find(h=>h.counter);if(hc&&n>0&&hc.target>0&&d.apps>=hc.target&&!(d.h&&d.h[hc.id])){toggle(hc,true);return}render()}
 function setExtra(s,x){
   if(s>today()){toast('You can tick this once the day starts');return}
   SND.unlock();const d=ensure(s);d.extra=x;
@@ -1430,6 +1502,9 @@ function toggleQuest(id){
 /* ---------- design your room ---------- */
 function renderRoom(){
   const box=$('room');box.innerHTML='';const qs=getQuests().filter(q=>q.room);
+  {const sec=box.closest('section');if(tripOn(today())){if(sec)sec.classList.add('roomoff');$('roomCount').textContent='On hold';
+    const n=document.createElement('p');n.className='he-note roomaway';n.textContent='✈️ You’re away, so your room is on hold. Nothing here counts until you’re home.';box.appendChild(n);return}
+    if(sec)sec.classList.remove('roomoff')}
   if(!qs.length){$('roomCount').textContent='';
     const w=document.createElement('div');w.className='room-intro';
     w.innerHTML='<p>One-time changes to your space that make the right thing the easy thing. Each one adds clutter to your room up top. Do it and the clutter disappears. Clear them all for a ×1.25 Extra Boost ⚡ that day and new decor.</p>';
@@ -1518,6 +1593,7 @@ $('lbAddBox').onsubmit=async e=>{e.preventDefault();const c=cleanCode($('lbCode'
 function openClose(){
   SND.unlock();recompute();const t=today(),d=day(t),e=TL.map[t]||{xp:0,mult:1,sol:false};
   const wins=habitsFor(t,lvOf(t)).filter(h=>d.h&&d.h[h.id]).map(h=>h.name);
+  awayFor(t,lvOf(t)).filter(h=>d.h&&d.h[h.id]).forEach(h=>wins.push('Bonus: '+h.name));
   if(d.extra)wins.push('Extra Boost: '+d.extra.text);
   getQuests().filter(q=>q.done&&q.doneOn===t&&!(d.extra&&d.extra.id===q.id)).forEach(q=>wins.push((q.room?'Room: ':'Task: ')+q.text));
   $('cdTitle').textContent=wins.length?wins.length+(wins.length===1?' win':' wins'):'Day one of many';
@@ -1741,7 +1817,7 @@ $('seePath').onclick=()=>{const p=$('lookPanel');if(p.hidden)$('hero').click();w
 
 /* ---------- your room: a 16-bit scene behind the character; clutter vanishes as you finish room changes ---------- */
 const SCENE=(function(){
-  const W=160,H=48,O='#1B1F2E';
+  const W=160,H=48,W2=320,H2=96,O='#1B1F2E';
   const C={wall:'#3B4466',wallD:'#323A58',amber:'#E39B0B',floor:'#7A5534',floorD:'#5E4127',floorL:'#93683F',sky:'#8FD3FF',skyL:'#BDE6FF',night:'#1C2547',moon:'#F4E9B8',star:'#DDE6FF',
     frame:'#E9E2D0',frameS:'#C9BFA8',curtain:'#C0504D',curtainS:'#943936',bed:'#5B3A24',bedS:'#432A19',blanket:'#3F7BD9',blanketD:'#2F5FB0',blanketL:'#6A9BEA',pillow:'#F2F2F2',pillowS:'#D3D6DE',
     wood:'#8B5E3C',woodD:'#6B4528',woodL:'#A87650',metal:'#9AA3B5',metalS:'#6E7688',red:'#E2453C',redS:'#B02E27',white:'#FFFFFF',screen:'#7FD4FF',screenS:'#4FA9DB',
@@ -1750,36 +1826,38 @@ const SCENE=(function(){
     box:'#B9895A',boxS:'#946A41',sock:'#C9CFDB',can:'#D62F2F',mug:'#F2F2F2',mugS:'#C9CFDB'};
   // Each clutter object: where it sits and how it's drawn (x,y = top-left of its spot in the 160x48 room)
   const OBJ={
-    phone:{x:16,y:29,draw:(p,r,t)=>{const on=t%4<2;r(16,30,7,3,O);r(17,30,5,2,on?C.screen:C.screenS);p(18,30,C.white);if(on){p(19,29,C.screen);p(15,31,C.screen)}r(23,31,4,1,C.metal);r(26,32,1,6,C.metal)}},
-    clock:{x:42,y:25,draw:(p,r,t)=>{const s=t%2;r(43+s,27,6,5,C.red);r(44+s,28,4,3,C.white);p(46+s,28,O);p(46+s,29,O);p(47+s,29,O);r(42+s,26,2,2,C.redS);r(48+s,26,2,2,C.redS);p(43+s,32,O);p(48+s,32,O)}},
-    clothes:{x:46,y:39,draw:(p,r)=>{r(46,42,12,2,C.cloth1);r(46,43,12,1,C.redS);r(48,40,8,2,C.cloth2);r(50,39,4,1,C.cloth3);r(53,41,4,1,C.cloth4);p(57,41,C.cloth1)}},
-    bottles:{x:132,y:34,draw:(p,r)=>{r(132,40,3,4,C.can);p(133,39,C.metal);r(136,37,3,7,C.green);r(136,37,1,7,C.greenS);r(137,35,1,2,C.green);p(137,34,C.white);r(140,42,4,2,C.can);p(143,42,C.metal)}},
-    bag:{x:6,y:40,draw:(p,r)=>{r(6,42,11,4,C.blanketD);r(6,42,11,1,C.blanketL);r(8,40,1,2,O);r(14,40,1,2,O);r(8,40,7,1,O);r(10,44,3,1,C.blanket);r(15,41,3,2,C.white);r(16,41,2,1,C.pillowS);r(4,44,3,2,C.red);r(4,45,3,1,C.white)}},
-    papers:{x:132,y:25,draw:(p,r)=>{r(132,27,6,1,C.paper);r(139,26,5,1,C.paper);r(140,27,5,1,C.paperS);r(146,27,5,1,C.paper);r(114,45,6,1,C.paper);r(115,44,4,1,C.paperS)}},
-    notes:{x:29,y:26,draw:(p,r,t)=>{r(28,26,10,6,O);r(29,27,8,4,'#2A3150');p(30,28,C.red);p(32,28,C.green);p(34,28,C.amber);p(36,28,C.pink);p(30,30,C.pink);p(32,30,C.amber);p(34,30,C.red);if(t%4<2){r(36,25,3,2,C.red);p(37,25,C.white)}}},
-    monitor:{x:116,y:18,draw:(p,r,t)=>{r(116,18,12,8,O);r(117,19,10,6,C.screen);r(117,23,10,2,C.screenS);[[118,20],[121,20],[118,22]].forEach(([x,y])=>r(x,y,2,1,C.white));if(t%3){r(125,19,2,2,C.red)}r(121,26,2,1,O);r(119,27,6,1,O)}},
-    console:{x:100,y:42,draw:(p,r,t)=>{r(100,43,6,3,O);r(101,43,4,1,C.trashL);p(104,45,t%2?C.red:C.green);r(107,44,5,2,C.trash);p(108,44,C.red);p(110,44,C.green);r(106,45,1,1,O)}},
-    pizza:{x:28,y:42,draw:(p,r)=>{r(28,42,10,3,C.pizza);r(28,44,10,1,C.pizzaS);p(30,43,C.red);p(33,42,C.red);p(35,43,C.red)}},
-    trash:{x:150,y:36,draw:(p,r)=>{r(151,38,6,6,C.trash);r(153,36,2,2,C.trash);p(152,39,C.trashL);p(152,40,C.trashL)}},
-    socks:{x:38,y:43,draw:(p,r)=>{r(38,44,3,2,C.sock);r(40,43,1,1,C.sock);r(42,45,3,1,C.sock)}},
-    boxes:{x:104,y:28,draw:(p,r)=>{r(104,32,9,8,C.box);r(104,35,9,1,C.boxS);r(106,28,6,4,C.box);r(108,28,1,4,C.boxS)}},
-    mugs:{x:148,y:25,draw:(p,r)=>{r(148,25,3,3,C.mug);r(148,27,3,1,C.mugS);p(151,26,C.mug);r(153,25,3,3,C.mug);r(153,27,3,1,C.mugS)}}
+    phone:{x:30,y:54,draw:(p,r,t)=>{const on=t%4<2;r(32,59,15,7,O);r(33,60,13,5,on?C.screen:C.screenS);r(35,61,3,3,C.white);r(39,61,5,1,'rgba(255,255,255,.75)');r(39,63,4,1,'rgba(255,255,255,.5)');
+      if(on){r(30,57,2,1,C.screen);r(49,57,2,1,C.screen);r(39,55,1,2,C.screen)}r(47,62,7,1,C.metal);r(53,62,1,13,C.metal);r(53,74,8,1,C.metal);r(60,73,3,3,C.metalS)}},
+    clock:{x:84,y:44,draw:(p,r,t)=>{const s=(t%2)*2;r(87+s,50,12,10,C.red);r(88+s,51,10,8,C.redS);r(89+s,52,8,6,C.white);r(92+s,53,1,3,O);r(93+s,55,2,1,O);
+      r(85+s,46,4,4,C.redS);r(97+s,46,4,4,C.redS);r(92+s,48,2,2,C.redS);r(88+s,60,2,2,O);r(96+s,60,2,2,O);
+      if(t%2)[[83,47],[104,47],[82,52],[105,52]].forEach(([x,y])=>r(x+s,y,2,1,C.yellow))}},
+    clothes:{x:90,y:76,draw:(p,r)=>{r(92,84,24,4,C.cloth1);r(92,87,24,1,'#B8410F');r(90,82,6,3,C.cloth1);r(112,82,6,3,C.cloth1);r(96,80,16,4,C.cloth2);r(96,80,16,1,'#5BD9A8');r(100,78,8,2,C.cloth3);r(106,82,8,2,C.cloth4);r(114,86,3,1,C.cloth1)}},
+    bottles:{x:262,y:64,draw:(p,r)=>{r(264,80,6,8,C.can);r(264,80,6,1,'#FF7A6E');r(265,78,4,2,C.metal);r(272,72,6,16,C.green);r(272,72,2,16,C.greenS);r(274,68,2,4,C.green);r(273,66,4,2,C.white);r(272,78,6,4,C.white);r(273,79,4,1,C.greenS);r(280,84,8,4,C.can);r(286,84,2,4,C.metal);r(280,84,8,1,'#FF7A6E')}},
+    bag:{x:8,y:76,draw:(p,r)=>{r(10,82,24,9,C.blanketD);r(10,82,24,2,C.blanketL);r(10,89,24,2,'#244C8F');r(14,78,2,4,O);r(28,78,2,4,O);r(14,78,16,2,O);r(19,85,6,2,C.blanket);r(28,82,6,4,C.white);r(30,82,4,2,C.pillowS);r(6,87,6,4,C.red);r(6,90,6,2,C.white)}},
+    papers:{x:260,y:48,draw:(p,r)=>{r(262,53,12,2,C.paper);r(263,53,10,1,C.paperS);r(276,51,10,2,C.paper);r(278,53,10,2,C.paperS);r(290,53,10,2,C.paper);r(291,53,8,1,C.paperS);r(226,89,12,2,C.paper);r(228,88,8,1,C.paperS);r(229,90,6,1,'#B5BAC4')}},
+    notes:{x:54,y:48,draw:(p,r,t)=>{r(56,52,20,13,O);r(57,53,18,11,'#2A3150');[[59,55,C.red],[63,55,C.green],[67,55,C.amber],[71,55,C.pink],[59,59,C.pink],[63,59,C.amber],[67,59,C.red],[71,59,C.cloth4]].forEach(([x,y,c])=>r(x,y,3,3,c));if(t%4<2){r(72,49,5,4,C.red);r(74,50,1,2,C.white)}}},
+    monitor:{x:226,y:32,draw:(p,r,t)=>{r(228,34,26,18,O);r(230,36,22,14,C.screen);r(230,44,22,6,C.screenS);[[232,38],[238,38],[232,42],[244,46]].forEach(([x,y])=>r(x,y,4,2,C.white));r(240,41,3,3,C.pink);if(t%3){r(248,36,4,4,C.red);p(249,37,C.white)}r(239,52,4,2,O);r(235,54,12,2,O)}},
+    console:{x:198,y:80,draw:(p,r,t)=>{r(200,85,13,6,O);r(201,85,11,2,C.trashL);r(209,88,2,1,t%2?C.red:C.green);r(214,87,10,4,C.trash);r(215,88,2,2,C.red);r(220,88,2,2,C.green);r(213,89,1,1,O);r(204,83,2,2,O)}},
+    pizza:{x:56,y:80,draw:(p,r)=>{r(56,85,20,6,C.pizza);r(56,89,20,2,C.pizzaS);r(56,84,20,1,'#E9C38A');[[60,86],[66,85],[71,87],[63,88]].forEach(([x,y])=>r(x,y,2,2,C.red));r(74,82,8,3,C.box);r(74,82,8,1,'#D1A473')}},
+    trash:{x:296,y:66,draw:(p,r)=>{r(298,74,14,14,C.trash);r(298,74,14,2,C.trashL);r(301,77,1,9,C.trashL);r(306,77,1,9,C.trashL);r(300,70,6,4,C.paper);r(304,68,5,4,C.paperS);r(296,86,4,2,C.paper)}},
+    socks:{x:76,y:84,draw:(p,r)=>{r(76,88,6,3,C.sock);r(80,86,2,2,C.sock);r(84,90,6,2,C.sock);r(76,90,6,1,'#A8AEBC')}},
+    boxes:{x:204,y:52,draw:(p,r)=>{r(206,64,20,16,C.box);r(206,64,20,2,'#D1A473');r(214,64,4,16,'#D9B98C');r(206,72,20,1,C.boxS);r(210,56,14,8,C.box);r(210,56,14,1,'#D1A473');r(216,56,2,8,'#D9B98C')}},
+    mugs:{x:292,y:44,draw:(p,r)=>{r(294,50,7,6,C.mug);r(294,54,7,2,C.mugS);r(301,51,2,3,C.mug);r(304,50,7,6,C.mug);r(304,54,7,2,C.mugS);r(311,51,2,3,C.mug);r(296,51,3,1,'#7A4A22');p(298,46,C.mugS);p(297,44,C.mugS)}}
   };
   const DEFAULT_MAP={charger:'phone',alarm:'clock',gymbag:'clothes',creatine:'bottles',laptopbag:'papers',tracker:'notes',games:'console',screentime:'monitor'};
   // your own changes have no drawing, so each one is a book in its own colour
   const BOOKC=['#E2453C','#3F7BD9','#3CC98E','#FFC531','#9B59B6','#E8771A','#1ABC9C','#F27BD3'];
-  const FLOOR=[[18,44],[121,44],[55,44],[134,44],[30,45],[144,45],[100,45],[110,45]];
-  function book(i){const s=FLOOR[i%FLOOR.length],sh=Math.floor(i/FLOOR.length)*3,x=s[0]+sh,y=s[1],col=BOOKC[i%BOOKC.length],P='#F4F1E6',PS='#C9C2AE';
-    return{x:x,y:y-3,draw:(p,r)=>{
+  const FLOOR=[[34,88],[240,88],[110,89],[266,88],[58,90],[286,90],[200,90],[220,90]];
+  function book(i){const s=FLOOR[i%FLOOR.length],sh=Math.floor(i/FLOOR.length)*6,x=s[0]+sh,y=s[1],col=BOOKC[i%BOOKC.length],P='#F4F1E6',PS='#C9C2AE',D='rgba(0,0,0,.25)';
+    return{x:x,y:y-6,draw:(p,r)=>{
       if(i%2===0){ // lying open, pages up
-        r(x,y+1,11,2,col);r(x+1,y,4,2,P);r(x+6,y,4,2,P);r(x+5,y,1,2,PS);r(x+2,y,2,1,PS);r(x+7,y+1,2,1,PS)}
+        r(x,y+2,22,3,col);r(x,y+5,22,1,D);r(x+1,y,10,3,P);r(x+11,y,10,3,P);r(x+10,y,2,3,PS);r(x+2,y,7,1,PS);r(x+13,y,6,1,PS);r(x+2,y+2,5,1,PS);r(x+13,y+2,6,1,PS)}
       else{ // half open, face down like a little tent
-        r(x+4,y,3,1,col);r(x+2,y+1,2,1,col);r(x+7,y+1,2,1,col);r(x,y+2,2,1,col);r(x+9,y+2,2,1,col);
-        r(x+4,y+1,3,1,P);r(x+2,y+2,7,1,P);r(x+3,y+2,1,1,PS);r(x+7,y+2,1,1,PS)}}}}
+        r(x+8,y,6,2,col);r(x+4,y+2,4,2,col);r(x+14,y+2,4,2,col);r(x,y+4,4,2,col);r(x+18,y+4,4,2,col);r(x+8,y+2,6,2,P);r(x+4,y+4,14,2,P);r(x+6,y+4,2,2,PS);r(x+14,y+4,2,2,PS);r(x,y+6,22,1,D)}}}}
   // done: closed, standing on the shelf (more than 6 lie flat on top)
   function shelfBook(i){const col=BOOKC[i%BOOKC.length];
-    return{draw:(p,r)=>{if(i<6){const x=100+i*3;r(x,11,2,5,col);r(x,12,2,1,'rgba(255,255,255,.55)');r(x,14,2,1,'rgba(0,0,0,.25)')}
-      else{const k=i-6,x=100+(k%3)*6,y=9-Math.floor(k/3)*2;r(x,y,5,2,col);r(x,y+1,5,1,'rgba(0,0,0,.22)');r(x+4,y,1,2,'#F4F1E6')}}}}
+    return{draw:(p,r)=>{if(i<6){const x=200+i*6,h=[10,12,11,12,10,11][i];r(x,32-h,5,h,col);r(x,34-h,5,1,'rgba(255,255,255,.55)');r(x,28,5,1,'rgba(0,0,0,.22)');r(x+4,32-h,1,h,'rgba(0,0,0,.18)')}
+      else{const k=i-6,x=200+(k%3)*12,y=16-Math.floor(k/3)*4;r(x,y,10,4,col);r(x,y+3,10,1,'rgba(0,0,0,.22)');r(x+8,y,2,4,'#F4F1E6')}}}}
   const vanish={};let cv=null,g=null,t=0,cleanAt=0;
   // a 'Made bed' habit today keeps the bed messy until you tick it
   let bedKey='',bedVal=false;
@@ -1795,20 +1873,22 @@ const SCENE=(function(){
   const objFor=it=>it.key==='book'?book(it.idx):OBJ[it.key];
   const PCOL=['#FFE066','#FF9CC2','#8BE3A8','#9CC8FF','#FFB870'],PDARK=['#D9B630','#D9739B','#5DB57D','#6E9DD6','#D98C45'];
   const pcol=id=>{let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;return h%5};
-  const slotXY=i=>[36+(i%4)*6,4+Math.floor(i/4)*5];
+  const slotXY=i=>[72+(i%4)*11,8+Math.floor(i/4)*10];
   const tears={};let boostAt=0,boostM=1.5,perfAt=0;
   function openTasks(){return getQuests().filter(q=>!q.room&&!q.done)}
+  const F5={B:['110','101','110','101','110'],O:['010','101','101','101','010'],S:['011','100','010','001','110'],T:['111','010','010','010','010']};
+  function boostWord(r,x,y,c){[...'BOOST'].forEach((ch,k)=>F5[ch].forEach((row,j)=>[...row].forEach((v,i)=>{if(v==='1')r(x+k*8+i*2,y+j*2,2,2,c)})))}
   function corkboard(p,r,g,A,now){g.globalAlpha=Math.max(A,.85);
-    r(34,2,26,13,'#6E4423');r(35,3,24,11,'#C08A55');[[37,12],[44,4],[52,11],[57,6],[40,8],[49,7]].forEach(([x,y])=>p(x,y,'#A8743F'));
+    r(68,4,52,26,'#6E4423');r(69,5,50,24,'#8B5E3C');r(70,6,48,22,'#C08A55');for(let i=0;i<70;i++)p(70+(i*37)%48,6+(i*13)%22,i%3?'#A8743F':'#D49E66');
     const open=openTasks(),n=open.length>8?7:open.length;
-    for(let i=0;i<n;i++){const [x,y]=slotXY(i),k=pcol(open[i].id);r(x,y,4,4,PCOL[k]);r(x,y+3,4,1,PDARK[k]);p(x+1,y,'#C83A3A')}
-    if(open.length>8){const [x,y]=slotXY(7);r(x+1,y+1,1,3,C.white);r(x,y+2,3,1,C.white)}
-    if(!open.length&&getQuests().some(q=>!q.room&&q.done)){const F={B:['110','101','110','101','110'],O:['010','101','101','101','010'],S:['011','100','010','001','110'],T:['111','010','010','010','010']};
-      r(36,5,21,8,'#FFFDF6');r(37,13,21,1,'rgba(0,0,0,.25)');r(57,6,1,7,'rgba(0,0,0,.18)');p(36,5,'#C83A3A');p(56,5,'#C83A3A');p(36,4,'#7A1F1F');p(56,4,'#7A1F1F');
-      [['#8E1F17',1],['#E2453C',0]].forEach(([c,o])=>[...'BOOST'].forEach((ch,k)=>F[ch].forEach((row,j)=>[...row].forEach((v,i)=>{if(v==='1')p(37+k*4+i,6+j+o,c)}))));
-      {const [cx,cy]=(t>>2)%2===0?[35,4]:[58,13];p(cx,cy,'#FFF1B0');p(cx-1,cy,'#FFF1B0');p(cx+1,cy,'#FFF1B0');p(cx,cy-1,'#FFF1B0');p(cx,cy+1,'#FFF1B0')}}
+    for(let i=0;i<n;i++){const [x,y]=slotXY(i),k=pcol(open[i].id);r(x+1,y+1,10,9,'rgba(0,0,0,.18)');r(x,y,10,9,PCOL[k]);r(x,y+8,10,1,PDARK[k]);r(x+2,y+3,6,1,PDARK[k]);r(x+2,y+5,4,1,PDARK[k]);r(x+4,y,2,2,'#C83A3A');p(x+4,y,'#FF8A80')}
+    if(open.length>8){const [x,y]=slotXY(7);r(x+4,y+1,2,7,C.white);r(x+1,y+4,8,2,C.white)}
+    if(!open.length&&getQuests().some(q=>!q.room&&q.done)){
+      r(72,9,44,17,'#FFFDF6');r(74,26,44,1,'rgba(0,0,0,.25)');r(116,10,1,16,'rgba(0,0,0,.18)');r(72,9,2,2,'#C83A3A');r(114,9,2,2,'#C83A3A');
+      boostWord(r,75,12,'#8E1F17');boostWord(r,75,11,'#E2453C');
+      {const [cx,cy]=(t>>2)%2===0?[71,8]:[117,26];r(cx,cy-2,1,5,'#FFF1B0');r(cx-2,cy,5,1,'#FFF1B0')}}
     for(const id in tears){const tr=tears[id],k=(now-tr.at)/1000;if(k>1){delete tears[id];continue}
-      const [x0,y0]=slotXY(tr.slot),x=Math.round(x0+k*6),y=Math.round(y0+k*k*32),s=k<.25?4:k<.6?3:2;r(x,y,s,s,PCOL[tr.col]);if(s>2)p(x+1,y+1,PDARK[tr.col])}
+      const [x0,y0]=slotXY(tr.slot),x=Math.round(x0+k*12),y=Math.round(y0+k*k*64),s=k<.25?9:k<.6?7:4;r(x,y,s,s,PCOL[tr.col]);if(s>4)r(x+2,y+2,s-4,1,PDARK[tr.col])}
     g.globalAlpha=A}
   function tear(id){const open=openTasks(),i=open.findIndex(q=>q.id===id);if(i<0||i>7)return;tears[id]={slot:i,col:pcol(id),at:performance.now()}}
   function boostFX(m){boostAt=performance.now();boostM=m;const hc=$('hero');if(!hc)return;
@@ -1860,76 +1940,284 @@ const SCENE=(function(){
         WDK=[['#2B324A','#433A63','#6B4560','#94604E','#C8B47C'],['#262C42','#3B3357','#5E3C55','#835444','#B3A06C']];
   const isDark=()=>{const th=document.documentElement.dataset.theme;return th==='dark'||(th!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches)};
   function paintWall(r){const wf=wallS<0?wallF:wallS,pal=isDark()?WDK:WLT,wall=wallAt(pal[0],wf),wd=wallAt(pal[1],wf);
-    r(0,0,W,40,wall);for(let x=6;x<W;x+=12)r(x,0,1,38,wd);r(0,37,W,3,wd)}
+    r(0,0,W2,80,wall);for(let x=10;x<W2;x+=24)r(x,0,2,72,wd);for(let y=10;y<70;y+=16)for(let x=22;x<W2;x+=24)r(x,y,1,1,wd);r(0,72,W2,2,wd)}
   function wallAt(st,f){f=Math.max(0,Math.min(1,f));const k=f*(st.length-1),i=Math.min(st.length-2,Math.floor(k)),u=k-i,a=parseInt(st[i].slice(1),16),b=parseInt(st[i+1].slice(1),16);
     const ch=s=>Math.round(((a>>s)&255)*(1-u)+((b>>s)&255)*u);return 'rgb('+ch(16)+','+ch(8)+','+ch(0)+')'}
   function base(p,r,night,unmade){
-    const wall='rgba(0,0,0,0)',wd='rgba(0,0,0,0)';
-    r(0,0,W,40,wall);for(let x=6;x<W;x+=12)r(x,0,1,38,wd);r(0,37,W,3,wd);
-    r(0,40,W,8,C.floor);r(0,40,W,1,C.floorL);r(0,43,W,1,C.floorD);r(0,46,W,1,C.floorD);
-    for(let x=0;x<W;x+=16){r(x,41,1,2,C.floorD);r(x+8,44,1,2,C.floorD)}
+    // skirting and floorboards
+    r(0,74,W2,6,'#F2E9DC');r(0,74,W2,1,'#FFFFFF');r(0,79,W2,1,'#C9B79F');
+    for(let y=80;y<96;y+=4){const odd=(y/4)%2,off=odd*22;r(0,y,W2,4,odd?C.floor:'#835A37');r(0,y,W2,1,C.floorL);for(let x=off;x<W2;x+=44)r(x,y,1,4,C.floorD);for(let x=off+10;x<W2;x+=44)r(x,y+2,6,1,'#6E4A2C')}
+    // rug
+    for(let yy=0;yy<10;yy++){const w=Math.round(50*Math.sqrt(Math.max(0,1-((yy-4.5)/5)**2)));r(160-w,86+yy,w*2,1,yy===0||yy===9?'#E8C25A':'#C0504D')}for(let x=118;x<202;x+=6)p(x,90,'#E8C25A');
     // window with curtains
-    r(2,9,30,1,C.woodD);r(3,10,4,19,C.curtain);r(3,10,1,19,C.curtainS);r(27,10,4,19,C.curtain);r(30,10,1,19,C.curtainS);
-    r(7,12,20,16,C.frame);r(9,14,16,12,night?C.night:C.sky);
-    if(night){r(11,16,3,3,C.moon);p(13,16,C.night);[[20,15],[22,19],[17,22],[12,23]].forEach(([x,y])=>p(x,y,C.star))}
-    else{r(9,14,16,3,C.skyL);r(11,18,4,1,C.white);r(12,17,2,1,C.white);r(19,21,3,1,C.white)}
-    r(16,14,2,12,C.frame);r(9,19,16,2,C.frame);r(6,27,22,2,C.frameS);
+    r(4,17,62,2,C.woodD);r(3,15,3,5,'#3E2A18');r(64,15,3,5,'#3E2A18');r(16,24,38,32,C.frame);
+    if(night){r(19,27,32,26,C.night);r(19,27,32,6,'#141B3A');r(23,30,6,6,C.moon);r(26,30,3,3,C.night);[[40,29],[45,33],[36,36],[25,47],[44,48],[31,43]].forEach(([x,y])=>p(x,y,C.star))}
+    else{r(19,27,32,26,C.sky);r(19,27,32,7,C.skyL);r(23,31,9,3,C.white);r(25,29,5,2,C.white);r(38,43,8,2,C.white);r(40,41,4,2,C.white);r(19,48,32,5,'#A6DCFF')}
+    r(34,27,2,26,C.frame);r(19,39,32,2,C.frame);r(36,27,1,26,C.frameS);r(19,41,32,1,C.frameS);r(14,55,42,3,C.white);r(14,57,42,1,C.frameS);
+    const cur=x0=>{for(let i=0;i<10;i++)r(x0+i,19,1,38,i%3===0?C.curtainS:i%3===1?C.curtain:'#D9726E');r(x0,56,10,2,C.curtainS)};cur(6);cur(56);
     // bed
-    r(2,24,4,16,C.bed);r(2,24,4,1,C.bedS);r(4,31,38,3,C.pillow);r(2,34,40,6,C.bed);r(2,38,40,2,C.bedS);
-    if(!unmade){r(12,29,30,6,C.blanket);r(12,29,30,1,C.blanketL);r(12,32,30,1,C.blanketD);r(40,29,2,7,C.blanketD)}
-    if(!unmade){r(6,27,9,5,C.pillow);r(6,31,9,1,C.pillowS);r(7,28,3,1,C.white)}
-    else{ // crumpled sheet, blanket kicked to the end, pillow knocked sideways
-      r(12,31,28,1,C.pillowS);p(16,32,C.pillowS);p(22,31,C.white);p(27,32,C.pillowS);p(33,31,C.white);
-      r(29,29,12,5,C.blanket);r(31,28,6,1,C.blanket);r(33,27,3,1,C.blanketL);r(29,29,3,1,C.blanketL);r(36,30,4,1,C.blanketL);r(30,32,10,1,C.blanketD);
-      r(39,33,3,6,C.blanketD);r(40,38,2,1,C.blanket);
-      r(5,28,8,4,C.pillow);r(6,27,5,1,C.pillow);r(5,31,8,1,C.pillowS);p(12,28,C.pillowS);r(14,30,3,1,C.pillowS)}
+    r(4,44,10,36,C.bedS);r(5,45,8,34,C.bed);r(6,48,6,12,'#6E4A30');r(6,62,6,12,'#6E4A30');
+    r(12,66,72,14,C.bedS);r(12,66,72,2,C.bed);r(14,78,4,2,'#2E1D10');r(78,78,4,2,'#2E1D10');
+    r(12,60,72,7,'#F4F4F4');r(12,60,72,1,C.white);
+    if(!unmade){
+      r(14,51,20,10,C.pillow);r(14,60,20,1,C.pillowS);r(16,52,7,2,C.white);r(32,53,2,7,C.pillowS);
+      r(30,56,54,11,C.blanket);r(30,56,54,2,C.blanketL);r(30,65,54,2,C.blanketD);for(let x=36;x<82;x+=8)for(let y=59;y<65;y+=4)p(x+((y-59)/4%2)*4,y,C.blanketL);r(82,58,2,14,C.blanketD);r(30,56,6,11,'#F4F4F4');r(30,56,6,1,C.white)}
+    else{ // crumpled sheet, duvet kicked to the end, pillow knocked sideways
+      r(30,62,50,1,C.pillowS);[[34,61],[46,63],[58,61],[70,63]].forEach(([x,y])=>r(x,y,4,1,C.pillowS));
+      r(58,56,26,12,C.blanket);r(62,54,12,2,C.blanket);r(66,52,6,2,C.blanketL);r(58,56,6,2,C.blanketL);r(72,58,8,2,C.blanketL);r(60,64,20,2,C.blanketD);r(78,64,6,14,C.blanketD);r(80,76,4,2,C.blanket);
+      r(10,54,16,8,C.pillow);r(12,52,10,2,C.pillow);r(10,61,16,1,C.pillowS);r(24,55,2,2,C.pillowS);r(28,58,6,2,C.pillowS)}
     // nightstand
-    r(41,31,10,1,C.woodD);r(42,32,8,8,C.wood);r(43,35,6,1,C.woodD);p(46,37,C.yellow);
+    r(84,62,20,2,C.woodD);r(85,64,18,16,C.wood);r(86,66,16,6,C.woodL);r(93,68,2,2,C.yellow);r(86,73,16,6,C.woodL);r(93,75,2,2,C.yellow);
     // shelf
-    r(98,16,20,2,C.wood);r(98,17,20,1,C.woodD);r(100,18,1,2,C.woodD);r(115,18,1,2,C.woodD);
-    // desk + chair
-    r(116,28,40,2,C.wood);r(116,28,40,1,C.woodL);r(116,30,40,1,C.woodD);r(118,31,2,9,C.woodD);r(152,31,2,9,C.woodD);
-    r(140,31,10,4,C.wood);r(140,34,10,1,C.woodD);p(145,32,C.yellow);
-    r(130,24,2,10,C.metal);r(124,32,8,2,C.metal);r(124,33,8,1,C.metalS);r(125,34,1,6,C.metalS);r(130,34,1,6,C.metalS);
+    r(196,32,40,3,C.wood);r(196,34,40,1,C.woodD);r(200,35,2,5,C.woodD);r(230,35,2,5,C.woodD);
+    // desk, keyboard, drawers, chair
+    r(222,56,92,4,C.woodL);r(222,56,92,1,'#C8935F');r(222,59,92,1,C.woodD);r(226,60,4,20,C.woodD);r(306,60,4,20,C.woodD);
+    r(282,60,22,16,C.wood);r(284,62,18,6,C.woodL);r(284,69,18,6,C.woodL);r(292,64,2,1,C.yellow);r(292,71,2,1,C.yellow);
+    r(232,53,16,3,'#D9DCE3');for(let x=233;x<247;x+=2)p(x,54,'#B5BAC4');
+    r(258,44,16,16,'#3B3F4A');r(260,46,12,12,'#4B5160');r(264,60,4,6,'#2B2F3A');r(256,66,20,4,'#3B3F4A');r(265,70,2,6,'#2B2F3A');r(258,76,16,2,'#2B2F3A');r(257,78,3,2,'#1E2129');r(272,78,3,2,'#1E2129');
   }
   function reward(p,r,tt){ // a tidy room grows a plant, a lamp and a poster
-    r(104,34,6,6,C.pot);r(104,34,6,1,C.potS);r(105,39,4,1,C.potS);
-    r(106,26,2,8,C.leaf);r(103,28,3,2,C.leaf);r(108,27,3,2,C.leafL);r(102,31,4,2,C.leaf);r(108,30,4,2,C.leafL);p(107,25,C.leafL);
-    r(45,22,2,9,C.metal);r(43,30,6,1,C.metalS);r(42,18,8,4,C.amber);r(42,21,8,1,'#B97B05');if(tt%2){p(41,22,C.yellow);p(50,22,C.yellow)}
-    r(54,12,16,12,C.frame);r(56,14,12,8,C.sky);r(56,19,12,3,C.green);r(58,17,4,2,C.greenS);r(63,16,4,3,C.greenS);r(64,15,2,1,C.white);r(57,15,2,2,C.yellow);
-    const s=[[34,6],[90,10],[118,6],[140,30],[52,30]][tt%5];p(s[0],s[1],C.white);p(s[0]+1,s[1],C.yellow);
+    r(206,68,14,12,C.pot);r(206,68,14,2,'#D9844F');r(208,78,10,2,C.potS);
+    r(212,48,3,20,C.leaf);r(204,52,8,4,C.leaf);r(214,50,8,4,C.leafL);r(202,58,10,4,C.leaf);r(214,58,10,4,C.leafL);r(206,44,4,4,C.leafL);r(214,44,4,3,C.leaf);p(213,47,C.leafL);
+    r(90,40,3,22,C.metal);r(86,60,11,2,C.metalS);r(84,32,15,9,C.amber);r(84,40,15,2,'#B97B05');r(86,33,11,2,'#F5C04A');if(tt%2){r(81,42,2,2,C.yellow);r(100,42,2,2,C.yellow)}
+    r(146,6,32,24,C.frame);r(148,8,28,20,C.sky);r(148,20,28,8,C.green);r(152,16,10,5,C.greenS);r(162,14,10,7,C.greenS);r(166,12,4,2,C.white);r(150,10,4,4,C.yellow);r(146,6,32,1,C.white);
+    const s=[[68,12],[180,20],[236,12],[280,60],[104,60]][tt%5];r(s[0],s[1],2,2,C.white);r(s[0]+2,s[1],2,2,C.yellow);
   }
+  /* ---------- travel scenes (2x) ---------- */
+  const HR=()=>{const d=new Date();return window.__hr!=null?window.__hr:d.getHours()+d.getMinutes()/60};
+  function skyOf(){const h=HR();
+    if(h<6.5||h>=20.5)return{k:'night',b:['#0C1230','#10183B','#152045','#1A2750','#1F2E5C','#253668']};
+    if(h<8.5)return{k:'dawn',b:['#3A4A8A','#5C5FA2','#8A70B0','#C487A8','#E9A39C','#F7C88F']};
+    if(h<17.5)return{k:'day',b:['#3F9BEA','#4CA6EF','#5BB1F3','#6FBDF7','#88CAFA','#A9DAFF']};
+    return{k:'dusk',b:['#36397E','#5B4A92','#8C579B','#C9668A','#EE8470','#F8B46C']}}
+  let PROG=1;
+  function cloud(r,x,y,c,cs){r(x+2,y+4,24,6,c);r(x+6,y,12,4,c);r(x+16,y+2,8,2,c);r(x,y+6,28,4,c);r(x+2,y+10,24,2,cs)}
+  // sky bands, sun or moon and stars; grey clouds until you tick your habits, then a clear sky
+  function skyPaint(p,r,S,y1,sx){const n=S.b.length;for(let i=0;i<n;i++){const a=Math.floor(i*y1/n),b=Math.floor((i+1)*y1/n);r(0,a,W2,b-a,S.b[i])}
+    sx=sx||224;const night=S.k==='night';
+    if(night){for(let i=0;i<40;i++){const x=(i*73+11)%W2,y=(i*29+5)%Math.max(8,y1-6),tw=(i+(t>>2))%9;p(x,y,tw?'#DDE6FF':'#6F80B8')}
+      r(sx+2,6,8,12,'#F4E9B8');r(sx,8,12,8,'#F4E9B8');r(sx+6,5,6,10,S.b[0]);r(sx+9,8,3,7,S.b[0])}
+    else{const sy=S.k==='day'?6:y1-16,c=S.k==='day'?'#FFE27A':'#FFC56A';r(sx+3,sy,8,14,c);r(sx,sy+3,14,8,c);r(sx+1,sy+1,12,12,c);r(sx+4,sy+3,4,4,'#FFF6C8');
+      if(S.k==='day')[[6,-4],[6,16],[-4,6],[16,6]].forEach(([dx,dy])=>r(sx+dx,sy+dy,2,2,'#FFE27A'))}
+    const grey=Math.round((1-PROG)*4),nc=grey||(S.k==='day'?2:night?0:1);
+    const c=grey?(night?'#3A4468':'#A3ABBD'):(night?'#2B3558':S.k==='day'?'#FFFFFF':'#F6D9C4'),cs=grey?(night?'#2A3352':'#868FA3'):(S.k==='day'?'#DCEBF7':'#E6B9A6');
+    for(let i=0;i<nc;i++){const x=((i*122+Math.floor(t/3))%(W2+60))-40,y=4+(i*14)%Math.max(6,y1-24);cloud(r,x,y,c,cs)}}
+  function glow(r,g,cx,cy,rad,c){for(let k=rad;k>0;k-=3){g.globalAlpha=.07;for(let yy=-k;yy<=k;yy++){const w=Math.round(Math.sqrt(k*k-yy*yy));r(cx-w,cy+yy,w*2,1,c)}}g.globalAlpha=1}
+  function hazePaint(r,g,S){if(PROG>=1)return;g.globalAlpha=(1-PROG)*.3;r(0,0,W2,H2,S.k==='night'?'#151A2C':'#7E8699');g.globalAlpha=1}
+  function pine(r,x,y,s,night,snowy){const d=night?'#1A3A2A':'#1F6B42',l=night?'#244A35':'#2E8B57',h=Math.round(30*s),sn=night?'#C3CCE6':'#FFFFFF';
+    for(let i=0;i<h;i++){const w=Math.max(2,Math.round(((i%10)+2+i*.45)*s));const x0=x+8-Math.floor(w/2);r(x0,y+i,w,1,i%10<4?l:d);if(snowy&&i%10===0&&i)r(x0+1,y+i,w-2,1,sn)}
+    if(snowy)r(x+7,y,2,2,sn);r(x+6,y+h,4,6,'#6B4528');r(x+6,y+h,1,6,'#5B3A24')}
+  function beachPaint(p,r,g,S,night){skyPaint(p,r,S,50);
+    const sea=night?['#1B3157','#22406C','#2B4D80','#4A6AA0']:S.k==='dusk'?['#45609F','#5370AE','#6383BD','#F3B48A']:S.k==='dawn'?['#4E6AA8','#5C78B4','#6E8AC2','#F5C69A']:['#1F7CC0','#2A8BCD','#3D9CDB','#D6F2FF'];
+    r(0,48,W2,28,sea[0]);r(0,48,W2,2,sea[1]);r(0,56,W2,6,sea[1]);r(0,66,W2,10,sea[2]);
+    for(let i=0;i<18;i++){const x=((i*41+(t>>1)*(i%2?2:-2))%W2+W2)%W2,y=52+(i%6)*4;r(x,y,6,1,sea[3]);r(x+2,y-1,2,1,sea[3])}
+    if(night){r(226,50,12,1,'#8FA3D0');r(229,54,8,1,'#7A90C0');r(231,58,5,1,'#6F86B8')}else if(S.k!=='day'){r(222,50,18,2,'#F7D08A');r(225,55,12,1,'#F7D08A');r(228,60,7,1,'#F3C27A')}
+    {const bx=(Math.floor(t/3)%400)-60;r(bx,58,22,4,'#F2F2F2');r(bx+2,62,18,2,'#B9C0CC');r(bx+10,38,2,20,'#6B4528');r(bx+12,40,8,16,'#FFFFFF');r(bx+12,42,5,12,'#E4E9EF');r(bx+4,44,6,12,'#FFFFFF')}
+    r(0,74,W2,22,'#EBCB8E');r(0,74,W2,2,'#F6E2B0');
+    for(let x=0;x<W2;x+=4)r(x,72+(((x>>3)+(t>>2))%2),3,2,'#FFFFFF');
+    for(let i=0;i<70;i++)p((i*29+7)%W2,78+(i*7)%17,i%3?'#D2B070':'#F7E7C2');
+    r(250,88,10,4,'#F4E9D8');r(252,86,6,2,'#E8DCC0');p(254,87,'#C9A06A');
+    for(let i=0;i<12;i++){const y=78-i*4,x=34-Math.round(i*i*.08);r(x,y,6,4,i%2?'#8B5E3C':'#A87650');r(x,y,1,4,'#6E4A30')}
+    {const fr='#2FA36B',fd='#1F7A4C',fl='#52C98A',sw=(t>>2)%2,cx=26,cy=32;
+      r(cx-20,cy+2+sw,18,3,fr);r(cx-26,cy+5+sw,8,2,fr);r(cx-28,cy+7+sw,4,2,fr);
+      r(cx+4,cy,20,3,fr);r(cx+22,cy+3-sw,6,2,fr);r(cx+26,cy+5-sw,4,2,fr);
+      r(cx-12,cy-6,14,3,fd);r(cx-16,cy-4,6,2,fd);r(cx+2,cy-8,16,3,fl);r(cx+16,cy-6,6,2,fl);
+      r(cx-8,cy+5,3,8,fd);r(cx-10,cy+12,2,4,fd);r(cx+6,cy+4,3,8,fr);r(cx+8,cy+11,2,4,fr);
+      r(cx-2,cy-2,8,6,'#7A5534');r(cx,cy,3,3,'#A87650');r(cx+3,cy+2,3,3,'#5B3A24')}
+    r(248,46,2,34,'#E8E8E8');r(230,48,38,4,'#E2453C');r(234,44,30,4,'#E2453C');r(240,42,18,2,'#E2453C');[234,246,258].forEach(x=>r(x,44,4,8,'#FFFFFF'));r(230,51,38,1,'#B02E27');
+    r(228,86,40,6,'#3CC98E');r(228,86,40,2,'#7BE0B5');r(236,86,4,6,'#FFFFFF');r(252,86,4,6,'#FFFFFF');
+    {const gx=(Math.floor(t)%420)-60,gy=18+((t>>3)%3)*2;r(gx,gy,2,2,'#FFFFFF');r(gx+2,gy+2,2,2,'#FFFFFF');r(gx+4,gy+2,2,2,'#FFFFFF');r(gx+6,gy,2,2,'#FFFFFF')}}
+  function mountainPaint(p,r,g,S,night){skyPaint(p,r,S,60);
+    const far=night?'#2C3766':S.k==='day'?'#7D8BC2':'#8A6E9E',farS=night?'#232D57':S.k==='day'?'#6573AA':'#735A88',snow=night?'#B9C3E0':'#FFFFFF',snowS=night?'#9AA5C8':'#DDE4F2';
+    const hr=x=>16+14*Math.abs(Math.sin((x/2+8)*.045))+8*Math.abs(Math.sin((x/2+30)*.11)),hf=x=>Math.round(hr(x));
+    for(let x=0;x<W2;x++){const h=hf(x),sh=hr(x+1)>hr(x);r(x,h,1,68-h,sh?farS:far);if(h<28)r(x,h,1,Math.max(2,28-h+((x*7)%3)),sh?snowS:snow)}
+    const near=night?'#1E3B33':'#3E7D4B',nearL=night?'#25473C':'#4E9258',nr=x=>50+8*Math.sin(x/2*.06+1)+4*Math.sin(x/2*.17),nf=x=>Math.round(nr(x));
+    for(let x=0;x<W2;x++){const h=nf(x),sh=nr(x+1)>nr(x);r(x,h,1,80-h,sh?near:nearL)}
+    r(0,72,W2,24,night?'#2E5233':'#5FAF55');r(0,72,W2,2,night?'#3A6440':'#7CC66F');
+    for(let i=0;i<50;i++){const x=(i*31+5)%W2,y=76+(i*5)%18,c=night?'#24452A':'#4A9443';r(x,y,1,2,c);r(x+1,y-1,1,2,c);r(x+2,y,1,2,c)}
+    [[24,82,'#F27BD3'],[60,90,'#FFC531'],[110,84,'#FFFFFF'],[206,88,'#F27BD3'],[300,84,'#FFC531']].forEach(([x,y,c])=>{r(x,y,2,2,c);r(x,y+2,1,2,'#2F8A4A')});
+    [[2,44,1],[22,38,1.25],[46,50,.85],[226,48,1],[296,40,1.2]].forEach(([x,y,s])=>pine(r,x,y,s,night));
+    {const f=t%3;r(236,88,14,2,'#6B4528');r(238,90,10,2,'#5B3A24');r(238,82+(f===1?2:0),10,6,'#E8541A');r(240,78+(f===2?2:0),6,6,'#FFC531');r(242,76+(f%2)*2,2,2,'#FFF1B0');if(night||S.k==='dusk')glow(r,g,243,84,22,'#FFC531')}}
+  const BLD=(()=>{const a=[];let x=-4,i=0;while(x<W2){const w=18+((i*7)%3)*8+((i*13)%4)*2,top=14+((i*11)%7)*4;a.push([x,w,top,i]);x+=w+2;i++}return a})();
+  function cityPaint(p,r,g,S,night){skyPaint(p,r,S,64);
+    const back=night?'#232B4A':S.k==='day'?'#A6B4CD':'#7E6F98';BLD.forEach(([x,w,top])=>r(x+8,top-10,w-4,76-top,back));
+    const cols=night?['#2E3654','#39405F','#2A3150']:['#5C6B8A','#6D7C99','#53607D'],warm=night||S.k==='dusk';
+    BLD.forEach(([x,w,top,i])=>{r(x,top,w,66-top,cols[i%3]);r(x,top,w,2,night?'#4A5375':'#8796B2');r(x+w-2,top,2,66-top,'rgba(0,0,0,.15)');if(i%3===1)r(x+(w>>1)-1,top-6,2,6,cols[i%3]);
+      for(let yy=top+4;yy<62;yy+=6)for(let xx=x+3;xx<x+w-4;xx+=5){const lit=warm&&(xx*3+yy*5+i)%4!==0;r(xx,yy,3,3,lit?((xx+yy+(t>>4))%17===0?'#FFF3C2':'#FFD66B'):night?'#1F2540':'#A9C7E6');if(!warm)p(xx,yy,'#D6E8F7')}});
+    r(0,64,W2,14,'#4A4F57');r(0,64,W2,2,'#5B616A');for(let x=4;x<W2;x+=20)r(x,70,10,2,'#E8E8E8');
+    {const cx=(Math.floor(t*2.4)%660)-80;if(cx<W2){r(cx,66,26,6,'#FFC531');r(cx+6,62,14,4,'#FFC531');r(cx+8,62,4,3,'#9FD3FF');r(cx+14,62,4,3,'#9FD3FF');r(cx+10,60,6,2,'#2B2F3A');r(cx,69,26,1,'#D9A60E');r(cx+2,72,6,3,'#2B2F3A');r(cx+18,72,6,3,'#2B2F3A');r(cx+24,67,2,2,warm?'#FFF3C2':'#FFFFFF');r(cx,67,1,2,'#E2453C')}}
+    r(0,78,W2,18,'#A4A9B1');r(0,78,W2,2,'#C9CDD4');for(let x=0;x<W2;x+=24)r(x,80,1,16,'#8E949D');r(0,88,W2,1,'#959BA4');
+    r(240,28,2,50,'#3B3F4A');r(236,26,10,3,'#3B3F4A');r(238,29,6,2,warm?'#FFE27A':'#C9CFDB');r(238,76,6,2,'#3B3F4A');
+    if(warm){glow(r,g,241,32,12,'#FFE27A');g.globalAlpha=.08;for(let k=0;k<44;k++)r(241-Math.round(k*.35),32+k,1+Math.round(k*.7),1,'#FFE27A');g.globalAlpha=1}
+    r(20,82,30,3,'#8B5E3C');r(20,78,30,2,'#8B5E3C');r(22,85,2,6,'#3B3F4A');r(46,85,2,6,'#3B3F4A');
+    r(298,84,14,10,'#8E949D');r(298,84,14,2,'#B5BAC4');for(let yy=-8;yy<=8;yy++){const w=Math.round(Math.sqrt(64-yy*yy));r(305-w,70+yy,w*2,1,night?'#1E3A2E':'#3F8F4F')}r(304,78,2,6,'#5B3A24')}
+  function cow(r,x,y,flip){const Wc='#F4F4F4',B='#2B2F3A',P='#F2A7B8',f=(t>>2)%4,dn=f===0?2:0;
+    r(x,y,20,10,Wc);r(x+4,y,6,4,B);r(x+12,y+4,6,4,B);r(x+2,y+6,3,3,B);r(x,y+8,20,2,'#D9DCE3');r(x+8,y+9,4,2,P);
+    const hx=flip?x-6:x+20;r(hx,y+2+dn,6,6,Wc);r(flip?hx:hx+4,y+6+dn,2,2,P);r(flip?hx+3:hx+1,y+3+dn,1,1,B);r(flip?hx+4:hx,y+1+dn,2,2,B);r(flip?hx+5:hx-1,y+dn,2,1,'#E8E0C8');
+    [2,6,12,16].forEach(k=>{r(x+k,y+10,2,6,Wc);r(x+k,y+15,2,1,B)});
+    const tx=flip?x+20:x-2;r(tx,y+2,2,6,Wc);r(tx+(f%2?(flip?2:-2):0),y+8,2,2,B)}
+  function fieldsPaint(p,r,g,S,night){skyPaint(p,r,S,56);
+    const h1=night?'#26453A':'#8CCB6A',h2=night?'#203B31':'#75B957';
+    for(let x=0;x<W2;x++){const h=Math.round(48+6*Math.sin(x/2*.05)+4*Math.sin(x/2*.13+2));r(x,h,1,72-h,h1)}
+    for(let i=0;i<8;i++){const x=(i*47+20)%W2,y=46+((i*5)%6);r(x,y,5,5,night?'#1A332A':'#4E9A4A');r(x+2,y+5,1,3,'#5B3A24')}
+    for(let x=0;x<W2;x++){const h=Math.round(60+4*Math.sin(x/2*.07+3));r(x,h,1,76-h,h2)}
+    r(12,48,40,24,'#B3362E');for(let x=14;x<52;x+=4)r(x,50,1,22,'#9C2C25');r(12,48,40,2,'#D24A40');
+    r(8,44,48,4,'#5B3A24');r(14,40,36,4,'#5B3A24');r(20,36,24,4,'#5B3A24');r(26,34,12,2,'#5B3A24');
+    r(26,58,12,14,'#7A1F1A');r(26,58,12,2,'#FFFFFF');r(26,58,2,14,'#FFFFFF');r(36,58,2,14,'#FFFFFF');for(let k=0;k<12;k++){p(26+k,59+k,'#FFFFFF');p(37-k,59+k,'#FFFFFF')}
+    const lit=night||S.k==='dusk'?'#FFD66B':'#F2F2F2';r(16,52,6,6,lit);r(42,52,6,6,lit);r(18,52,1,6,'#B3362E');r(44,52,1,6,'#B3362E');
+    r(0,72,W2,24,night?'#2E5233':'#6DBE4B');for(let y=76;y<96;y+=5)r(0,y,W2,1,night?'#284A2D':'#62AE43');for(let i=0;i<40;i++){const x=(i*37+11)%W2,y=74+(i*11)%20;r(x,y,1,2,night?'#3A6440':'#86D364')}
+    for(let x=4;x<W2;x+=18){r(x,66,2,12,'#8B5E3C');r(x,66,2,1,'#A87650')}r(0,68,W2,2,'#A87650');r(0,74,W2,2,'#A87650');
+    r(290,72,20,12,'#E8C25A');r(290,72,20,2,'#F5D97F');r(294,76,12,1,'#C9A040');r(292,80,16,1,'#C9A040');r(290,72,2,12,'#D4AE45');
+    cow(r,16,78,false);cow(r,228,72,false)}
+  function cottagePaint(p,r,g,S,night){skyPaint(p,r,S,60);
+    const t1=night?'#1E3A2E':'#3F8F4F',t2=night?'#25463A':'#57A862',t3=night?'#3A2E28':'#C97B3A';
+    [[90,34,16],[124,28,16],[196,30,18],[244,26,20],[304,34,16]].forEach(([cx,cy,rad],i)=>{r(cx-2,cy+rad-2,4,18,'#5B3A24');for(let yy=-rad;yy<=rad;yy++){const w=Math.round(Math.sqrt(rad*rad-yy*yy));r(cx-w,cy+yy,w*2,1,yy<-rad/3?t2:i===3?t3:t1)}for(let k=0;k<8;k++)r(cx-(rad>>1)+((k*7)%rad),cy-(rad>>1)+((k*5)%rad),2,2,i===3?'#E8994A':t2)});
+    r(0,68,W2,28,night?'#2E5233':'#64B05A');r(0,68,W2,2,night?'#3A6440':'#7FC873');
+    const wl=night?'#9C927E':'#E8DCC0';r(8,48,48,28,wl);r(8,48,48,2,night?'#B0A690':'#F4EBD6');for(let y=52;y<76;y+=6)for(let x=10+((y/6)%2)*6;x<54;x+=12)r(x,y,6,1,night?'#8C826E':'#D8CBAE');
+    r(44,22,6,16,'#7A6A5A');r(42,22,10,2,'#5E5145');for(let y=24;y<38;y+=4)r(44,y,6,1,'#6A5B4C');
+    for(let i=0;i<18;i++)r(4+i,46-i,56-i*2,1,i%2?'#8E3B2F':'#A9473A');
+    r(26,62,10,14,'#6B4528');r(26,62,10,1,'#5B3A24');r(33,68,2,2,'#F5C531');
+    const win=night||S.k==='dusk'?'#FFD66B':'#9FD3FF';[[13,54],[41,54]].forEach(([x,y])=>{r(x,y,10,8,'#FFFFFF');r(x+1,y+1,8,6,win);r(x+4,y+1,2,6,'#FFFFFF');r(x+1,y+3,8,1,'#FFFFFF');r(x-1,y+8,12,2,'#8B5E3C');r(x,y+7,3,2,'#F27BD3');r(x+5,y+7,3,2,'#E2453C')});
+    if(night||S.k==='dusk'){glow(r,g,18,58,12,'#FFD66B');glow(r,g,46,58,12,'#FFD66B')}
+    [[28,78],[31,84],[27,90]].forEach(([x,y])=>{r(x,y,8,4,'#C9BFA8');r(x,y,8,1,'#E1D8C4')});
+    [[12,80,'#F27BD3'],[18,84,'#FFC531'],[50,80,'#E2453C'],[56,86,'#F27BD3'],[6,88,'#FFFFFF'],[44,90,'#FFC531']].forEach(([x,y,c])=>{r(x,y,2,2,c);r(x,y+2,1,3,'#2F8A4A')});
+    for(let x=226;x<274;x+=6){r(x,70,4,12,'#F2F2F2');r(x+1,68,2,2,'#F2F2F2')}r(226,74,48,2,'#D8DCE3');
+    for(let i=0;i<6;i++){const a=((t+i*6)%36)/36,x=Math.round(47+a*52+Math.sin((t+i*6)*.3)*2),y=Math.round(20-a*12),s=a<.25?4:6;
+      g.globalAlpha=Math.max(0,.8-a*.8);r(x,y,s,s-2,night?'#7F879C':S.k==='day'?'#C9CED8':'#EEF0F4');g.globalAlpha=1}}
+  function snowPaint(p,r,g,S,night){skyPaint(p,r,S.k==='day'?{k:'day',b:['#4F9FE4','#5FAAE9','#72B6EE','#88C3F2','#A3D1F6','#C3E2FA']}:S,62);
+    const m=night?'#5F6C96':'#E9F1FB',ms=night?'#4A5680':'#B8CBE4',hr=x=>16+14*Math.abs(Math.sin((x/2+20)*.04))+6*Math.abs(Math.sin(x/2*.13)),hf=x=>Math.round(hr(x));
+    for(let x=0;x<W2;x++){const h=hf(x),sh=hr(x+1)>hr(x);r(x,h,1,66-h,sh?ms:m)}
+    for(let x=0;x<W2;x++)r(x,Math.round(6+x*.09),1,1,'#3B3F4A');
+    [[64,12],[214,25]].forEach(([x,y])=>{r(x,y,3,72-y,'#555B66');r(x-4,y,11,2,'#555B66')});
+    for(let i=0;i<5;i++){const x=((Math.floor(t*1.6)+i*76)%400)-40,y=Math.round(6+x*.09);if(x<2||x>=W2-4)continue;r(x,y,1,6,'#3B3F4A');r(x-4,y+6,10,3,'#E2453C');r(x-4,y+6,1,6,'#3B3F4A');r(x-4,y+11,8,1,'#3B3F4A')}
+    r(0,66,W2,30,night?'#AEB8D6':'#F5F9FF');for(let x=0;x<W2;x++)r(x,Math.round(64+4*Math.sin(x/2*.05)),1,4,night?'#C3CCE6':'#FFFFFF');
+    for(let i=0;i<50;i++)p((i*41+9)%W2,74+(i*7)%20,night?'#98A3C4':'#D6E3F3');
+    [[6,40,1.1],[30,48,.9],[266,46,1],[298,40,1.15]].forEach(([x,y,s])=>pine(r,x,y,s,night,true));
+    r(20,80,14,12,'#FFFFFF');r(22,72,10,9,'#FFFFFF');r(25,75,1,1,O);r(28,75,1,1,O);r(26,77,4,1,'#FF7A2F');r(21,70,12,2,'#2B2F3A');r(23,65,8,5,'#2B2F3A');r(26,83,1,1,O);r(26,87,1,1,O);r(15,82,5,1,'#6B4528');r(34,81,5,1,'#6B4528');r(20,80,14,1,'#E2453C');
+    r(234,54,8,34,'#FF7A2F');r(236,52,4,2,'#FF7A2F');r(236,60,4,20,'#2C5BD8');r(234,66,8,2,'#FFFFFF');r(234,74,8,2,'#FFFFFF');r(230,84,16,4,night?'#C3CCE6':'#FFFFFF');
+    for(let i=0;i<60;i++){const x=((i*37+Math.round(Math.sin((t+i*5)*.2)*3))%W2+W2)%W2,y=(i*11+t*2)%H2,s=(i%5)?1:2;r(x,y,s,s,'#FFFFFF')}}
+  function planePaint(p,r,g,S,night){r(0,0,W2,8,'#CDD3DD');r(0,6,W2,2,'#AEB6C3');for(let x=20;x<W2;x+=60)r(x,2,24,2,'#F4F6FA');
+    const n=S.b.length;for(let i=0;i<n;i++){const a=8+Math.floor(i*44/n),b=8+Math.floor((i+1)*44/n);r(0,a,W2,b-a,S.b[i])}
+    if(night)for(let i=0;i<24;i++)p((i*73+5)%W2,10+(i*23)%28,'#DDE6FF');else{const c=S.k==='day'?'#FFE27A':'#FFC56A';r(226,14,10,10,c);r(224,16,14,6,c)}
+    r(0,52,W2,14,night?'#2B2F3A':'#6E7480');r(0,52,W2,2,night?'#3A3F4C':'#8A909C');for(let x=0;x<W2;x+=24)r(x,58,12,2,night?'#FFE27A':'#F2F2F2');if(night)for(let x=6;x<W2;x+=16)r(x,53,2,2,'#7CC4FF');
+    {const c=t%150;let x,y;if(c<75){x=-80+c*2.6;y=44}else{const k=(c-75)/75;x=114+k*280;y=Math.round(44-k*k*52)}x=Math.round(x);
+      if(x>-60&&x<W2+4){r(x,y,48,8,'#F4F6FA');r(x+40,y+2,12,4,'#F4F6FA');r(x+50,y+4,3,2,'#F4F6FA');r(x,y-8,6,8,'#2C5BD8');r(x+2,y-10,4,2,'#2C5BD8');r(x+6,y+2,36,2,'#2C5BD8');
+        for(let k=12;k<40;k+=4)r(x+k,y+2,2,1,'#BFD9FF');r(x+18,y+6,16,4,'#9AA3B5');r(x+16,y+8,6,2,'#6E7688');r(x,y+7,48,1,'#C9CFDB');if(night){r(x+50,y+6,2,2,'#FF5A5A');r(x+2,y,2,2,'#7CFF9B')}}}
+    for(let x=0;x<W2;x+=80){r(x,8,4,60,'#4B5563');r(x+1,8,1,60,'#6B7280')}r(0,66,W2,6,'#9AA3B5');r(0,66,W2,2,'#C3C9D3');
+    r(0,72,W2,24,'#C9CED6');r(0,72,W2,2,'#E2E6EC');for(let x=0;x<W2;x+=32)r(x,74,1,22,'#B5BBC5');r(0,84,W2,1,'#B5BBC5');
+    g.globalAlpha=.3;r(16,76,60,2,'#FFFFFF');r(224,80,48,2,'#FFFFFF');g.globalAlpha=1;
+    for(let i=0;i<4;i++){const x=4+i*14;r(x,62,12,10,'#2C5BD8');r(x,62,12,2,'#5B84E8');r(x,72,12,4,'#2346A8');r(x+2,76,2,8,'#555B66')}
+    r(232,64,8,18,'#555B66');r(230,62,12,3,'#3B3F4A');r(226,82,20,2,'#3B3F4A')}
+  function trainPaint(p,r,g,S,night){const n=S.b.length;for(let i=0;i<n;i++){const a=Math.floor(i*20/n),b=Math.floor((i+1)*20/n);r(0,a,W2,b-a,S.b[i])}
+    r(0,0,W2,6,'#4B5160');r(0,6,W2,2,'#3A3F4C');for(let x=0;x<W2;x+=32)r(x,0,2,6,'#5B6474');
+    r(0,20,W2,48,night?'#4A3A3A':'#9B6B57');for(let y=22;y<68;y+=6)for(let x=(((y-22)/6)%2)*8;x<W2;x+=16)r(x,y,14,4,night?'#563F3E':'#A87763');
+    r(0,68,W2,8,'#3B3F4A');r(0,70,W2,2,'#6E7688');
+    {const c=t%260;let off;if(c<40)off=Math.round((1-c/40)*(1-c/40)*380);else if(c<220)off=0;else{const k=(c-220)/40;off=-Math.round(k*k*420)}
+      const x0=4+off;if(x0<W2&&x0>-320){r(x0,28,316,44,'#E9EDF3');r(x0,28,316,4,'#C3CAD6');r(x0,60,316,4,'#E2453C');r(x0,64,316,2,'#9B2C26');r(x0,70,316,2,'#2B2F3A');
+        for(let k=0;k<292;k+=26){const wx=x0+k+6;if(k%78===52){r(wx-2,36,14,30,'#CFD5DF');r(wx+4,36,2,30,'#AEB6C3');continue}r(wx,36,16,12,night?'#FFE6A3':'#2F4870');r(wx,36,16,2,night?'#FFF3C9':'#5677A8');if(!night)r(wx+2,40,4,6,'#3E5A88')}
+        r(x0+300,32,16,28,'#E9EDF3');r(x0+304,36,10,10,'#2F4870');r(x0+312,54,4,4,'#FFF3C2')}}
+    [60,196,300].forEach(x=>{r(x,6,6,70,'#6B7280');r(x,6,2,70,'#8A909C')});
+    r(0,76,W2,20,'#A9AFB8');r(0,76,W2,2,'#C3C9D2');for(let x=0;x<W2;x+=8)r(x,78,4,2,'#F2C21B');r(0,88,W2,1,'#9AA0A9');for(let x=12;x<W2;x+=28)r(x,90,1,6,'#9AA0A9');
+    {const cx=222,cy=13;r(cx,0,2,4,'#3B3F4A');r(cx-8,4,18,18,'#3B3F4A');r(cx-6,6,14,14,'#F4F4F4');
+      const d=new Date(),hh=d.getHours()%12,mm=d.getMinutes(),ah=(hh+mm/60)/12*Math.PI*2,am=mm/60*Math.PI*2;
+      r(cx,cy,2,2,'#2B2F3A');for(const k of [1,2,3])r(Math.round(cx+Math.sin(ah)*k),Math.round(cy-Math.cos(ah)*k),2,2,'#2B2F3A');for(const k of [1,2,3,4,5])p(Math.round(cx+.5+Math.sin(am)*k),Math.round(cy+.5-Math.cos(am)*k),'#E2453C')}}
+  // road trip: the scenery rolls past while you drive
+  function carPaint(p,r,g,S,night){skyPaint(p,r,S,52);const sp=t*3;
+    const h1=night?'#26453A':'#9CC97A',hf=x=>Math.round(42+6*Math.sin((x+sp*.2)/2*.045+1)+4*Math.sin((x+sp*.2)/2*.12));
+    for(let x=0;x<W2;x++){const h=hf(x);r(x,h,1,60-h,h1)}
+    for(let i=0;i<10;i++){const x=(((i*41+7)-Math.floor(sp*.5))%380+380)%380-30,y=hf(Math.max(0,Math.min(W2-1,x)))-6;r(x,y,6,6,night?'#1A332A':'#4E9A4A');r(x+2,y+6,2,3,'#5B3A24')}
+    r(0,56,W2,8,night?'#1F3A30':'#7DB55E');
+    for(let i=0;i<14;i++){const x=(((i*28)-Math.floor(sp*1.5))%392+392)%392-30;r(x,52,2,10,'#8B5E3C');r(x-1,52,4,1,'#A87650')}
+    r(0,64,W2,32,night?'#3A3F48':'#555B64');r(0,64,W2,2,'#E8E8E8');r(0,94,W2,2,'#E8E8E8');
+    for(let i=0;i<10;i++){const x=(((i*40)-Math.floor(sp*3))%400+400)%400-40;r(x,80,20,2,night?'#C9C9A0':'#F2F2F2')}}
+  const CAR={c:'#E2523B',l:'#F07A5F',d:'#A8321F',dd:'#7E2416'};
+  function wheel(r,cx,cy){r(cx-8,cy-6,16,12,'#1E2129');r(cx-6,cy-8,12,16,'#1E2129');r(cx-4,cy-4,8,8,'#8A909C');r(cx-2,cy-2,4,4,'#5B616A');const [dx,dy]=[[0,-3],[3,0],[0,3],[-3,0]][t%4];r(cx+dx-1,cy+dy-1,2,2,'#D9DCE3')}
+  // the car is drawn in two layers: the cabin behind you, the door and wheels in front, so you sit inside
+  function carBack(p,r,g,S,night,TS,blink){r(104,93,128,3,'rgba(0,0,0,.25)');
+    r(124,30,80,4,CAR.c);r(124,30,80,1,CAR.l);
+    r(128,34,16,28,night?'#26324D':'#BFE3F7');r(148,34,54,28,night?'#26324D':'#CFEAF9');if(!night){r(131,36,2,20,'#E8F6FF');r(195,36,2,12,'#E8F6FF')}
+    r(144,34,4,28,CAR.d);r(124,34,4,28,CAR.c);for(let k=0;k<28;k++)r(202+Math.round(k*.6),34+k,3,1,CAR.c);
+    r(130,26,48,2,'#3B3F4A');r(134,28,2,2,'#3B3F4A');r(172,28,2,2,'#3B3F4A');
+    suitcasePaint(p,r,TS.stk,blink,null,132,0)}
+  function carFront(p,r,g,S,night){
+    r(100,58,26,4,CAR.c);r(100,58,26,1,CAR.l);r(204,58,32,4,CAR.c);r(204,58,32,1,CAR.l);
+    r(98,62,140,22,CAR.c);r(98,62,140,2,CAR.l);r(98,82,140,2,CAR.d);r(98,72,140,1,CAR.d);
+    r(146,64,1,18,CAR.dd);r(202,64,1,18,CAR.dd);r(152,66,8,2,'#F4D5CF');r(208,66,8,2,'#F4D5CF');
+    r(234,64,4,6,'#FFE27A');r(98,64,3,6,'#E2453C');r(96,78,6,4,'#5B616A');r(232,78,8,4,'#5B616A');
+    r(204,54,6,6,CAR.d);r(205,55,4,3,'#BFE3F7');
+    wheel(r,122,86);wheel(r,214,86);
+    if(night||S.k==='dusk'){glow(r,g,238,67,14,'#FFE27A');g.globalAlpha=.12;for(let k=0;k<70;k++)r(238+k,66-Math.round(k*.12),1,2+Math.round(k*.25),'#FFE27A');g.globalAlpha=1}}
+  // the task boards: departures on the plane and train, a motorway sign by car
+  function roadSign(p,r,g){r(74,30,3,30,'#8A909C');r(110,30,3,30,'#8A909C');r(68,6,52,26,'#FFFFFF');r(70,8,48,22,'#11834A');
+    const open=openTasks(),Wt='#FFFFFF';
+    if(open.length){open.slice(0,3).forEach((q,i)=>{const y=10+i*6,k=pcol(q.id);r(72,y,4,4,PCOL[k]);let x=80;for(const w of [[8,4,6,2,8],[6,6,4,8,2],[4,8,6,4,6]][i]){if(x+w>115)break;r(x,y,w,4,Wt);x+=w+2}});if(open.length>3){r(108,27,2,2,Wt);r(112,27,2,2,Wt)}}
+    else if(getQuests().some(q=>!q.room&&q.done))boostWord(r,75,13,(t>>2)%2?Wt:'#FFE27A');
+    else{r(80,18,22,2,Wt);r(98,16,2,6,Wt);r(96,14,2,2,Wt);r(96,22,2,2,Wt)}}
+  function departBoard(p,r,g){r(78,0,2,10,'#4B5563');r(110,0,2,10,'#4B5563');r(68,10,52,26,'#1A2030');r(70,12,48,22,'#0E1320');
+    const open=openTasks(),A='#F5B83D';
+    if(open.length){open.slice(0,3).forEach((q,i)=>{const y=14+i*6,k=pcol(q.id);r(72,y,4,4,PCOL[k]);let x=80;for(const w of [[6,2,8,4,6],[4,8,2,6,4],[8,4,4,6,2]][i]){if(x+w>115)break;r(x,y,w,4,A);x+=w+2}});if(open.length>3){r(108,31,2,2,A);r(112,31,2,2,A)}}
+    else if(getQuests().some(q=>!q.room&&q.done))boostWord(r,75,17,(t>>2)%2?A:'#FFD978');
+    else for(let x=74;x<114;x+=6)r(x,22,2,2,'#3A4256')}
+  const FPAL={R:'#D52B1E',W:'#FFFFFF',N:'#0B2A6F',B:'#1559B5',L:'#74ACDF',Y:'#FFCD00',G:'#0E8A43',O:'#FF883E',K:'#1A1A1A',M:'#8C1D40',P:'#B07A2A',A:'#A7A9AC',S:'#3FA9E8'};
+  function flagPaint(r,code,x,y){const f=FLAGS[code]||FLAGS.XX;r(x+2,y+10,14,2,'rgba(0,0,0,.28)');r(x+14,y+2,2,8,'rgba(0,0,0,.28)');for(let j=0;j<5;j++)for(let i=0;i<7;i++)r(x+i*2,y+j*2,2,2,FPAL[f[j*7+i]]||'#FFFFFF')}
+  // the suitcase: one flag sticker per country you've had a solid day in (the newest 6 show)
+  const SLOTS=[[2,2],[16,4],[28,2],[4,14],[18,14],[28,12]];
+  function suitcasePaint(p,r,stk,blink,roll,x,y){x=x==null?72:x;y=y==null?62:y;const w=44,h=26;
+    if(roll){r(x+16,y-14,2,14,'#3B3F4A');r(x+26,y-14,2,14,'#3B3F4A');r(x+16,y-16,12,2,'#3B3F4A')}else if(roll===false){r(x+16,y-4,12,2,'#3B3F4A');r(x+14,y-2,2,2,'#3B3F4A');r(x+28,y-2,2,2,'#3B3F4A')}
+    r(x,y,w,h,'#C0623A');r(x,y,w,2,'#DA8452');r(x,y+2,2,h-4,'#CF7346');r(x,y+h-2,w,2,'#8E4423');r(x+w-2,y+2,2,h-4,'#97461F');r(x+2,y+13,w-4,1,'#A8532E');
+    [[2,2],[w-4,2],[2,h-4],[w-4,h-4]].forEach(([a,b])=>r(x+a,y+b,2,2,'#E8C25A'));
+    if(roll!==null){r(x+4,y+h,6,4,'#2B2F3A');r(x+w-10,y+h,6,4,'#2B2F3A')}
+    const show=stk.slice(-6);show.forEach((st,i)=>{if(blink&&i===show.length-1&&(t>>1)%2)return;const [sx,sy]=SLOTS[i];flagPaint(r,st.code,x+sx,y+sy)})}
+  let stkN=-1,stkAt=0;
+  function travelPaint(p,r,g,now,TS){const S=skyOf(),night=S.k==='night';PROG=TS.prog;
+    ({beach:beachPaint,mountain:mountainPaint,city:cityPaint,fields:fieldsPaint,cottage:cottagePaint,snow:snowPaint,plane:planePaint,train:trainPaint,car:carPaint}[TS.via||TS.dest]||beachPaint)(p,r,g,S,night);
+    hazePaint(r,g,S);
+    if(TS.via==='car')roadSign(p,r,g);else if(TS.via)departBoard(p,r,g);
+    if(TS.stk.length!==stkN){if(stkN>=0&&TS.stk.length>stkN)stkAt=now;stkN=TS.stk.length}
+    if(TS.via==='car')carBack(p,r,g,S,night,TS,now-stkAt<3000);else suitcasePaint(p,r,TS.stk,now-stkAt<3000,TS.via==='plane'||TS.via==='train')}
+  function travelFront(p,r,g,now,TS){if(TS.via==='car'){const S=skyOf();carFront(p,r,g,S,S.k==='night')}}
   function draw(){if(!cv)return;paint(g,items(),false);
     const sp=$('suRoomCv');if(sp&&!$('setup').hidden&&!$('suR').hidden)paint(sp.getContext('2d'),toItems(SU.room.map(x=>({id:x.qid,done:false}))),true)}
   function paint(g,list,preview){
     const now=performance.now(),hr=new Date().getHours(),night=hr<7||hr>=20;
-    const p=(x,y,c)=>{if(x>=0&&y>=0&&x<W&&y<H){g.fillStyle=c;g.fillRect(x,y,1,1)}},r=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+    const p=(x,y,c)=>{if(x>=0&&y>=0&&x<W2&&y<H2){g.fillStyle=c;g.fillRect(x,y,1,1)}},r=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+    const lp=(x,y,c)=>{if(x>=0&&y>=0&&x<W&&y<H){g.fillStyle=c;g.fillRect(x,y,1,1)}};
     const real=list.length&&!list[0].id.startsWith('teaser'),all=real&&list.every(i=>i.done);
-    // the room gets more solid as you clear it: 40% messy, 80% when everything is done
-    wallF=real?list.filter(i=>i.done).length/list.length:0;if(preview||wallS<0)wallS=wallF;else{wallS+=(wallF-wallS)*.3;if(Math.abs(wallF-wallS)<.01)wallS=wallF}const A=preview?.75:.4+.4*wallS;
-    g.imageSmoothingEnabled=false;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,W,H);g.globalAlpha=1;paintWall(r);g.globalAlpha=A;base(p,r,night,!preview&&bedUnmade());if(!preview)corkboard(p,r,g,A,now);
-    if(all)reward(p,r,t);
-    for(const it of list){const o=objFor(it);if(!o)continue;
-      const v=vanish[it.id];
-      if(!it.done){o.draw(p,r,t);continue}
-      if(it.key==='book')shelfBook(it.idx).draw(p,r);
-      if(v&&now-v<900){const k=(now-v)/900;
-        if(k<.35){o.draw(p,r,t);g.globalAlpha=.85;r(o.x-2,o.y-2,16,10,C.white);g.globalAlpha=A}
-        else{g.globalAlpha=1;const rad=Math.round(2+k*9);[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([dx,dy],i)=>{const c=i%2?C.yellow:C.white;p(o.x+4+dx*rad,o.y+2+dy*rad,c);p(o.x+5+dx*rad,o.y+2+dy*rad,c)});g.globalAlpha=A}}
-    }
-    g.globalAlpha=1;if(preview)return;const hc=$('heroCv');const fly=typeof HERO!=='undefined'&&HERO.stage&&HERO.stage()===25&&HERO16.mood===2;if(fly){r(70,46,22,1,'rgba(0,0,0,.14)');}if(!preview)boostAura(p,g,now,hc,fly?-4+(t%4<2?0:1):16);if(!preview)perfGlow(g,now,hc,fly?-4+(t%4<2?0:1):16);if(hc)g.drawImage(hc,64,fly?-4+(t%4<2?0:1):16);if(!preview)boostLayer(p,r,g,now,hc,fly?-4+(t%4<2?0:1):16);
+    // the room is always drawn solid; only the walls warm up as you clear it
+    wallF=real?list.filter(i=>i.done).length/list.length:0;if(preview||wallS<0)wallS=wallF;else{wallS+=(wallF-wallS)*.3;if(Math.abs(wallF-wallS)<.01)wallS=wallF}const A=1;
+    g.imageSmoothingEnabled=false;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.clearRect(0,0,W2,H2);
+    const TS=!preview&&travelNow();
+    if(TS)travelPaint(p,r,g,now,TS);
+    else{paintWall(r);g.globalAlpha=A;base(p,r,night,!preview&&bedUnmade());if(!preview)corkboard(p,r,g,A,now);
+      if(all)reward(p,r,t);
+      for(const it of list){const o=objFor(it);if(!o)continue;
+        const v=vanish[it.id];
+        if(!it.done){o.draw(p,r,t);continue}
+        if(it.key==='book')shelfBook(it.idx).draw(p,r);
+        if(v&&now-v<900){const k=(now-v)/900;
+          if(k<.35){o.draw(p,r,t);g.globalAlpha=.85;r(o.x-4,o.y-4,32,20,C.white);g.globalAlpha=A}
+          else{g.globalAlpha=1;const rad=Math.round(4+k*18);[[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]].forEach(([dx,dy],i)=>{const c=i%2?C.yellow:C.white;r(o.x+8+dx*rad,o.y+4+dy*rad,4,2,c)});g.globalAlpha=A}}}}
+    g.globalAlpha=1;if(preview)return;
+    g.setTransform(2,0,0,2,0,0);
+    const hc=$('heroCv'),fly=!TS&&typeof HERO!=='undefined'&&HERO.stage&&HERO.stage()===25&&HERO16.mood===2,hy=fly?-4+(t%4<2?0:1):16;
+    if(fly)r(70,46,22,1,'rgba(0,0,0,.14)');
+    boostAura(lp,g,now,hc,hy);perfGlow(g,now,hc,hy);if(hc)g.drawImage(hc,64,hy);
+    if(TS){g.setTransform(1,0,0,1,0,0);travelFront(p,r,g,now,TS);g.setTransform(2,0,0,2,0,0)}
+    boostLayer(lp,r,g,now,hc,hy);
     if(cleanAt&&now-cleanAt<2500){for(let i=0;i<16;i++){const x=(i*23+t*5)%W,y=(i*7+t*2)%36;r(x,y,2,2,[C.yellow,C.white,C.pink,C.green][i%4])}}
+    g.setTransform(1,0,0,1,0,0);
   }
   const thumbs={};
   function thumb(key,idx){const k=key+(idx||0);if(thumbs[k])return thumbs[k];
     const o=key==='book'?book(idx||0):OBJ[key];if(!o)return'';
-    const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+    const c=document.createElement('canvas');c.width=W2;c.height=H2;const x=c.getContext('2d');
     o.draw((px,py,col)=>{x.fillStyle=col;x.fillRect(px,py,1,1)},(rx,ry,rw,rh,col)=>{x.fillStyle=col;x.fillRect(rx,ry,rw,rh)},0);
-    const d=x.getImageData(0,0,W,H).data;let x0=W,y0=H,x1=-1,y1=-1;
-    for(let yy=0;yy<H;yy++)for(let xx=0;xx<W;xx++)if(d[(yy*W+xx)*4+3]){if(xx<x0)x0=xx;if(xx>x1)x1=xx;if(yy<y0)y0=yy;if(yy>y1)y1=yy}
-    if(x1<0)return'';const s=Math.max(x1-x0+1,y1-y0+1)+2,o2=document.createElement('canvas');o2.width=o2.height=s*4;const z=o2.getContext('2d');z.imageSmoothingEnabled=false;
-    z.drawImage(c,x0,y0,x1-x0+1,y1-y0+1,Math.round((s-(x1-x0+1))/2)*4,Math.round((s-(y1-y0+1))/2)*4,(x1-x0+1)*4,(y1-y0+1)*4);
+    const d=x.getImageData(0,0,W2,H2).data;let x0=W2,y0=H2,x1=-1,y1=-1;
+    for(let yy=0;yy<H2;yy++)for(let xx=0;xx<W2;xx++)if(d[(yy*W2+xx)*4+3]){if(xx<x0)x0=xx;if(xx>x1)x1=xx;if(yy<y0)y0=yy;if(yy>y1)y1=yy}
+    if(x1<0)return'';const s=Math.max(x1-x0+1,y1-y0+1)+4,o2=document.createElement('canvas');o2.width=o2.height=s*2;const z=o2.getContext('2d');z.imageSmoothingEnabled=false;
+    z.drawImage(c,x0,y0,x1-x0+1,y1-y0+1,Math.round((s-(x1-x0+1))/2)*2,Math.round((s-(y1-y0+1))/2)*2,(x1-x0+1)*2,(y1-y0+1)*2);
     return thumbs[k]=o2.toDataURL()}
+
   function thumbFor(qid,customIdx){const lib=ROOMLIB.find(r=>'room-'+r.id===qid);return lib?thumb(lib.obj):thumb('book',customIdx)}
   let lastTier=null;
   function frame(n,risk){const el=$('streakFrame');if(!el)return;const tiers=['t0','t1','t7','t14','t30'];
@@ -2084,9 +2372,11 @@ let layout='normal',moving=false,dayOpen=false;
 function secs(){const q=l=>document.querySelector('section[aria-label="'+l+'"]');return{day:q('Day'),tasks:q('Tasks'),room:q('Design your room')}}
 function placeSections(mode){if(layout===mode)return;const {day,tasks,room}=secs();if(!day||!tasks||!room)return;
   if(mode==='closed'){day.parentNode.insertBefore(room,day);tasks.after(day)}else{room.parentNode.insertBefore(day,tasks);tasks.after(room)}
-  layout=mode}
+  layout=mode;roomSpot()}
 function dayClosed(){const t=today();return !!(days[t]&&days[t].closed)}
-function applyDayLayout(){if(!dayClosed())dayOpen=false;if(!moving)placeSections(dayClosed()?'closed':'normal');renderDayFold()}
+function applyDayLayout(){if(!dayClosed())dayOpen=false;if(!moving){placeSections(dayClosed()?'closed':'normal');roomSpot()}renderDayFold()}
+// after closing the day the room moves up, unless you're travelling: then it stays below the day
+function roomSpot(){const {day,tasks,room}=secs();if(!day||!tasks||!room||layout!=='closed')return;if(tripOn(today())){if(day.nextElementSibling!==room)day.after(room)}else if(tasks.compareDocumentPosition(room)&Node.DOCUMENT_POSITION_FOLLOWING)tasks.before(room)}
 function renderDayFold(){const t=today(),on=dayClosed()&&layout==='closed'&&viewDate===t,fold=on&&!dayOpen,bar=$('dayBar');if(!bar)return;
   bar.hidden=!on;
   if(on){const xp=(TL&&TL.map[t]||{xp:0}).xp;bar.innerHTML='<b>Day closed ✓</b><span>+'+xp+' XP</span><span class="db-hint">'+(fold?'Tap to open':'Tap to fold')+'</span>';bar.setAttribute('aria-expanded',!fold)}
@@ -2098,7 +2388,7 @@ function sparkle(el){if(!el||matchMedia('(prefers-reduced-motion: reduce)').matc
 function allDone(s){const d=day(s),hs=habitsFor(s,lvOf(s));return hs.length>0&&hs.every(h=>d.h&&d.h[h.id])}
 function closeMove(){if(!moving)return;moving=false;const S=secs(),list=[S.day,S.tasks,S.room].filter(Boolean),rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const go=()=>{const first=new Map(list.map(e=>[e,e.getBoundingClientRect().top]));dayOpen=false;placeSections('closed');renderDayFold();
-    const hud=$('hud'),toRoom=()=>{if(S.room)window.scrollTo({top:S.room.getBoundingClientRect().top+scrollY-(hud?hud.offsetHeight:0)-12,behavior:rm?'auto':'smooth'})};
+    const hud=$('hud'),toRoom=()=>{const tg=tripOn(today())?S.tasks:S.room;if(tg)window.scrollTo({top:tg.getBoundingClientRect().top+scrollY-(hud?hud.offsetHeight:0)-12,behavior:rm?'auto':'smooth'})};
     if(rm){toRoom();return}
     list.forEach(e=>{const dy=first.get(e)-e.getBoundingClientRect().top;e.style.transition='none';e.style.transform='translateY('+dy+'px)'});
     requestAnimationFrame(()=>requestAnimationFrame(()=>list.forEach(e=>{e.style.transition='transform .65s cubic-bezier(.2,.8,.2,1)';e.style.transform=''})));
@@ -2703,8 +2993,80 @@ const HERO16=(function(){
     head(d,8,2,{hair:true,eyes:blink(t,12),mouth:'soft'});
     if(MOOD===2){r(9,0,14,8,O);r(10,1,12,6,G);r(10,1,12,1,K.goldH);r(20,1,2,6,K.goldS);digit(d,12,2,3,J);digit(d,16,2,5,J);r(8,1,2,2,G);r(22,1,2,2,G);if(t%3===0)sparkle(d,16,0,WH)}};
   const S=Array.from({length:35},(_,i)=>L[i+1]);
+  const TRVO={plane:['#5B84E8','#2E3A5C'],train:['#2FA36B','#2E3A5C'],car:['#E8541A','#2E3A5C'],beach:['#1ABC9C','#3F7BD9'],mountain:['#C0504D','#5A4632'],city:['#22305A','#5A6276'],fields:['#7FB4FF','#3F5D99'],cottage:['#B23A3A','#5A6276'],snow:['#FF7A2F','#22305A']};
+  function travel(ctx,kind,lv,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;const d=api(ctx),{p,r}=d,M=MOOD,[SH,PA]=TRVO[kind]||TRVO.beach;
+    const sk=lv<=1?'grey':lv===2?'dusk':lv===3?'pale':lv===4?'warm':'skin',hair=lv>=6,full=lv>=6,SKC=K[sk];
+    const face=(x,y,o)=>head(d,x,y,Object.assign({skin:sk,hair,eyes:M===0?'tired':'open',mouth:M===0?'neutral':'smile'},o||{}));
+    const hx=8,hy=full?2:14,fb=o=>{shadow(d,16);return body(d,16,18,Object.assign({shirt:SH,pants:PA},o))},ho=()=>shadow(d,12);
+    const ticket=(x,y)=>{r(x,y,6,4,WH);r(x,y+1,6,1,'#2C5BD8');p(x+4,y+3,O)};
+    const passport=(x,y)=>{r(x,y,4,5,'#8C1D40');p(x+1,y+2,K.gold);p(x+2,y+2,K.gold)};
+    const pillow=(x,y)=>{r(x+1,y,14,3,'#7FB4FF');r(x+1,y+2,14,1,'#5B84E8');r(x,y-2,2,4,'#7FB4FF');r(x+14,y-2,2,4,'#7FB4FF')};
+    const cup=(x,y)=>{r(x,y,3,5,WH);r(x,y+1,3,2,'#7A4A22');r(x-1,y-1,5,1,'#5A6276');p(x+1,y-3-(t%2),'#C9CFDB');p(x+2,y-5+(t%2),'#C9CFDB')};
+    const paper=(x,y)=>{r(x,y,16,10,'#F4F1E6');r(x+7,y,2,10,'#C9C2AE');[1,3,5,7].forEach(k=>{r(x+1,y+k,5,1,'#9AA3B5');r(x+10,y+k,5,1,'#9AA3B5')});r(x+1,y+1,5,2,'#5A6276')};
+    const icecream=(x,y)=>{r(x,y+3,3,3,'#D9A35B');p(x+1,y+6,'#D9A35B');r(x-1,y+1,5,2,'#F27BD3');r(x,y,3,1,'#F27BD3');p(x+1,y-1,'#E2453C')};
+    const surf=x=>{r(x,6,4,24,'#FFC531');r(x+1,4,2,2,'#FFC531');r(x+1,30,2,1,'#FFC531');r(x+1,8,2,20,'#E8541A');r(x,6,1,24,'#D9A60E')};
+    const pole=(x,y)=>r(x,y,1,31-y,'#6E7688');
+    const flag=(x,y)=>{r(x,y-8,1,10,'#6E7688');r(x+1,y-8,5,3,'#E2453C');p(x+3,y-7,WH)};
+    const camera=(x,y)=>{r(x,y,6,4,'#2B2F3A');r(x+2,y+1,2,2,'#7FD4FF');p(x+1,y-1,'#2B2F3A');if(t%6===0)sparkle(d,x+3,y-2,WH)};
+    const phone=(x,y)=>{r(x,y,3,5,'#2B2F3A');p(x+1,y+1,'#7FD4FF')};
+    const map=(x,y)=>{r(x,y,14,8,'#F4F1E6');r(x+4,y,1,8,'#D8D2C0');r(x+9,y,1,8,'#D8D2C0');r(x+1,y+2,5,1,'#3CC98E');r(x+6,y+5,6,1,'#7FB4FF');p(x+11,y+2,'#E2453C')};
+    const straw=(x,y)=>{r(x-2,y+3,20,2,'#E8C25A');r(x+2,y-1,12,4,'#E8C25A');r(x+2,y+2,12,1,'#C0504D');r(x-2,y+4,20,1,'#C9A040')};
+    const basket=(x,y)=>{r(x-3,y,7,5,'#B9895A');r(x-3,y+2,7,1,'#946A41');r(x-2,y-2,1,2,'#946A41');r(x+2,y-2,1,2,'#946A41');r(x-1,y-3,3,1,'#946A41');p(x-1,y,'#E2453C')};
+    const mug=(x,y)=>{r(x,y,4,4,'#F4F4F4');r(x+4,y+1,1,2,'#F4F4F4');r(x,y,4,1,'#7A4A22');p(x+1,y-2-(t%2),'#E6EAF2');p(x+2,y-3+(t%2),'#E6EAF2')};
+    const book=(x,y)=>{r(x,y,12,6,'#F4F1E6');r(x+5,y,2,6,'#C9C2AE');r(x-1,y+5,14,1,'#3F7BD9');[1,3].forEach(k=>{r(x+1,y+k,3,1,'#9AA3B5');r(x+8,y+k,3,1,'#9AA3B5')})};
+    const beanie=(x,y,gog)=>{r(x+1,y-1,14,5,'#E2453C');r(x+1,y+3,14,2,'#B02E27');r(x+6,y-3,4,3,WH);if(gog){r(x+2,y+1,12,3,'#22305A');r(x+3,y+1,4,2,'#7FD4FF');r(x+9,y+1,4,2,'#7FD4FF')}};
+    const board=x=>{r(x,8,4,23,'#FF7A2F');r(x+1,6,2,2,'#FF7A2F');r(x+1,31,2,1,'#FF7A2F');r(x+1,11,2,17,'#2C5BD8')};
+    const knit=()=>{r(11,19,10,1,'#F4E9D8');[[12,21],[15,21],[18,21],[13,23],[16,23],[19,23]].forEach(([x,y])=>p(x,y,'#F4E9D8'))};
+    const flowers=()=>[[3,30,'#F27BD3'],[28,30,'#FFC531'],[24,28,WH],[6,27,'#FFC531']].forEach(([x,y,c])=>{p(x,y,c);p(x,y+1,'#2F8A4A')});
+    if(kind==='car'){ // in the driver's seat: your head through the window, sleepy, then shades, then a thumbs up
+      face(10,2,{eyes:M===0?'tired':'shades',mouth:M===2?'big':M===1?'smile':'neutral'});
+      if(M===2){r(28,7,3,4,SKC);r(29,5,1,2,SKC);[[27,7],[27,8],[27,9],[27,10],[28,11],[29,11],[30,11],[31,8],[31,9],[31,10],[28,6],[30,6],[29,4]].forEach(([x,y])=>p(x,y,O));r(28,12,3,6,SH)}
+      return}
+    if(kind==='plane'){
+      if(full){const h=fb({armR:M===2?'up':M===1?'fwd':'down'});face(hx,hy);pillow(8,16);if(M===1)ticket(h.R[0]-2,h.R[1]-2);if(M===2){passport(h.R[0]-1,h.R[1]-4);if(t%3===0)sparkle(d,29,2,K.gold)}}
+      else{ho();face(hx,hy);pillow(8,28);if(M===1)ticket(25,18+((t>>1)%2));if(M===2){passport(26,12-(t%2));sparkle(d,29,8,K.gold)}}
+      if(M===0)zzz(d,t);return}
+    if(kind==='train'){
+      if(full){if(M===1){fb({armL:'fwd',armR:'fwd'});face(hx,hy);paper(8,20)}
+        else if(M===2){const h=fb({armL:'out',armR:'wave'});face(hx,hy);cup(h.L[0],h.L[1]-4)}
+        else{const h=fb({armR:'fwd'});face(hx,hy);cup(h.R[0]-1,h.R[1]-4);zzz(d,t)}}
+      else{ho();face(hx,hy);if(M===1)paper(8,27);else cup(26,22);if(M===0)zzz(d,t);if(M===2&&t%3===0)sparkle(d,4,8,WH)}
+      return}
+    if(kind==='beach'){
+      if(full){if(M===2){surf(25);fb({tank:true});face(hx,hy,{eyes:'shades'})}
+        else if(M===1){const h=fb({tank:true,armR:'fwd'});face(hx,hy,{eyes:'shades'});icecream(h.R[0]-1,h.R[1]-6)}
+        else{fb({tank:true});face(hx,hy);straw(8,1)}}
+      else{ho();if(M===2)surf(26);face(hx,hy,M?{eyes:'shades'}:{});if(M===0)straw(8,13);if(M===1)icecream(27,20)}
+      if(M===2&&t%3===0)sparkle(d,3,6,K.sun);return}
+    if(kind==='mountain'){
+      if(full){r(6,18,4,9,'#3F7BD9');r(22,18,4,9,'#3F7BD9');r(6,18,4,1,'#7FB4FF');r(22,18,4,1,'#7FB4FF');
+        if(M===2){const h=fb({armL:'up',armR:'up'});r(12,18,1,7,'#2A5BB0');r(19,18,1,7,'#2A5BB0');face(hx,hy);flag(h.R[0],h.R[1]);if(t%3===0)sparkle(d,4,4,K.sun)}
+        else{const h=fb({armR:'down',legs:M===1?((t>>1)%2?'walkA':'walkB'):'stand'});r(12,18,1,7,'#2A5BB0');r(19,18,1,7,'#2A5BB0');face(hx,hy);pole(h.R[0]+2,h.R[1]-2)}}
+      else{ho();face(hx,hy);r(9,13,14,3,'#3CA66B');r(9,15,14,1,'#2F8A57');r(20,12,6,2,'#3CA66B');if(M===2)flag(27,24);else pole(27,18)}
+      if(M===0)zzz(d,t);return}
+    if(kind==='city'){
+      if(full){if(M===2){const h=fb({armL:'wave',armR:'reach'});face(hx,hy);phone(h.R[0]-1,h.R[1]);if(t%4===0)sparkle(d,h.R[0]+3,h.R[1]+1,WH)}
+        else if(M===1){fb({armL:'fwd',armR:'fwd'});face(hx,hy);r(10,17,1,6,'#2B2F3A');r(21,17,1,6,'#2B2F3A');camera(13,22)}
+        else{fb({armL:'fwd',armR:'fwd'});face(hx,hy);map(9,21);zzz(d,t)}}
+      else{ho();face(hx,hy);if(M===2){phone(27,6);if(t%4===0)sparkle(d,28,4,WH)}else if(M===1)camera(25,24);else{map(1,24);zzz(d,t)}}
+      return}
+    if(kind==='fields'){
+      if(full){if(M===2){shadow(d,26,31);r(15,24,10,6,O);r(16,24,8,5,SH);r(25,25,6,4,PA);r(31,24,1,6,K.shoe);face(1,14);straw(16,18);flowers();if(t%3===0)sparkle(d,26,8,K.sun)}
+        else{const h=fb({armR:'down'});face(hx,hy);straw(8,1);if(M===1)basket(h.R[0]+1,h.R[1]);if(M===0)zzz(d,t)}}
+      else{ho();face(hx,hy);straw(8,13);if(M===1)basket(28,26);if(M===2){flowers();if(t%3===0)sparkle(d,27,8,K.sun)}if(M===0)zzz(d,t)}
+      return}
+    if(kind==='cottage'){
+      if(full){if(M===2){fb({armL:'fwd',armR:'fwd'});knit();face(hx,hy);book(10,21)}
+        else{const h=fb({armR:'fwd'});knit();face(hx,hy);mug(h.R[0]-1,h.R[1]-3);if(M===0)zzz(d,t)}}
+      else{ho();face(hx,hy);r(9,13,14,4,'#B23A3A');r(9,16,14,1,'#F4E9D8');r(14,11,4,2,'#F4E9D8');if(M===2)book(19,25);else mug(26,24);if(M===0)zzz(d,t)}
+      return}
+    // snow
+    if(full){if(M===2){const up=t%4<2?3:1;shadow(d,14);body(d,16,15-up,{shirt:SH,pants:PA,armL:'up',armR:'up',legs:'squat'});r(5,28-up,22,3,'#FF7A2F');r(6,28-up,20,1,'#2C5BD8');face(hx,hy-3-up);beanie(hx,hy-3-up,true);if(t%3===0)sparkle(d,3,6,WH)}
+      else{board(26);fb({armR:'down'});face(hx,hy);beanie(hx,hy,M===1);if(M===0)zzz(d,t)}}
+    else{if(M===2){const up=t%4<2?4:1;shadow(d,10);r(6,30-up,20,3,'#FF7A2F');face(hx,hy-up);beanie(hx,hy-up,true);sparkle(d,3,8,WH)}else{ho();board(26);face(hx,hy);beanie(hx,hy,M===1)}if(M===0)zzz(d,t)}
+  }
   function draw(ctx,i,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;S[i](api(ctx),t)}
-  return{draw,n:S.length,floorShadow:v=>{FLOOR_SHADOW=v},setMood:m=>{MOOD=m},get mood(){return MOOD}};
+  return{draw,travel,n:S.length,floorShadow:v=>{FLOOR_SHADOW=v},setMood:m=>{MOOD=m},get mood(){return MOOD}};
 })();
 
 /* ---------- the character on screen: looks gallery, evolve flash, mood ---------- */
@@ -2712,6 +3074,7 @@ const HERO=(function(){
   const W=32;let cv=null,g=null,t=1,cur=-1;
   const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const draw=(ctx,i,tt)=>HERO16.draw(ctx,i,tt);
+  let TRAV=null;const mainDraw=()=>{if(TRAV)HERO16.travel(g,TRAV,cur+1,t);else draw(g,cur,t)};
   function stageFor(lv){let i=0;STAGES.forEach((s,k)=>{if(lv>=s[0])i=k});return i}
   function renderLooks(){const box=$('looks');box.innerHTML='';
     const sil=getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()||'#888',m=HERO16.mood;HERO16.setMood(0);
@@ -2726,17 +3089,107 @@ const HERO=(function(){
     if(open){renderLooks();renderLadder();setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'center'}),60)}}
   function set(lv){const i=stageFor(lv);
     if(!cv){cv=$('heroCv');g=cv.getContext('2d');$('hero').onclick=toggleLooks;
-      if(!RM)setInterval(()=>{if(!document.hidden&&cur>=0){t++;draw(g,cur,t)}},300)}
+      if(!RM)setInterval(()=>{if(!document.hidden&&cur>=0){t++;mainDraw()}},300)}
     if(cur!==-1&&i>cur){const b=$('hero');b.classList.remove('evolve');void b.offsetWidth;b.classList.add('evolve')}
-    const changed=i!==cur;cur=i;draw(g,cur,t);
+    const changed=i!==cur;cur=i;mainDraw();
     if(changed&&!$('lookPanel').hidden)renderLooks()}
-  return{set,_draw:draw,_n:HERO16.n,stage:()=>cur,setMood:m=>{if(m!==HERO16.mood){HERO16.setMood(m);if(g&&cur>=0)draw(g,cur,t)}}};
+  return{set,_draw:draw,_n:HERO16.n,stage:()=>cur,setMood:m=>{if(m!==HERO16.mood){HERO16.setMood(m);if(g&&cur>=0)mainDraw()}},setTravel:k=>{if(k!==TRAV){TRAV=k;if(g&&cur>=0)mainDraw()}}};
 })();
 let tt;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),1800)}
 
 $('prev').onclick=()=>{viewDate=addDays(viewDate,-1);render()};
 $('next').onclick=()=>{if(viewDate<addDays(today(),1)){viewDate=addDays(viewDate,1);render()}};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&viewDate>addDays(today(),1))viewDate=today();if(!document.hidden)render()});
+/* ---------- travel mode sheet ---------- */
+let TR=null;
+const fmtD=s=>parse(s).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+function tripHabits(){const c=latestConfig(),lv=curLevel();return c?orderHabits(c.habits.filter(h=>isActive(h,lv)).map(h=>({id:h.id,core:!!h.core,name:hName(h,lv),hint:hHint(h,lv),h}))):[]}
+function activeTrip(){const t=today();return tripOn(t)||trips().filter(x=>x.from>t).sort((a,b)=>a.from<b.from?-1:1)[0]||null}
+function renderTripBar(){const b=$('trBar');if(!b)return;const t=today(),tr=tripOn(viewDate),up=!tr&&viewDate===t?activeTrip():null;
+  {const tb=$('travel');if(tb)tb.classList.toggle('on',!!activeTrip())}
+  const show=x=>{b.hidden=false;b.innerHTML='';const [a,s]=x;const B=document.createElement('b');B.textContent=a;const S=document.createElement('span');S.textContent=s;const I=document.createElement('i');I.textContent='Edit';b.append(B,S,I)};
+  if(tr){const j=journeyOn(viewDate),D=DESTS[tr.dest]||DESTS.beach,pl=tr.country?flagEmoji(tr.country)+' '+tripPlace(tr):D[0]+' '+D[1];show([j?VIAS[j][0]+' Travel day'+(tr.country?' · '+flagEmoji(tr.country):''):pl,(tr.to?(tr.to===viewDate?'Last day away':'Back '+fmtD(tr.to)):'Until you’re back')+' · plan paused'])}
+  else if(up){const D=DESTS[up.dest]||DESTS.beach;show([(up.country?flagEmoji(up.country):D[0])+' Trip coming up'+(up.country?': '+tripPlace(up):''),'From '+fmtD(up.from)])}
+  else b.hidden=true}
+function openTrip(){SND.unlock();const t=today(),tr=activeTrip(),tp=profile.travelPack||null;
+  if(tr){const pk=packFor(tr,tr.from<t?addDays(t,1):tr.from);TR={id:tr.id,from:tr.from,to:tr.to||tr.from,open:!tr.to,dest:tr.dest,via:tr.via||'none',country:tr.country||'',place:tr.place||'',ids:clone(pk.ids||{}),extra:clone(pk.extra||[])}}
+  else TR={id:null,from:t,to:t,open:false,dest:tp&&DESTS[tp.dest]?tp.dest:'beach',via:tp&&VIAS[tp.via]?tp.via:'plane',country:'',place:'',ids:{},extra:[]};  // a new trip starts with nothing packed
+  renderTrip();$('trSheet').hidden=false;$('trCard').scrollTop=0}
+function tripSummary(){const c=latestConfig();if(!c)return'';const lv=curLevel(),R=rates(c,lv),hs=tripHabits();let core=0,best=0;
+  const d0=TR.from>today()?TR.from:today(),w0=parse(d0).getDay();
+  for(const x of hs)if(TR.ids[x.id]&&TR.ids[x.id].core&&daysAt(x.h,lv).includes(w0))core++;for(const x of TR.extra)if(x.core)core++;
+  for(let w=0;w<7;w++){let s=0;for(const x of hs){const o=TR.ids[x.id];if(o&&daysAt(x.h,lv).includes(w))s+=R*(+x.h.effort||1)*(o.core?2:1)}for(const x of TR.extra)s+=R*(+x.effort||2)*(x.core?2:1);best=Math.max(best,s)}
+  const away=hs.filter(x=>!TR.ids[x.id]).length;
+  const on=d0===today()?'today':'on '+parse(d0).toLocaleDateString('en-GB',{weekday:'short'});
+  return(core?'Solid day: your CORE ticked ('+core+' '+on+').':'No CORE '+on+': your streak rests, it won’t break.')+' Up to '+Math.round(best)+' XP a day'+(away?'. '+away+' at home as bonus.':'.')}
+function renderTrip(){const c=$('trCard'),keep=c.scrollTop;c.innerHTML='';const t=today(),tr=TR.id?trips().find(x=>x.id===TR.id):null,started=!!tr&&tr.from<t;
+  const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+  const add=(tag,cls,txt)=>{const e=el(tag,cls,txt);c.appendChild(e);return e};
+  const btn=(cls,txt,fn,pressed)=>{const b=el('button',cls,txt);b.type='button';b.onclick=fn;if(pressed!=null)b.setAttribute('aria-pressed',!!pressed);return b};
+  add('span','label',tr?(tripOn(t)?'Travel mode · on':'Travel mode · coming up'):'Travel mode');
+  add('h2','',tr?'Your trip':'Going away?').id='trTitle';
+  add('p','he-note','Pack what you can do on the trip. Solid days still grow your streak, and your plan waits for you.');
+  add('span','label tr-l','Country');
+  {const sel=el('select','tr-sel');sel.id='trCountry';sel.setAttribute('aria-label','Country');const o=(v,txt)=>{const x=el('option','',txt);x.value=v;sel.appendChild(x)};
+    o('','Pick a country…');for(const [c,n] of COUNTRIES)o(c,flagEmoji(c)+' '+n);o('XX','🌍 Somewhere else…');sel.value=TR.country||'';
+    sel.onchange=()=>{TR.country=sel.value;renderTrip()};add('div','tr-selw').appendChild(sel);
+    if(TR.country==='XX'){const pi=el('input','tr-place');pi.type='text';pi.id='trPlace';pi.maxLength=40;pi.placeholder='Where are you going?';pi.value=TR.place||'';pi.oninput=()=>{TR.place=pi.value};c.appendChild(pi)}
+    add('p','he-note',TR.country?'A solid day there earns its sticker for your suitcase.':'Pick it to earn that country’s sticker for your suitcase.')}
+  add('span','label tr-l','The view');{const g=add('div','tr-chips');for(const k in DESTS)g.appendChild(btn('chip'+(TR.dest===k?' on':''),DESTS[k][0]+' '+DESTS[k][1],()=>{TR.dest=k;renderTrip()},TR.dest===k))}
+  add('span','label tr-l','Getting there');{const g=add('div','tr-chips');for(const k in VIAS)g.appendChild(btn('chip'+(TR.via===k?' on':''),VIAS[k][0]+' '+VIAS[k][1],()=>{TR.via=k;renderTrip()},TR.via===k))}
+  add('p','he-note',TR.via==='none'?'Your room drawing turns into the place you picked.':'The first and last day show the journey. The days in between show the place you picked.');
+  add('span','label tr-l','Dates');
+  {const dr=add('div','tr-dates');const fi=el('input');fi.type='date';fi.id='trFrom';fi.value=TR.from;fi.onchange=()=>{TR.from=fi.value||t;if(TR.to<TR.from)TR.to=TR.from;renderTrip()};
+    const ti=el('input');ti.type='date';ti.id='trTo';ti.value=TR.open?'':TR.to;ti.disabled=TR.open;ti.min=TR.from;ti.onchange=()=>{TR.to=ti.value&&ti.value>=TR.from?ti.value:TR.from;renderTrip()};
+    const l1=el('label','tr-dl');l1.append(el('span','','Leaving'),fi);const l2=el('label','tr-dl');l2.append(el('span','',TR.open?'Last day: not sure yet':'Last day away'),ti);dr.append(l1,l2)}
+  {const g=add('div','tr-chips');[['Just today',0],['3 days',2],['1 week',6]].forEach(([txt,n])=>{const on=!TR.open&&TR.to===addDays(TR.from,n);g.appendChild(btn('chip sm'+(on?' on':''),txt,()=>{TR.open=false;TR.to=addDays(TR.from,n);renderTrip()},on))});
+    g.appendChild(btn('chip sm'+(TR.open?' on':''),'Not sure yet',()=>{TR.open=!TR.open;if(TR.to<TR.from)TR.to=TR.from;renderTrip()},TR.open))}
+  add('span','label tr-l','Pack your habits');add('p','he-note','Tick the ones you can do on this trip. Tap CORE to change it just for the trip.');
+  {const ul=add('div','tr-pack');for(const x of tripHabits()){const on=!!TR.ids[x.id],core=on&&!!TR.ids[x.id].core;
+    const row=el('div','tr-row'+(on?' on':''));const flip=()=>{if(on)delete TR.ids[x.id];else TR.ids[x.id]={core:x.core};renderTrip()};
+    const cb=btn('tr-cb','',flip,on);cb.innerHTML=CHECK;cb.setAttribute('aria-label','Pack '+x.name);
+    const nm=el('div','tr-nm');nm.append(el('b','',x.name),el('span','',x.hint||'Every day'));nm.onclick=flip;
+    const cr=btn('tr-core'+(core?' on':''),'CORE',()=>{TR.ids[x.id]={core:!core};renderTrip()},core);cr.disabled=!on;cr.setAttribute('aria-label','CORE on the trip: '+x.name);
+    row.append(cb,nm,cr);ul.appendChild(row)}}
+  add('span','label tr-l','Travel habits');add('p','he-note','Things you only do away. They count like any habit.');
+  {if(TR.extra.length){const xl=add('div','tr-pack');TR.extra.forEach((x,i)=>{const row=el('div','tr-row on');
+      const del=btn('tr-del','✕',()=>{TR.extra.splice(i,1);renderTrip()});del.setAttribute('aria-label','Remove '+x.title);
+      const nm=el('div','tr-nm');nm.append(el('b','',x.title),el('span','','Only on trips'));
+      const cr=btn('tr-core'+(x.core?' on':''),'CORE',()=>{x.core=!x.core;renderTrip()},!!x.core);cr.setAttribute('aria-label','CORE on the trip: '+x.title);
+      row.append(del,nm,cr);xl.appendChild(row)})}
+    const ar=add('div','tr-addrow');const inp=el('input');inp.type='text';inp.id='trNew';inp.maxLength=60;inp.placeholder='Add one, e.g. 20 min walk';inp.setAttribute('aria-label','New travel habit');
+    const addX=txt=>{txt=(txt||'').trim();if(!txt){inp.focus();return}if(TR.extra.length>=6){toast('Six travel habits at most');return}
+      TR.extra.push({id:'tx'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),title:txt.slice(0,60),core:false,effort:2});renderTrip()};
+    inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addX(inp.value)}};ar.append(inp,btn('tbtn','Add',()=>addX(inp.value)));
+    const prev=((profile.travelPack&&profile.travelPack.extra)||[]).map(x=>x.title),sg=add('div','tr-chips');
+    [...new Set(prev.concat(['20 min walk','Bodyweight workout','2 L of water','10 min journal']))].filter(s=>!TR.extra.some(x=>x.title===s)).slice(0,8).forEach(s=>sg.appendChild(btn('chip sm','+ '+s,()=>addX(s))))}
+  add('p','tr-sum',tripSummary());
+  if(started)add('p','he-note','Habit changes start tomorrow. Today stays as it is.');
+  {const L=stickerList();add('p','he-note tr-stk',L.length?'🧳 Your suitcase: '+L.map(x=>flagEmoji(x.code)+' '+x.name+' ('+x.n+(x.n===1?' day)':' days)')).join(', ')+'.':'🧳 Your suitcase is empty. A solid day in a country adds its sticker, and you keep it.')}
+  const bt=add('div','tr-btns');bt.appendChild(btn('btn primary',tr?'Save trip':'Start trip ✈️',saveTrip));
+  if(tr&&tripOn(t))bt.appendChild(btn('btn','I’m home',endTrip));
+  if(tr&&tr.from>=t)bt.appendChild(btn('btn danger','Delete trip',delTrip));
+  bt.appendChild(btn('tbtn','Cancel',()=>{$('trSheet').hidden=true}));
+  c.scrollTop=keep}
+function afterTrip(msg){saveState();$('trSheet').hidden=true;viewDate=today();lastXP=null;render();SCENE.draw();toast(msg)}
+function saveTrip(){const t=today();if(!TR.from){toast('Pick the day you leave');return}
+  const to=TR.open?null:(TR.to||TR.from);if(to&&to<TR.from){toast('The last day can’t be before you leave');return}
+  if(trips().some(x=>x.id!==TR.id&&x.from<=(to||'9999-12-31')&&(!x.to||x.to>=TR.from))){toast('You already have a trip on those days');return}
+  if(!Array.isArray(profile.trips))profile.trips=[];
+  const pk={ids:clone(TR.ids),extra:clone(TR.extra)};let tr=TR.id?profile.trips.find(x=>x.id===TR.id):null;
+  if(tr){if(tr.from<t&&TR.from===tr.from){const tm=addDays(t,1),cur=packFor(tr,tm);
+      if(JSON.stringify({ids:cur.ids,extra:cur.extra})!==JSON.stringify(pk)){tr.packs=tr.packs.filter(p=>p.from<=t);tr.packs.push(Object.assign({from:tm},pk))}}
+    else tr.packs=[Object.assign({from:TR.from},pk)];
+    tr.from=TR.from;tr.to=to;tr.dest=TR.dest;tr.via=TR.via;tr.country=TR.country;tr.place=(TR.place||'').trim().slice(0,40);tr.packs.sort((a,b)=>a.from<b.from?-1:1);tr.packs[0].from=tr.from}
+  else{tr={id:'tr'+Date.now().toString(36),from:TR.from,to,dest:TR.dest,via:TR.via,country:TR.country,place:(TR.place||'').trim().slice(0,40),packs:[Object.assign({from:TR.from},pk)]};profile.trips.push(tr)}
+  profile.travelPack=Object.assign({dest:TR.dest,via:TR.via},clone(pk));
+  afterTrip(tripOn(t)===tr?(tr.country?flagEmoji(tr.country):DESTS[tr.dest][0])+' Travel mode on. Enjoy the trip!':'Trip saved: '+fmtD(tr.from)+(tr.to?' to '+fmtD(tr.to):''))}
+function endTrip(){const t=today(),tr=tripOn(t);if(!tr)return;
+  if(tr.from>=t)profile.trips=profile.trips.filter(x=>x!==tr);else{tr.to=addDays(t,-1);tr.packs=tr.packs.filter(p=>p.from<=tr.to)}
+  afterTrip('Welcome home! Your normal plan is back today.')}
+function delTrip(){profile.trips=trips().filter(x=>x.id!==TR.id);afterTrip('Trip deleted')}
+$('travel').onclick=openTrip;$('trBar').onclick=openTrip;
+$('trSheet').onclick=e=>{if(e.target.id==='trSheet')$('trSheet').hidden=true};
 initStore();
 })();
 </script>
