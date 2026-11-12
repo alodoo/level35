@@ -474,6 +474,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .row.awayrow:not(.on) .name,.row.awayrow:not(.on) .hint,.row.awayrow:not(.on) .xp{opacity:.6}
 .row .core.triptag{background:color-mix(in srgb,#2C8FD8 16%,transparent);color:#2C7FB8}
 .roomaway{margin:14px 16px!important}
+.trempty{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:color-mix(in srgb,#2C8FD8 9%,var(--surface));color:var(--ink);font:inherit}
+.trempty b{font-weight:800;font-size:15px}.trempty span{font-size:13px;color:var(--muted)}
+.trempty i{align-self:flex-start;margin-top:6px;font-style:normal;font-weight:700;font-size:13px;padding:6px 12px;border-radius:999px;background:#2C8FD8;color:#fff}
 .roomoff .sec-head h3{opacity:.55}.roomoff .roomlist{background:var(--soft)}
 .tr-card{max-width:420px;max-height:calc(100dvh - 32px);overflow-y:auto;align-items:stretch;text-align:left;gap:8px;overscroll-behavior:contain}
 .tr-card>*{flex-shrink:0}
@@ -1326,6 +1329,10 @@ function renderDay(){
       const [minus,plus]=ex.querySelectorAll('button');ex.querySelector('b').textContent=d.apps||0;minus.onclick=()=>bump(-1);plus.onclick=()=>bump(1);row.appendChild(ex)}
     return row};
   for(const h of orderHabits(habitsFor(viewDate,lv)))box.appendChild(mkRow(h,'hrow'));
+  {const trp=tripOn(viewDate);if(trp&&viewDate>=today()&&!habitsFor(viewDate,lv).length){const pk=packFor(trp,viewDate),none=!Object.keys(pk.ids||{}).length&&!(pk.extra||[]).length;
+    const e=document.createElement('button');e.type='button';e.className='trempty';const B=document.createElement('b'),S=document.createElement('span');
+    B.textContent=none?'🧳 Nothing packed yet':'🧳 None of your packed habits are on today';S.textContent=none?'Pick the habits you can do on this trip.':'Pack more for the trip, or add a travel habit.';
+    const I=document.createElement('i');I.textContent='Pack habits';e.append(B,S,I);e.onclick=()=>openTrip(true);box.appendChild(e)}}
   {const aw=awayFor(viewDate,lv);if(aw.length){const hd=document.createElement('div');hd.className='awayhead';hd.innerHTML='<b>At home</b> Optional on this trip. Ticks still earn XP.';box.appendChild(hd);
     for(const h of orderHabits(aw))box.appendChild(mkRow(h,'awayrow'))}}
   box.appendChild(boostRow(d));
@@ -2184,10 +2191,30 @@ const SCENE=(function(){
     if(TS.via==='car')roadSign(p,r,g);else if(TS.via)departBoard(p,r,g);
     if(TS.stk.length!==stkN){if(stkN>=0&&TS.stk.length>stkN)stkAt=now;stkN=TS.stk.length}
     if(TS.via==='car')carBack(p,r,g,S,night,TS,now-stkAt<3000);else suitcasePaint(p,r,TS.stk,now-stkAt<3000,TS.via==='plane'||TS.via==='train')}
-  function paperPlane(r,x,y,s){const W='#FFFFFF';r(x,y,2*s,s,W);r(x+s,y+s,4*s,s,W);r(x+s,y+2*s,5*s,s,'#9AA6BA');r(x+6*s,y+2*s,2*s,s,W);r(x+s,y+3*s,4*s,s,W);r(x,y+4*s,2*s,s,W)}
+  const PPS=(()=>{const E=["##......",".####...",".ccccc##",".####...","##......"],NE=[".......#",".....##.","...##c#.",".###c#..","###c##..","..###...","...##...","...#...."],
+      ccw=g=>g[0].split('').map((_,y)=>g.map((_,x)=>g[x][g[0].length-1-y]).join('')),cw=g=>g[0].split('').map((_,y)=>g.map((_,x)=>g[g.length-1-x][y]).join('')),
+      fx=g=>g.map(q=>q.split('').reverse().join('')),fy=g=>g.slice().reverse();
+    return[E,NE,ccw(E),fx(NE),fx(E),fx(fy(NE)),cw(E),fy(NE)]})();  // E, NE, N, NW, W, SW, S, SE
+  function paperPlane(r,cx,cy,ang,s){const G=PPS[((Math.round(ang/(Math.PI/4))%8)+8)%8];if(!G)return;const x0=Math.round(cx-G[0].length*s/2),y0=Math.round(cy-G.length*s/2);
+    for(let j=0;j<G.length;j++)for(let i=0;i<G[j].length;i++){const c=G[j][i];if(c!=='.')r(x0+i*s,y0+j*s,s,s,c==='c'?'#9AA6BA':'#FFFFFF')}}
+  const PPT=[330,1830,2980];  // ms after the throw: reaches the loop, finishes it, gone off the right edge
+  function paperPath(ms,full){const cx=206,cy=33,R=13,bx=cx,by=cy+R;
+    if(ms<PPT[0]){const k=ms/PPT[0],x0=full?188:182,y0=full?52:66,a=(1-k)*(1-k),b=2*(1-k)*k,c=k*k;return[a*x0+b*(bx-14)+c*bx,a*y0+b*by+c*by]}
+    if(ms<PPT[1]){const v=(ms-PPT[0])/(PPT[1]-PPT[0]),th=2*Math.PI*v+.45*Math.sin(2*Math.PI*v);return[cx+R*Math.sin(th),cy+R*Math.cos(th)]}  // slower over the top
+    const u=ms-PPT[1],x=bx+.08*u+3.6e-5*u*u,k=Math.min(1,(x-bx)/46);return[x,by+7*k*k*(3-2*k)]}  // speeds up and drops under the sign
+  let PPfast=0,PPaim=null;const PPRM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function paperFly(r,g){const ms=HERO16.paperMs(),aim=ms<0;
+    if(aim!==PPaim){PPaim=aim;if(typeof HERO!=='undefined'&&HERO.poke)HERO.poke()}  // swap the hand pose right as it leaves his hand
+    if(!PPRM&&!PPfast&&ms>-200)PPfast=setTimeout(()=>{PPfast=0;if(!document.hidden)draw()},33);  // smooth flight: ~30 fps from the throw until the trail is gone
+    if(aim)return;const full=(typeof HERO!=='undefined'&&HERO.stage?HERO.stage():0)>=5;
+    // trail: a fading ribbon along the last ~0.7 s of the path, at the plane's pixel size
+    const seen=new Set();let prev=paperPath(ms,full);
+    for(let j=1;j<=30;j++){const m=ms-j*24;if(m<0)break;const q=paperPath(m,full),n=Math.max(1,Math.ceil(Math.hypot(q[0]-prev[0],q[1]-prev[1])));g.globalAlpha=.95*(1-j/31);
+      for(let i=0;i<n;i++){const x=(Math.round(prev[0]+(q[0]-prev[0])*i/n)>>1)<<1,y=(Math.round(prev[1]+(q[1]-prev[1])*i/n)>>1)<<1,key=x*512+y;if(seen.has(key))continue;seen.add(key);r(x-1,y-1,2,2,'#FFFFFF')}
+      prev=q}
+    g.globalAlpha=1;if(ms>PPT[2])return;const p0=paperPath(ms,full),p1=paperPath(ms+20,full);paperPlane(r,p0[0],p0[1],Math.atan2(p0[1]-p1[1],p1[0]-p0[0]),2)}  // past PPT[2] only the trail is left, sliding off
   function travelFront(p,r,g,now,TS){if(TS.via==='car'){const S=skyOf();carFront(p,r,g,S,S.k==='night')}
-    if(TS.via==='plane'&&typeof HERO16!=='undefined'&&HERO16.mood===2){const ph=(performance.now()%3000)/3000;
-      if(ph>=.25){const u=(ph-.25)/.75,full=(typeof HERO!=='undefined'&&HERO.stage?HERO.stage():0)>=5,sx=full?186:180,sy=full?54:64,x=Math.round(sx+u*150),y=Math.round(sy-Math.sin(u*Math.PI)*7);paperPlane(r,x,y,2)}}
+    if(TS.via==='plane'&&typeof HERO16!=='undefined'&&HERO16.mood===2&&HERO16.paperMs)paperFly(r,g);
     if(SURF){const by=2*(SURFY+31);g.globalAlpha=.8;r(128,by-1,66,3,'#E6F7FF');g.globalAlpha=1;for(let i=0;i<12;i++){const k=(t+i*2)%10;r(112+((i*9)%22)-k,by-2-((i*5+k)%9),2,2,'#FFFFFF')}}}
   function draw(){if(!cv)return;paint(g,items(),false);
     const sp=$('suRoomCv');if(sp&&!$('setup').hidden&&!$('suR').hidden)paint(sp.getContext('2d'),toItems(SU.room.map(x=>({id:x.qid,done:false}))),true)}
@@ -3007,6 +3034,7 @@ const HERO16=(function(){
     if(MOOD===2){r(9,0,14,8,O);r(10,1,12,6,G);r(10,1,12,1,K.goldH);r(20,1,2,6,K.goldS);digit(d,12,2,3,J);digit(d,16,2,5,J);r(8,1,2,2,G);r(22,1,2,2,G);if(t%3===0)sparkle(d,16,0,WH)}};
   const S=Array.from({length:35},(_,i)=>L[i+1]);
   const TRVO={plane:['#5B84E8','#2E3A5C'],train:['#2FA36B','#2E3A5C'],car:['#E8541A','#2E3A5C'],beach:['#1ABC9C','#3F7BD9'],mountain:['#C0504D','#5A4632'],city:['#22305A','#5A6276'],fields:['#C0504D','#3F7BD9'],cottage:['#B23A3A','#5A6276'],snow:['#FF7A2F','#22305A']};
+  const PAPER_MS=4200,PAPER_AIM=600;  // the paper plane throw: aim, then the scene flies it (glide, loop, out)
   function travel(ctx,kind,lv,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;const d=api(ctx),{p,r}=d,M=MOOD,[SH,PA]=TRVO[kind]||TRVO.beach;
     const sk=lv<=1?'grey':lv===2?'dusk':lv===3?'pale':lv===4?'warm':'skin',hair=lv>=6,full=lv>=6,SKC=K[sk];
     const face=(x,y,o)=>head(d,x,y,Object.assign({skin:sk,hair,eyes:M===0?'tired':'open',mouth:M===0?'neutral':'smile'},o||{}));
@@ -3036,7 +3064,7 @@ const HERO16=(function(){
       // the thumbs up on a solid day is drawn by the car, at the scene's finer detail
       return}
     if(kind==='plane'){
-      const aim=(performance.now()%3000)/3000<.25,pp=(x,y)=>{r(x,y,2,1,WH);r(x+1,y+1,4,1,WH);r(x+1,y+2,5,1,'#9AA6BA');r(x+6,y+2,2,1,WH);r(x+1,y+3,4,1,WH);r(x,y+4,2,1,WH)};
+      const aim=performance.now()%PAPER_MS<PAPER_AIM,pp=(x,y)=>{r(x,y,2,1,WH);r(x+1,y+1,4,1,WH);r(x+1,y+2,5,1,'#9AA6BA');r(x+6,y+2,2,1,WH);r(x+1,y+3,4,1,WH);r(x,y+4,2,1,WH)};
       if(full){if(M===2){fb({armR:aim?'wave':'out'});face(hx,hy);pillow(8,16);if(aim)pp(25,7)}
         else{const h=fb({armR:M===1?'fwd':'down'});face(hx,hy);pillow(8,16);if(M===1)ticket(h.R[0]-2,h.R[1]-2)}}
       else{ho();face(hx,hy);pillow(8,28);if(M===1)ticket(25,18+((t>>1)%2));if(M===2&&aim)pp(24,16)}
@@ -3121,7 +3149,7 @@ const HERO16=(function(){
     else{if(M===2){const up=t%4<2?4:1;shadow(d,10);r(6,30-up,20,3,'#FF7A2F');face(hx,hy-up);beanie(hx,hy-up,true);sparkle(d,3,8,WH)}else{ho();board(26);face(hx,hy);beanie(hx,hy,M===1)}if(M===0)zzz(d,t)}
   }
   function draw(ctx,i,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;S[i](api(ctx),t)}
-  return{draw,travel,n:S.length,floorShadow:v=>{FLOOR_SHADOW=v},setMood:m=>{MOOD=m},get mood(){return MOOD}};
+  return{draw,travel,paperMs:()=>performance.now()%PAPER_MS-PAPER_AIM,n:S.length,floorShadow:v=>{FLOOR_SHADOW=v},setMood:m=>{MOOD=m},get mood(){return MOOD}};
 })();
 
 /* ---------- the character on screen: looks gallery, evolve flash, mood ---------- */
@@ -3148,7 +3176,7 @@ const HERO=(function(){
     if(cur!==-1&&i>cur){const b=$('hero');b.classList.remove('evolve');void b.offsetWidth;b.classList.add('evolve')}
     const changed=i!==cur;cur=i;mainDraw();
     if(changed&&!$('lookPanel').hidden)renderLooks()}
-  return{set,_draw:draw,_n:HERO16.n,stage:()=>cur,setMood:m=>{if(m!==HERO16.mood){HERO16.setMood(m);if(g&&cur>=0)mainDraw()}},setTravel:k=>{if(k!==TRAV){TRAV=k;if(g&&cur>=0)mainDraw()}}};
+  return{set,_draw:draw,_n:HERO16.n,stage:()=>cur,setMood:m=>{if(m!==HERO16.mood){HERO16.setMood(m);if(g&&cur>=0)mainDraw()}},setTravel:k=>{if(k!==TRAV){TRAV=k;if(g&&cur>=0)mainDraw()}},poke:()=>{if(g&&cur>=0)mainDraw()}};
 })();
 let tt;function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),1800)}
 
@@ -3158,7 +3186,10 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&viewDate>
 /* ---------- travel mode sheet ---------- */
 let TR=null;
 const fmtD=s=>parse(s).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-function tripHabits(){const c=latestConfig(),lv=curLevel();return c?orderHabits(c.habits.filter(h=>isActive(h,lv)).map(h=>({id:h.id,core:!!h.core,name:hName(h,lv),hint:hHint(h,lv),h}))):[]}
+function tripHabits(){const c=latestConfig(),lv=curLevel();return c?orderHabits(c.habits.filter(h=>isActive(h,lv)).map(h=>{const ds=daysAt(h,lv),dl=h.kind!=='weekly'&&ds.length<7?dayList(ds):'',hi=hHint(h,lv);
+  return{id:h.id,core:!!h.core,name:hName(h,lv),hint:dl&&hi?dl+' · '+hi:dl||hi,h}})):[]}
+// the first day a change to the trip's habits can apply to: today, unless you've already closed it
+function packFrom(){const t=today();return days[t]&&days[t].closed?addDays(t,1):t}
 function activeTrip(){const t=today();return tripOn(t)||trips().filter(x=>x.from>t).sort((a,b)=>a.from<b.from?-1:1)[0]||null}
 function renderTripBar(){const b=$('trBar');if(!b)return;const t=today(),tr=tripOn(viewDate),up=!tr&&viewDate===t?activeTrip():null;
   {const tb=$('travel');if(tb)tb.classList.toggle('on',!!activeTrip())}
@@ -3166,10 +3197,11 @@ function renderTripBar(){const b=$('trBar');if(!b)return;const t=today(),tr=trip
   if(tr){const j=journeyOn(viewDate),D=DESTS[tr.dest]||DESTS.beach,pl=tr.country?flagEmoji(tr.country)+' '+tripPlace(tr):D[0]+' '+D[1];show([j?VIAS[j][0]+' Travel day'+(tr.country?' · '+flagEmoji(tr.country):''):pl,(tr.to?(tr.to===viewDate?'Last day away':'Back '+fmtD(tr.to)):'Until you’re back')+' · plan paused'])}
   else if(up){const D=DESTS[up.dest]||DESTS.beach;show([(up.country?flagEmoji(up.country):D[0])+' Trip coming up'+(up.country?': '+tripPlace(up):''),'From '+fmtD(up.from)])}
   else b.hidden=true}
-function openTrip(){SND.unlock();const t=today(),tr=activeTrip(),tp=profile.travelPack||null;
-  if(tr){const pk=packFor(tr,tr.from<t?addDays(t,1):tr.from);TR={id:tr.id,from:tr.from,to:tr.to||tr.from,open:!tr.to,dest:tr.dest,via:tr.via||'none',country:tr.country||'',place:tr.place||'',ids:clone(pk.ids||{}),extra:clone(pk.extra||[])}}
+function openTrip(toPack){SND.unlock();const t=today(),tr=activeTrip(),tp=profile.travelPack||null;
+  if(tr){const pk=packFor(tr,tr.from<=t?packFrom():tr.from);TR={id:tr.id,from:tr.from,to:tr.to||tr.from,open:!tr.to,dest:tr.dest,via:tr.via||'none',country:tr.country||'',place:tr.place||'',ids:clone(pk.ids||{}),extra:clone(pk.extra||[])}}
   else TR={id:null,from:t,to:t,open:false,dest:tp&&DESTS[tp.dest]?tp.dest:'beach',via:tp&&VIAS[tp.via]?tp.via:'plane',country:'',place:'',ids:{},extra:[]};  // a new trip starts with nothing packed
-  renderTrip();$('trSheet').hidden=false;$('trCard').scrollTop=0}
+  renderTrip();$('trSheet').hidden=false;const cd=$('trCard');cd.scrollTop=0;
+  if(toPack===true){const pl=cd.querySelector('.tr-packhd');if(pl)cd.scrollTop=Math.max(0,pl.offsetTop-12)}}
 function tripSummary(){const c=latestConfig();if(!c)return'';const lv=curLevel(),R=rates(c,lv),hs=tripHabits();let core=0,best=0;
   const d0=TR.from>today()?TR.from:today(),w0=parse(d0).getDay();
   for(const x of hs)if(TR.ids[x.id]&&TR.ids[x.id].core&&daysAt(x.h,lv).includes(w0))core++;for(const x of TR.extra)if(x.core)core++;
@@ -3177,7 +3209,7 @@ function tripSummary(){const c=latestConfig();if(!c)return'';const lv=curLevel()
   const away=hs.filter(x=>!TR.ids[x.id]).length;
   const on=d0===today()?'today':'on '+parse(d0).toLocaleDateString('en-GB',{weekday:'short'});
   return(core?'Solid day: your CORE ticked ('+core+' '+on+').':'No CORE '+on+': your streak rests, it won’t break.')+' Up to '+Math.round(best)+' XP a day'+(away?'. '+away+' at home as bonus.':'.')}
-function renderTrip(){const c=$('trCard'),keep=c.scrollTop;c.innerHTML='';const t=today(),tr=TR.id?trips().find(x=>x.id===TR.id):null,started=!!tr&&tr.from<t;
+function renderTrip(){const c=$('trCard'),keep=c.scrollTop;c.innerHTML='';const t=today(),tr=TR.id?trips().find(x=>x.id===TR.id):null;
   const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
   const add=(tag,cls,txt)=>{const e=el(tag,cls,txt);c.appendChild(e);return e};
   const btn=(cls,txt,fn,pressed)=>{const b=el('button',cls,txt);b.type='button';b.onclick=fn;if(pressed!=null)b.setAttribute('aria-pressed',!!pressed);return b};
@@ -3199,7 +3231,7 @@ function renderTrip(){const c=$('trCard'),keep=c.scrollTop;c.innerHTML='';const 
     const l1=el('label','tr-dl');l1.append(el('span','','Leaving'),fi);const l2=el('label','tr-dl');l2.append(el('span','',TR.open?'Last day: not sure yet':'Last day away'),ti);dr.append(l1,l2)}
   {const g=add('div','tr-chips');[['Just today',0],['3 days',2],['1 week',6]].forEach(([txt,n])=>{const on=!TR.open&&TR.to===addDays(TR.from,n);g.appendChild(btn('chip sm'+(on?' on':''),txt,()=>{TR.open=false;TR.to=addDays(TR.from,n);renderTrip()},on))});
     g.appendChild(btn('chip sm'+(TR.open?' on':''),'Not sure yet',()=>{TR.open=!TR.open;if(TR.to<TR.from)TR.to=TR.from;renderTrip()},TR.open))}
-  add('span','label tr-l','Pack your habits');add('p','he-note','Tick the ones you can do on this trip. Tap CORE to change it just for the trip.');
+  add('span','label tr-l tr-packhd','Pack your habits');add('p','he-note','Tick the ones you can do on this trip. Tap CORE to change it just for the trip.');
   {const ul=add('div','tr-pack');for(const x of tripHabits()){const on=!!TR.ids[x.id],core=on&&!!TR.ids[x.id].core;
     const row=el('div','tr-row'+(on?' on':''));const flip=()=>{if(on)delete TR.ids[x.id];else TR.ids[x.id]={core:x.core};renderTrip()};
     const cb=btn('tr-cb','',flip,on);cb.innerHTML=CHECK;cb.setAttribute('aria-label','Pack '+x.name);
@@ -3219,7 +3251,7 @@ function renderTrip(){const c=$('trCard'),keep=c.scrollTop;c.innerHTML='';const 
     const prev=((profile.travelPack&&profile.travelPack.extra)||[]).map(x=>x.title),sg=add('div','tr-chips');
     [...new Set(prev.concat(['20 min walk','Bodyweight workout','2 L of water','10 min journal']))].filter(s=>!TR.extra.some(x=>x.title===s)).slice(0,8).forEach(s=>sg.appendChild(btn('chip sm','+ '+s,()=>addX(s))))}
   add('p','tr-sum',tripSummary());
-  if(started)add('p','he-note','Habit changes start tomorrow. Today stays as it is.');
+  if(tr&&tr.from<=t&&packFrom()>t)add('p','he-note','You’ve closed today, so habit changes start tomorrow.');
   {const L=stickerList();add('p','he-note tr-stk',L.length?'🧳 Your suitcase: '+L.map(x=>flagEmoji(x.code)+' '+x.name+' ('+x.n+(x.n===1?' day)':' days)')).join(', ')+'.':'🧳 Your suitcase is empty. A solid day in a country adds its sticker, and you keep it.')}
   const bt=add('div','tr-btns');bt.appendChild(btn('btn primary',tr?'Save trip':'Start trip ✈️',saveTrip));
   if(tr&&tripOn(t))bt.appendChild(btn('btn','I’m home',endTrip));
@@ -3232,8 +3264,9 @@ function saveTrip(){const t=today();if(!TR.from){toast('Pick the day you leave')
   if(trips().some(x=>x.id!==TR.id&&x.from<=(to||'9999-12-31')&&(!x.to||x.to>=TR.from))){toast('You already have a trip on those days');return}
   if(!Array.isArray(profile.trips))profile.trips=[];
   const pk={ids:clone(TR.ids),extra:clone(TR.extra)};let tr=TR.id?profile.trips.find(x=>x.id===TR.id):null;
-  if(tr){if(tr.from<t&&TR.from===tr.from){const tm=addDays(t,1),cur=packFor(tr,tm);
-      if(JSON.stringify({ids:cur.ids,extra:cur.extra})!==JSON.stringify(pk)){tr.packs=tr.packs.filter(p=>p.from<=t);tr.packs.push(Object.assign({from:tm},pk))}}
+  if(tr){const eff=packFrom();
+    if(tr.from<eff&&TR.from===tr.from){const cur=packFor(tr,eff);
+      if(JSON.stringify({ids:cur.ids,extra:cur.extra})!==JSON.stringify(pk)){tr.packs=tr.packs.filter(p=>p.from<eff);tr.packs.push(Object.assign({from:eff},pk))}}
     else tr.packs=[Object.assign({from:TR.from},pk)];
     tr.from=TR.from;tr.to=to;tr.dest=TR.dest;tr.via=TR.via;tr.country=TR.country;tr.place=(TR.place||'').trim().slice(0,40);tr.packs.sort((a,b)=>a.from<b.from?-1:1);tr.packs[0].from=tr.from}
   else{tr={id:'tr'+Date.now().toString(36),from:TR.from,to,dest:TR.dest,via:TR.via,country:TR.country,place:(TR.place||'').trim().slice(0,40),packs:[Object.assign({from:TR.from},pk)]};profile.trips.push(tr)}
