@@ -3019,7 +3019,10 @@ const HERO16=(function(){
     const flowers=()=>[[3,30,'#F27BD3'],[28,30,'#FFC531'],[24,28,WH],[6,27,'#FFC531']].forEach(([x,y,c])=>{p(x,y,c);p(x,y+1,'#2F8A4A')});
     if(kind==='car'){ // in the driver's seat: your head through the window, sleepy, then shades, then a thumbs up
       face(10,2,{eyes:M===0?'tired':'shades',mouth:M===2?'big':M===1?'smile':'neutral'});
-      if(M===2){r(28,7,3,4,SKC);r(29,5,1,2,SKC);[[27,7],[27,8],[27,9],[27,10],[28,11],[29,11],[30,11],[31,8],[31,9],[31,10],[28,6],[30,6],[29,4]].forEach(([x,y])=>p(x,y,O));r(28,12,3,6,SH)}
+      if(M===2){ // thumbs up: a fist with curled fingers, the thumb on its side pointing up
+        const SKS=K[sk+'S'],TU=['.oo...','osso..','osso..','ossooo','osssso','oddddo','osssso','oddddo','osssso','.oooo.'];
+        r(27,13,4,5,SH);r(26,13,1,5,O);r(31,13,1,5,O);
+        TU.forEach((row,j)=>[...row].forEach((c,i)=>{if(c!=='.')p(26+i,3+j,c==='o'?O:c==='d'?SKS:SKC)}))}
       return}
     if(kind==='plane'){
       if(full){const h=fb({armR:M===2?'up':M===1?'fwd':'down'});face(hx,hy);pillow(8,16);if(M===1)ticket(h.R[0]-2,h.R[1]-2);if(M===2){passport(h.R[0]-1,h.R[1]-4);if(t%3===0)sparkle(d,29,2,K.gold)}}
