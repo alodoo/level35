@@ -2139,20 +2139,13 @@ const SCENE=(function(){
     r(144,34,4,28,CAR.d);r(124,34,4,28,CAR.c);for(let k=0;k<28;k++)r(202+Math.round(k*.6),34+k,3,1,CAR.c);
     r(130,26,48,2,'#3B3F4A');r(134,28,2,2,'#3B3F4A');r(172,28,2,2,'#3B3F4A');
     suitcasePaint(p,r,TS.stk,blink,null,132,0)}
-  // a 👍 at 2x: thick rounded thumb up on the left, four curled fingers stacked on the right, wrist into the door
+  // a 👍 at the character's pixel size (each cell is 2x2): fat thumb up on the left, curled fingers bumping out on the right
   const SKINS={1:['#A9B1C2','#848CA0','#CCD2DE'],2:['#BDB5B3','#978F8E','#DAD4D3'],3:['#D2BBA6','#AE9580','#E8DACB'],4:['#E6C09A','#C49A72','#F5DCC3'],5:['#F4C28B','#D99A5E','#FFE0B8']};
-  const TUM=(()=>{const W=18,H=24,m=[];const inH=(x,y)=>(x>=5&&x<=8&&y===1)||(x>=4&&x<=9&&y>=2&&y<=11)||(x>=4&&x<=16&&y>=10&&y<=21&&!((x===4||x===16)&&(y===10||y===21))&&!(x===16&&(y===11||y===20)));
-    for(let y=0;y<H;y++){m[y]=[];for(let x=0;x<W;x++){const cuff=x>=3&&x<=11&&y>=21;m[y][x]=cuff?'c':inH(x,y)?'s':([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>inH(x+a,y+b))?'o':'.')}}
-    for(let y=2;y<=4;y++)for(let x=5;x<=7;x++)m[y][x]='n';                          // thumbnail
-    for(let y=2;y<=11;y++)m[y][4]='h';                                               // light edge of the thumb
-    for(let y=10;y<=12;y++)m[y][10]='k';m[12][9]='k';m[12][8]='k';                   // where the thumb meets the fist
-    for(const y of [13,16,19])for(let x=10;x<=15;x++)m[y][x]='k';                    // curled fingers
-    for(let y=11;y<=20;y++)m[y][16]=m[y][16]==='s'?'d':m[y][16];for(let x=5;x<=15;x++)if(m[20][x]==='s')m[20][x]='d';
-    return m})();
-  function thumbsUp(r,x,y,lv,shirt){const S=SKINS[Math.min(5,Math.max(1,lv))],col={o:O,s:S[0],d:S[1],k:S[1],h:S[2],n:'#FBE4D0',c:shirt};
-    TUM.forEach((row,j)=>row.forEach((c,i)=>{if(c!=='.')r(x+i,y+j,1,1,col[c])}))}
+  const TUP=['..oo......','.ohno.....','.ohso.....','.ohso.....','.ohsoooooo','ohssssssso','ohsskkkkko','ohssssssso','ohsskkkkko','ohsddddddo','.oooooooo.'];
+  function thumbsUp(r,hx,hy,lv){const S=SKINS[Math.min(5,Math.max(1,lv))],col={o:O,s:S[0],d:S[1],k:S[1],h:S[2],n:S[2]},G=window.__TU||TUP;
+    G.forEach((row,j)=>[...row].forEach((c,i)=>{if(c!=='.')r(128+2*(hx+i),32+2*(hy+j),2,2,col[c])}))}
   function carFront(p,r,g,S,night){
-    if(typeof HERO16!=='undefined'&&HERO16.mood===2){const lv=(typeof HERO!=='undefined'&&HERO.stage?HERO.stage():4)+1;thumbsUp(r,182,37+((t>>1)%2),lv,'#E8541A')}
+    if(typeof HERO16!=='undefined'&&HERO16.mood===2){const lv=(typeof HERO!=='undefined'&&HERO.stage?HERO.stage():4)+1;thumbsUp(r,27,2+((t>>2)%2),lv)}
     r(100,58,26,4,CAR.c);r(100,58,26,1,CAR.l);r(204,58,32,4,CAR.c);r(204,58,32,1,CAR.l);
     r(98,62,140,22,CAR.c);r(98,62,140,2,CAR.l);r(98,82,140,2,CAR.d);r(98,72,140,1,CAR.d);
     r(146,64,1,18,CAR.dd);r(202,64,1,18,CAR.dd);r(152,66,8,2,'#F4D5CF');r(208,66,8,2,'#F4D5CF');
