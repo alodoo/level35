@@ -2103,7 +2103,7 @@ const SCENE=(function(){
     const n=S.b.length;for(let i=0;i<n;i++){const a=8+Math.floor(i*44/n),b=8+Math.floor((i+1)*44/n);r(0,a,W2,b-a,S.b[i])}
     if(night)for(let i=0;i<24;i++)p((i*73+5)%W2,10+(i*23)%28,'#DDE6FF');else{const c=S.k==='day'?'#FFE27A':'#FFC56A';r(226,14,10,10,c);r(224,16,14,6,c)}
     r(0,52,W2,14,night?'#2B2F3A':'#6E7480');r(0,52,W2,2,night?'#3A3F4C':'#8A909C');for(let x=0;x<W2;x+=24)r(x,58,12,2,night?'#FFE27A':'#F2F2F2');if(night)for(let x=6;x<W2;x+=16)r(x,53,2,2,'#7CC4FF');
-    {const c=t%90;let x,y;if(c<36){x=-80+c*5.4;y=44}else if(c<72){const k=(c-36)/36;x=114+k*280;y=Math.round(44-k*k*52)}else x=-200;x=Math.round(x);
+    {const c=t%47;let x,y;if(c<20){x=-80+c*9.7;y=44}else if(c<40){const k=(c-20)/20;x=114+k*280;y=Math.round(44-k*k*52)}else x=-200;x=Math.round(x);
       if(x>-60&&x<W2+4){r(x,y,48,8,'#F4F6FA');r(x+40,y+2,12,4,'#F4F6FA');r(x+50,y+4,3,2,'#F4F6FA');r(x,y-8,6,8,'#2C5BD8');r(x+2,y-10,4,2,'#2C5BD8');r(x+6,y+2,36,2,'#2C5BD8');
         for(let k=12;k<40;k+=4)r(x+k,y+2,2,1,'#BFD9FF');r(x+18,y+6,16,4,'#9AA3B5');r(x+16,y+8,6,2,'#6E7688');r(x,y+7,48,1,'#C9CFDB');if(night){r(x+50,y+6,2,2,'#FF5A5A');r(x+2,y,2,2,'#7CFF9B')}}}
     for(let x=0;x<W2;x+=80){r(x,8,4,60,'#4B5563');r(x+1,8,1,60,'#6B7280')}r(0,66,W2,6,'#9AA3B5');r(0,66,W2,2,'#C3C9D3');
@@ -2184,7 +2184,10 @@ const SCENE=(function(){
     if(TS.via==='car')roadSign(p,r,g);else if(TS.via)departBoard(p,r,g);
     if(TS.stk.length!==stkN){if(stkN>=0&&TS.stk.length>stkN)stkAt=now;stkN=TS.stk.length}
     if(TS.via==='car')carBack(p,r,g,S,night,TS,now-stkAt<3000);else suitcasePaint(p,r,TS.stk,now-stkAt<3000,TS.via==='plane'||TS.via==='train')}
+  function paperPlane(r,x,y,s){const W='#FFFFFF';r(x,y,2*s,s,W);r(x+s,y+s,4*s,s,W);r(x+s,y+2*s,5*s,s,'#9AA6BA');r(x+6*s,y+2*s,2*s,s,W);r(x+s,y+3*s,4*s,s,W);r(x,y+4*s,2*s,s,W)}
   function travelFront(p,r,g,now,TS){if(TS.via==='car'){const S=skyOf();carFront(p,r,g,S,S.k==='night')}
+    if(TS.via==='plane'&&typeof HERO16!=='undefined'&&HERO16.mood===2){const ph=(performance.now()%3000)/3000;
+      if(ph>=.25){const u=(ph-.25)/.75,full=(typeof HERO!=='undefined'&&HERO.stage?HERO.stage():0)>=5,sx=full?186:180,sy=full?54:64,x=Math.round(sx+u*150),y=Math.round(sy-Math.sin(u*Math.PI)*7);paperPlane(r,x,y,2)}}
     if(SURF){const by=2*(SURFY+31);g.globalAlpha=.8;r(128,by-1,66,3,'#E6F7FF');g.globalAlpha=1;for(let i=0;i<12;i++){const k=(t+i*2)%10;r(112+((i*9)%22)-k,by-2-((i*5+k)%9),2,2,'#FFFFFF')}}}
   function draw(){if(!cv)return;paint(g,items(),false);
     const sp=$('suRoomCv');if(sp&&!$('setup').hidden&&!$('suR').hidden)paint(sp.getContext('2d'),toItems(SU.room.map(x=>({id:x.qid,done:false}))),true)}
@@ -3033,8 +3036,10 @@ const HERO16=(function(){
       // the thumbs up on a solid day is drawn by the car, at the scene's finer detail
       return}
     if(kind==='plane'){
-      if(full){const h=fb({armR:M===2?'up':M===1?'fwd':'down'});face(hx,hy);pillow(8,16);if(M===1)ticket(h.R[0]-2,h.R[1]-2);if(M===2){passport(h.R[0]-1,h.R[1]-4);if(t%3===0)sparkle(d,29,2,K.gold)}}
-      else{ho();face(hx,hy);pillow(8,28);if(M===1)ticket(25,18+((t>>1)%2));if(M===2){passport(26,12-(t%2));sparkle(d,29,8,K.gold)}}
+      const aim=(performance.now()%3000)/3000<.25,pp=(x,y)=>{r(x,y,2,1,WH);r(x+1,y+1,4,1,WH);r(x+1,y+2,5,1,'#9AA6BA');r(x+6,y+2,2,1,WH);r(x+1,y+3,4,1,WH);r(x,y+4,2,1,WH)};
+      if(full){if(M===2){fb({armR:aim?'wave':'out'});face(hx,hy);pillow(8,16);if(aim)pp(25,7)}
+        else{const h=fb({armR:M===1?'fwd':'down'});face(hx,hy);pillow(8,16);if(M===1)ticket(h.R[0]-2,h.R[1]-2)}}
+      else{ho();face(hx,hy);pillow(8,28);if(M===1)ticket(25,18+((t>>1)%2));if(M===2&&aim)pp(24,16)}
       if(M===0)zzz(d,t);return}
     if(kind==='train'){
       if(full){if(M===1){fb({armL:'fwd',armR:'fwd'});face(hx,hy);paper(8,20)}
@@ -3095,9 +3100,8 @@ const HERO16=(function(){
       const logs=(x,y,n,w)=>{for(let i=0;i<n;i++){const yy=y+i*3;r(x,yy,w,3,'#8B5E3C');r(x,yy,w,1,'#A87650');r(x,yy,3,3,'#D9A86C');p(x+1,yy+1,'#B07A45');r(x+w-1,yy,1,3,'#6B4528')}};
       const woolhat=y=>{r(9,y,14,4,'#B23A3A');r(9,y+3,14,1,'#F4E9D8');r(14,y-2,4,2,'#F4E9D8')};
       if(full){
-        if(M===0){shadow(d,18);legs(d,16,18,'stand',PA);
-          r(6,17,20,12,'#2F8A57');for(const x of [9,15,21])r(x,17,1,12,'#E2453C');for(const y of [21,26])r(6,y,20,1,'#FFC531');r(6,17,20,1,'#1F6B42');r(6,28,20,1,'#1F6B42');r(6,17,1,12,'#1F6B42');r(25,17,1,12,'#1F6B42');
-          face(hx,hy);bigmug(13,20);zzz(d,t)}
+        if(M===0){const st=(t>>1)%2;fb({armL:st?'reach':'up',armR:st?'reach':'up'});jumper(18);face(hx,hy,{eyes:'blink',mouth:'none'});
+          r(14,13,4,st?4:3,O);r(15,14,2,st?2:1,K.mouth);if(st){p(4,6,WH);p(27,6,WH)}}
         else if(M===1){fb({armL:'fwd',armR:'fwd'});jumper(18);face(hx,hy);logs(6,20,3,20)}
         else{const up=t%4<2;shadow(d,16);
           r(23,26,8,5,'#8B5E3C');r(23,26,8,1,'#D9A86C');r(24,28,6,1,'#6B4528');
@@ -3109,7 +3113,7 @@ const HERO16=(function(){
       else{ho();face(hx,hy);woolhat(13);
         if(M===2){bigmug(24,24);if(t%3===0)sparkle(d,28,18,K.gold)}
         else if(M===1)logs(22,24,2,10);
-        else{bigmug(24,24);zzz(d,t)}}
+        else{const st=(t>>1)%2;face(hx,hy,{eyes:'blink',mouth:'none'});woolhat(13);r(14,25,4,st?4:3,O);r(15,26,2,st?2:1,K.mouth)}}
       return}
     // snow
     if(full){if(M===2){const up=t%4<2?3:1;shadow(d,14);body(d,16,15-up,{shirt:SH,pants:PA,armL:'up',armR:'up',legs:'squat'});r(5,28-up,22,3,'#FF7A2F');r(6,28-up,20,1,'#2C5BD8');face(hx,hy-3-up);beanie(hx,hy-3-up,true);if(t%3===0)sparkle(d,3,6,WH)}
