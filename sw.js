@@ -1,5 +1,5 @@
 // Level 35 offline cache. Bump VERSION when files change.
-const VERSION = 'level35-v42';
+const VERSION = 'level35-v43';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'supabase.js'];
 
 self.addEventListener('install', e => {
@@ -32,4 +32,35 @@ self.addEventListener('fetch', e => {
     if (res.ok || res.type === 'opaque') { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); }
     return res;
   })));
+});
+
+// Push notifications. Messages use the Declarative Web Push format:
+// { web_push: 8030, notification: { title, body, navigate, silent, tag, lang } }
+// Newer Safari can show these by itself; here we always show it too, because iPhone switches off
+// notifications for an app whose pushes don't show anything.
+self.addEventListener('push', e => {
+  let msg = {};
+  try { msg = e.data ? e.data.json() : {}; } catch (_) { msg = { notification: { body: e.data ? e.data.text() : '' } }; }
+  const n = msg.notification || {};
+  const opts = {
+    body: n.body || '',
+    tag: n.tag || undefined,
+    lang: n.lang || 'en',
+    silent: n.silent !== false,
+    icon: 'icon-192.png',
+    data: { url: n.navigate || './' },
+  };
+  e.waitUntil(self.registration.showNotification(n.title || 'Level 35', opts));
+});
+
+// Tapping a notification opens the app on the right screen (?go=today, ?go=trip, ...).
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) {
+      if (c.url.startsWith(self.registration.scope) && 'focus' in c) { c.postMessage({ type: 'go', url }); return c.focus(); }
+    }
+    return self.clients.openWindow(url);
+  }));
 });

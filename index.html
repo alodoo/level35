@@ -505,6 +505,22 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .scene.travel .streakframe::before{display:none}
 .scene.travel .streakframe::after{content:"";position:absolute;left:50%;top:100%;width:4px;margin-left:-2px;height:95%;background:linear-gradient(90deg,#9A6A44 0 50%,#6B4528 50%)}
 .wb.trip .d{color:#2C8FD8}
+.nt-kinds{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:12px}
+.nt-k{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.nt-k:last-child{border-bottom:0}
+.nt-k input{width:20px;height:20px;flex-shrink:0;margin:0;accent-color:#2C8FD8}
+.nt-k span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nt-k b{font-size:14.5px;font-weight:700}
+.nt-k i{font-style:normal;font-size:12.5px;color:var(--muted)}
+.nt-up{margin-top:12px}
+.nt-up summary{cursor:pointer;font-weight:700;font-size:14px;padding:6px 0}
+.nt-up summary span{color:var(--muted);font-weight:600}
+.nt-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.nt-list li{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--ink) 5%,var(--surface))}
+.nt-list time{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+.nt-list b{font-size:14px}
+.nt-list span{font-size:13px;color:var(--muted)}
+.nt-list li.nt-none{background:none;padding:2px 0;color:var(--muted);font-size:13px}
 html{-webkit-tap-highlight-color:transparent}
 </style>
 </head>
@@ -589,6 +605,14 @@ html{-webkit-tap-highlight-color:transparent}
     <div class="sec-head"><h3>Account</h3><span class="label" id="acLabel">Not signed in</span></div>
     <div class="gh-status" id="acStatus"><span class="dot"></span><span id="acMsg">Sign in to back up your progress and add friends.</span></div>
     <div class="btns"><button class="btn primary" id="acIn" type="button">Sign in with Google</button><button class="btn" id="acSync" type="button" hidden>Sync now</button><button class="btn" id="acOut" type="button" hidden>Sign out</button></div>
+  </section>
+
+  <section class="grid-card" aria-label="Notifications" id="ntSec">
+    <div class="sec-head"><h3>Notifications</h3><span class="label" id="ntLabel"></span></div>
+    <p class="bk-note" id="ntMsg"></p>
+    <div class="btns"><button class="btn primary" id="ntOn" type="button" hidden>Turn on notifications</button><button class="btn" id="ntTest" type="button" hidden>Send me a test</button><button class="btn" id="ntOff" type="button" hidden>Turn off</button></div>
+    <div class="nt-kinds" id="ntKinds" hidden></div>
+    <details class="nt-up" id="ntUpBox" hidden><summary>Coming up <span id="ntUpN"></span></summary><ol class="nt-list" id="ntUp"></ol></details>
   </section>
 
   <section class="grid-card" aria-label="Backup">
@@ -1123,7 +1147,7 @@ async function initStore(){
   const hasCloud=!!(window.supabase&&window.supabase.createClient);let localOnly=false;try{localOnly=localStorage.getItem(LOCAL_ONLY)==='1'}catch(e){}
   if(!configs.length){if(hasCloud&&!localOnly)showLogin();else openSetup('new')}
   if(configs.length&&migrateV3())saveState();
-  render();SCENE.init();SCENE.frame(TL?TL.streak:0,atRisk());renderAccount();setSync();cloud.init();
+  render();SCENE.init();SCENE.frame(TL?TL.streak:0,atRisk());renderAccount();setSync();cloud.init();NOTIFY.init();
   if(wasReset)toast('Fresh start: Level 1, day one');
   try{if(configs.length&&!localStorage.getItem(LS+'-pts4')){localStorage.setItem(LS+'-pts4','1');checkUp()}}catch(e){}
   try{if(configs.length&&!localStorage.getItem(LS+'-intro1'))setTimeout(()=>showIntro('Got it'),400)}catch(e){}
@@ -1164,7 +1188,7 @@ const cloud=(function(){
       if(row&&row.data&&row.updated>updated){apply(row.data,row.updated);await pushProfile();last=Date.now();show('ok','Synced at '+hhmm(last)+' · loaded your latest progress')}
       else if(configs.length&&(!row||row.updated<updated)){if(await push()){last=Date.now();show('ok','Synced at '+hhmm(last))}else show('err','Couldn’t save to your account. It will try again.')}
       else{if(!row&&!configs.length){hideLogin();if($('setup').hidden)openSetup('new')}else await pushProfile();last=Date.now();show('ok','Synced at '+hhmm(last))}
-      FRIENDS.refresh();
+      FRIENDS.refresh();if(typeof NOTIFY!=='undefined'&&NOTIFY)NOTIFY.soon();
     }catch(e){show('err','Offline. Changes are saved on this phone and will sync when you’re back online.')}
     finally{busy=false;if(again){again=false;sync()}}
   }
@@ -1188,6 +1212,7 @@ const cloud=(function(){
     if(error)toast('Google sign-in isn’t working yet: '+error.message)}
   async function signOut(){
     if(timer){clearTimeout(timer);timer=null}if(on()&&configs.length)await sync();
+    try{if(typeof NOTIFY!=='undefined'&&NOTIFY)await NOTIFY.forget()}catch(e){}
     try{await sb.auth.signOut()}catch(e){}
     user=null;started=false;msg=null;FRIENDS.cache={};
     try{localStorage.removeItem(LS);localStorage.removeItem(LOCAL_ONLY)}catch(e){}
@@ -1196,7 +1221,9 @@ const cloud=(function(){
   async function friends(codes){if(!on())return null;try{const {data,error}=await sb.rpc('friend_streaks',{codes});return error?null:(data||[])}catch(e){return null}}
   addEventListener('online',()=>{if(on())sync()});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){if(on()&&timer){clearTimeout(timer);timer=null;sync()}}else if(on())sync()});
-  return{init,schedule,sync,on,signIn,signOut,friends,ready:()=>!!sb,user:()=>user,msg:()=>msg};
+  return{init,schedule,sync,on,signIn,signOut,friends,ready:()=>!!sb,user:()=>user,msg:()=>msg,
+    rpc:(fn,args)=>sb?sb.rpc(fn,args):Promise.resolve({data:null,error:{message:'offline'}}),
+    invoke:(fn,body)=>sb?sb.functions.invoke(fn,{body}):Promise.resolve({data:null,error:{message:'offline'}})};
 })();
 let armOut=false;
 function renderAccount(){
@@ -1214,6 +1241,166 @@ $('acOut').onclick=()=>{if(!armOut){armOut=true;renderAccount();setTimeout(()=>{
 $('loginSkip').onclick=()=>{try{localStorage.setItem(LOCAL_ONLY,'1')}catch(e){}hideLogin();openSetup('new')};
 function showLogin(){document.querySelector('.wrap').hidden=true;$('setup').hidden=true;$('login').hidden=false;window.scrollTo(0,0)}
 function hideLogin(){if($('login').hidden)return;$('login').hidden=true;if($('setup').hidden)document.querySelector('.wrap').hidden=false}
+
+/* ---------- notifications: the app plans them, the server delivers them ---------- */
+// Plan = up to 5 a day for the next 3 days, rebuilt after every sync, so a nudge about something you've done is
+// gone before it's sent. Messages use the Declarative Web Push format, which converts 1:1 to native push later.
+var NOTIFY=(function(){
+  const KINDS=[['morning','Morning start','At your wake-up time: today’s habits and tasks'],
+    ['streak','Streak check','Evening, only if the day isn’t solid yet'],
+    ['bed','Bedtime','30 minutes before your “In bed by” time'],
+    ['task','Tasks','At the time you set, or in the morning'],
+    ['trip','Trips','The evening before you leave'],
+    ['week','Weekly recap','Sunday evening'],
+    ['comeback','Check-in','Once, if you haven’t opened the app for 3 days'],
+    ['sound','Sound','Off: they arrive silently']];
+  const PRI={task:1,streak:2,morning:3,bed:4,trip:5,week:6,comeback:7},CAP=5,DAYS=3;
+  const APP=location.href.split(/[?#]/)[0].replace(/[^/]*$/,'');
+  let state='checking',vapid=null,REG=null,timer=null,lastSig='',busy=false,upBusy=false,regAt=0,built=false;
+  function prefs(){const p=(profile&&profile.notify)||{};return{on:!!p.on,sound:!!p.sound,types:Object.assign({morning:true,streak:true,bed:true,task:true,trip:true,week:true,comeback:true},p.types||{})}}
+  function setPrefs(f){const p=prefs();f(p);profile.notify={on:p.on,sound:p.sound,types:p.types};saveState();paint()}
+  const nowMs=()=>Date.now()+(typeof TEST_OFF==='number'?TEST_OFF*864e5:0);
+  const mins=v=>{const m=String(v||'').match(/^(\d{1,2}):(\d{2})/);return m?(+m[1])*60+(+m[2]):null};
+  const at=(s,m)=>{const p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2],0,m).getTime()};
+  const names=(hs,max)=>{const n=hs.map(h=>h.name);return n.length<=max?n.join(', '):n.slice(0,max).join(', ')+' +'+(n.length-max)};
+  const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+  const when=ms=>new Date(ms).toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'});
+  // wake-up (W) and bedtime (B, can pass midnight) in minutes for a date, from the plan's time habits
+  function clock(s){const c=configFor(s),lv=lvOf(s),w=parse(s).getDay(),k={W:null,B:null,wake:null,bed:null,bedDue:false};
+    for(const h of (c&&c.habits)||[]){if(h.kind!=='time'||!isActive(h,lv))continue;const txt=((h.prefix||'')+' '+(h.title||'')).toLowerCase(),v=mins(valueAt(h,lv));if(v==null)continue;
+      if(!k.wake&&/\bup\b|wake/.test(txt)){k.wake=h;k.W=daysAt(h,lv).includes(w)?v:v+60}
+      else if(!k.bed&&/bed/.test(txt)){k.bed=h;k.B=v<12*60?v+1440:v;k.bedDue=daysAt(h,lv).includes(w)}}
+    if(k.W==null)k.W=w===0||w===6?9*60+30:8*60+30;
+    if(k.B==null||k.B<=k.W+120)k.B=23*60+30;
+    return k}
+  function plan(){
+    const now=nowMs(),p=prefs(),T=p.types,t=today(),out=[];if(!TL)recompute();
+    const L=lvInfo(),left=L.lv>=MAXLV?0:L.need-L.into-L.pending,reach=left>0&&left<=avgXP();
+    const tasks=getQuests().filter(q=>!q.room&&!q.done&&q.date);
+    for(let i=0;i<DAYS;i++){
+      const s=addDays(t,i),d=days[s],lv=lvOf(s),hs=habitsFor(s,lv),k=clock(s),wd=parse(s).getDay(),closed=!!(d&&d.closed);
+      const done=h=>!!(d&&d.h&&d.h[h.id]),core=hs.filter(h=>h.core),coreLeft=core.filter(h=>!done(h)),open=hs.filter(h=>!done(h));
+      const tr=tripOn(s),back=!tr&&!!tripOn(addDays(s,-1)),E=Math.max(k.W+60,Math.min(22*60+30,Math.max(18*60,k.B-150)));
+      const dayTasks=tasks.filter(q=>q.date===s),timed=dayTasks.filter(q=>q.time),untimed=dayTasks.filter(q=>!q.time);
+      const add=(kind,m,title,body,go,key)=>{const ms=at(s,m);if(ms>now+30000)out.push({key:key||kind+':'+s,kind,at:ms,s,title,body,go})};
+      if(T.morning&&!closed&&(tr||hs.length||untimed.length)){let title,body,go='today';
+        if(tr){const n=Math.round((parse(s)-parse(tr.from))/864e5)+1,place=tripPlace(tr),flag=tr.country&&tr.country!=='XX'?flagEmoji(tr.country)+' ':'';
+          title=n===1?'✈️ Trip day'+(place?': '+place:''):flag+'Day '+n+(place?' in '+place:' away');
+          if(hs.length)body=plural(hs.length,'habit')+' packed: '+names(hs,3)+'.';else{body='Nothing packed yet. Tap to pick your trip habits.';go='trip'}}
+        else{title=back?'🏠 Welcome home':'☀️ Good morning';body=(back?'Your plan picks up again today. ':'')+plural(hs.length,'habit')+' today'+(core.length?'. CORE: '+names(core,3):'')+'.'}
+        if(T.task&&untimed.length)body+=' Today: '+untimed.slice(0,2).map(q=>q.text).join(', ')+(untimed.length>2?' +'+(untimed.length-2):'')+'.';
+        if(reach&&!tr)body+=' LV '+(L.lv+1)+' is within reach.';
+        add('morning',k.W,title,body,go)}
+      else if(T.task&&untimed.length&&!closed)add('task',k.W,'📌 Today: '+untimed[0].text,untimed.length>1?'And '+plural(untimed.length-1,'more task')+'.':'Tap to see your tasks.','tasks','tasks:'+s);
+      if(T.streak&&!closed&&coreLeft.length){let title,body=coreLeft.length+' CORE left: '+names(coreLeft,3)+'.';
+        if(i===0&&TL.miss===2&&shownLevel()>1){title='⚠️ Don’t drop a level';body='Miss today and you drop to LV '+(shownLevel()-1)+'. '+body}
+        else if(i===0&&atRisk()){title='🔥 Save your '+TL.streak+'-day streak';body='75% of your CORE keeps it. '+body}
+        else title=i===0&&TL.streak>0?'🔥 Keep your '+TL.streak+'-day streak':'🔥 Make today solid';
+        add('streak',E,title,body,'today')}
+      if(T.bed&&k.bed&&k.bedDue&&(!tr||hs.some(h=>h.id===k.bed.id))){const rest=open.filter(h=>h.id!==k.bed.id&&(!k.wake||h.id!==k.wake.id));
+        add('bed',k.B-30,'🌙 Bed in 30 min',hName(k.bed,lv)+'.'+(rest.length?' Still open: '+names(rest,2)+'.':'')+(closed?'':' Then close the day.'),'today')}
+      if(T.task)for(const q of timed){const m=mins(q.time);if(m!=null)add('task',m,'⏰ '+q.text,'Today at '+q.time+'.','tasks','task:'+q.id+':'+s+':'+q.time)}
+      if(T.trip)for(const x of trips())if(x.from===addDays(s,1)){const place=tripPlace(x),flag=x.country&&x.country!=='XX'?' '+flagEmoji(x.country):'',pk=packFor(x,x.from),n=Object.keys(pk.ids||{}).length+(pk.extra||[]).length;
+        add('trip',Math.min(20*60,k.B-60),'🧳 '+(place?place+' tomorrow'+flag:'Trip tomorrow'),n?plural(n,'habit')+' packed. Have a good trip!':'Pick the habits you’ll keep on the trip.','trip','trip:'+x.id+':'+s)}
+      if(T.week&&wd===0){let sol=0,perf=0,xp=0;for(let j=0;j<7;j++){const e=TL.map[addDays(s,-j)];if(e){if(e.sol)sol++;if(e.perfect)perf++;xp+=e.xp||0}}
+        add('week',Math.min(19*60,k.B-90),'📊 Your week',plural(sol,'solid day')+' · '+perf+' perfect · +'+xp+' XP.'+(left>0?' '+left+' XP to LV '+(L.lv+1)+'.':''),'today')}
+    }
+    if(T.comeback){const s=addDays(t,DAYS),ms=at(s,clock(s).W+9*60);if(ms>now)out.push({key:'comeback:'+s,kind:'comeback',at:ms,s,title:'👋 Quick check-in',body:'One tick today keeps your progress moving.',go:'today'})}
+    // nothing while you sleep (except tasks you timed yourself), then at most 5 a day, most useful first
+    const byDay={};
+    for(const it of out){if(it.kind!=='task'){const k=clock(it.s),m=Math.round((it.at-at(it.s,0))/60000);if(m<k.W||m>=k.B)continue}(byDay[it.s]=byDay[it.s]||[]).push(it)}
+    const keep=[];for(const s in byDay)keep.push(...byDay[s].sort((a,b)=>PRI[a.kind]-PRI[b.kind]||a.at-b.at).slice(0,CAP));
+    return keep.sort((a,b)=>a.at-b.at)}
+  function items(){const silent=!prefs().sound;return plan().map(it=>({key:it.key,kind:it.kind,at:it.at,
+    payload:{web_push:8030,notification:{title:it.title,body:it.body.slice(0,230),navigate:APP+'?go='+it.go,silent,lang:'en',tag:it.kind}}}))}
+  // ---- this phone's subscription
+  const u8=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');s+='='.repeat((4-s.length%4)%4);const b=atob(s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
+  const canPush=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+  const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  async function sub(){try{const r=REG||(navigator.serviceWorker&&await navigator.serviceWorker.getRegistration());return r?await r.pushManager.getSubscription():null}catch(e){return null}}
+  async function key(){if(vapid)return vapid;const {data,error}=await cloud.rpc('vapid_public_key');if(error||!data)throw new Error('no push key yet');return vapid=data}
+  async function register(s,force){if(!s||!cloud.on())return false;if(!force&&Date.now()-regAt<6*3600e3)return true;
+    const j=s.toJSON();let tz=null;try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||null}catch(e){}
+    const {error}=await cloud.rpc('register_push_device',{p_endpoint:j.endpoint,p_keys:j.keys,p_platform:'web',p_tz:tz,p_ua:navigator.userAgent.slice(0,300)});
+    if(error)return false;regAt=Date.now();return true}
+  async function subscribe(){const reg=await navigator.serviceWorker.ready;REG=reg;let s=await reg.pushManager.getSubscription();
+    if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(await key())});
+    if(!(await register(s,true)))throw new Error('couldn’t reach your account');return s}
+  async function refresh(){
+    if(!cloud.ready())state='preview';
+    else if(location.pathname.includes('/beta/'))state='beta';
+    else if(!canPush())state=isIOS&&!standalone?'install':'unsupported';
+    else if(!cloud.on())state='signin';
+    else if(Notification.permission==='denied')state='denied';
+    else{const s=await sub(),p=prefs(),ok=Notification.permission==='granted';
+      state=ok&&s&&p.on?'on':ok&&p.on?'paused':'off';
+      if(state==='on')register(s,false);
+      if(state==='paused'){try{await subscribe();state='on'}catch(e){}}
+      if(state==='off'||state==='paused')key().catch(()=>{})}
+    paint()}
+  async function upload(force){if(!cloud.on()||upBusy)return;const p=prefs();if(!p.on&&!(profile&&profile.notify))return;
+    const its=p.on?items():[],sig=JSON.stringify(its);if(!force&&sig===lastSig)return;
+    upBusy=true;try{const {error}=await cloud.rpc('replace_push_plan',{items:its});if(!error)lastSig=sig}catch(e){}finally{upBusy=false}}
+  function soon(){clearTimeout(timer);timer=setTimeout(async()=>{await refresh();await upload()},1200)}
+  // ---- buttons
+  async function turnOn(){if(busy)return;busy=true;$('ntOn').disabled=true;
+    try{const perm=Notification.permission==='granted'?'granted':await Notification.requestPermission();  // first, straight from the tap: iPhone only asks then
+      if(perm!=='granted'){toast(perm==='denied'?'Blocked. Turn them on in iPhone Settings → Notifications → Level 35.':'No problem. You can turn them on here anytime.');return}
+      await subscribe();setPrefs(p=>{p.on=true});lastSig='';await upload(true);
+      toast('Notifications on 🔔 Silent, max 5 a day.')}
+    catch(e){toast('Couldn’t turn them on: '+((e&&e.message)||e))}
+    finally{busy=false;$('ntOn').disabled=false;refresh()}}
+  async function turnOff(){setPrefs(p=>{p.on=false});const s=await sub();if(s&&cloud.on()){try{await cloud.rpc('unregister_push_device',{p_endpoint:s.endpoint})}catch(e){}}
+    lastSig='';await upload(true);toast('Notifications off');refresh()}
+  async function test(){const btn=$('ntTest');btn.disabled=true;
+    try{const n=plan()[0],r=await cloud.invoke('push-send',{action:'test',notification:{title:'🔔 Level 35',body:n?'All set. Next: '+n.title+' · '+when(n.at)+'.':'All set.',silent:!prefs().sound}});
+      const d=r&&r.data;if(!d||r.error){toast('Couldn’t send the test. Try again in a minute.');return}
+      toast(d.results&&d.results.includes('ok')?'Sent. It should arrive in a few seconds.':d.devices?'Your iPhone didn’t accept it ('+d.results.join(', ')+').':'This phone isn’t registered. Turn notifications off and on again.')}
+    catch(e){toast('Couldn’t send the test.')}
+    finally{btn.disabled=false}}
+  async function forget(){const s=await sub();if(s&&cloud.on())await cloud.rpc('unregister_push_device',{p_endpoint:s.endpoint})}
+  // ---- Settings section
+  const LABEL={preview:'Preview',beta:'Main app only',install:'Off',unsupported:'Not available',signin:'Off',denied:'Blocked',on:'On',paused:'Paused',off:'Off',checking:''};
+  const MSG={preview:'The test copy can’t send notifications. This is exactly what your phone would get.',
+    beta:'Notifications work in the main app on your Home Screen.',
+    install:'Add Level 35 to your Home Screen (Share → Add to Home Screen), open it from there, then turn these on.',
+    unsupported:'This browser can’t show notifications.',
+    signin:'Sign in first: notifications are sent from your account.',
+    denied:'Notifications are blocked for Level 35. Turn them on in iPhone Settings → Notifications → Level 35.',
+    on:'Silent unless you turn Sound on. Max 5 a day, nothing while you sleep, never about something you’ve already done.',
+    paused:'Your iPhone switched notifications off for this app. Tap to turn them back on.',
+    off:'A nudge before your streak breaks, at bedtime, for your tasks and trips. Silent, max 5 a day, nothing while you sleep.',
+    checking:''};
+  function paint(){const sec=$('ntSec');if(!sec)return;const p=prefs();
+    $('ntLabel').textContent=LABEL[state]||'';$('ntMsg').textContent=MSG[state]||'';
+    $('ntOn').hidden=state!=='off'&&state!=='paused';$('ntOn').textContent=state==='paused'?'Turn back on':'Turn on notifications';
+    $('ntTest').hidden=state!=='on';$('ntOff').hidden=state!=='on';
+    const show=state==='on'||state==='off'||state==='paused'||state==='preview',box=$('ntKinds');box.hidden=!show;
+    if(show&&!built){built=true;for(const [k,name,hint] of KINDS){const l=document.createElement('label');l.className='nt-k';
+      const c=document.createElement('input');c.type='checkbox';c.dataset.k=k;c.onchange=()=>setPrefs(q=>{if(k==='sound')q.sound=c.checked;else q.types[k]=c.checked});
+      const sp=document.createElement('span'),b=document.createElement('b'),i=document.createElement('i');b.textContent=name;i.textContent=hint;sp.append(b,i);l.append(c,sp);box.appendChild(l)}}
+    for(const c of box.querySelectorAll('input'))c.checked=c.dataset.k==='sound'?p.sound:!!p.types[c.dataset.k];
+    const up=$('ntUpBox');up.hidden=!show;if(!show)return;
+    const its=plan(),ol=$('ntUp');ol.innerHTML='';$('ntUpN').textContent=its.length?'· '+its.length:'';
+    if(!its.length){const li=document.createElement('li');li.className='nt-none';li.textContent='Nothing planned. Turn a type on above.';ol.appendChild(li)}
+    for(const it of its.slice(0,12)){const li=document.createElement('li'),tm=document.createElement('time'),b=document.createElement('b'),sp=document.createElement('span');
+      tm.textContent=when(it.at);b.textContent=it.title;sp.textContent=it.body;li.append(tm,b,sp);ol.appendChild(li)}}
+  // ---- opening the app from a notification (?go=today|trip|tasks|notify)
+  function go(g){if(!g)return;const t=today();
+    if(g==='trip'){if((tripOn(t)||trips().some(x=>x.from>t))&&typeof openTrip==='function'){openTrip(true);return}g='today'}
+    if(g==='today'&&viewDate!==t){viewDate=t;render()}
+    const el=g==='tasks'?document.querySelector('section[aria-label="Tasks"]'):g==='notify'?$('ntSec'):document.querySelector('section[aria-label="Day"]');if(!el)return;
+    const hud=document.querySelector('.hud'),top=el.getBoundingClientRect().top+scrollY-((hud&&hud.offsetHeight)||0)-12;
+    window.scrollTo({top:Math.max(0,top),behavior:'smooth'})}
+  function init(){
+    const g=new URLSearchParams(location.search).get('go');if(g){history.replaceState(null,'',location.pathname);setTimeout(()=>go(g),700)}
+    if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='go'){try{go(new URL(d.url).searchParams.get('go'))}catch(_){}}});
+      try{navigator.serviceWorker.getRegistration().then(r=>{if(r)REG=r}).catch(()=>{})}catch(e){}}
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)soon()});
+    $('ntOn').onclick=turnOn;$('ntOff').onclick=turnOff;$('ntTest').onclick=test;
+    paint();setTimeout(refresh,1200)}
+  return{init,render:paint,soon,refresh,plan,forget,go,state:()=>state};
+})();
 
 /* ---------- backup ---------- */
 function backupText(){return JSON.stringify({app:'level35',v:3,schema:SCHEMA,saved:today(),start,days,quests:getQuests(),configs,profile})}
@@ -1283,7 +1470,7 @@ function render(){
       if(fr.dataset.n&&+fr.dataset.n<n){fr.classList.remove('pop');void fr.offsetWidth;fr.classList.add('pop')}fr.dataset.n=n}}
   {const left=L.need-L.into-L.pending,dd=Math.max(1,Math.ceil(left/avgXP()));$('xpNext').textContent=L.lv>=MAXLV?'Final level 🏆':left<=0?(L.pending>0?'Close the day → LV ':'Tick a habit → LV ')+(L.lv+1)+' ⭐':left+' XP to LV '+(L.lv+1)+' · ≈'+dd+(dd===1?' day':' days')}
   $('streak').textContent=TL.streak;if(typeof SCENE!=='undefined')SCENE.frame(TL.streak,atRisk());
-  renderChips();renderDay();renderWeek();renderQuests();renderRoom();renderCal();renderLb();
+  renderChips();renderDay();renderWeek();renderQuests();renderRoom();renderCal();renderLb();if(typeof NOTIFY!=='undefined'&&NOTIFY)NOTIFY.render();
   if(!$('lookPanel').hidden)renderLadder();
   renderAlert();applyDayLayout();checkDown();checkUp();checkPrev();
 }
