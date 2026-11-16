@@ -3080,11 +3080,13 @@ const AVATAR=(function(){
   const TOP=[{id:'tee',n:'T-shirt',lv:1,c:0,cut:'short'},{id:'long',n:'Long sleeve',lv:4,c:5,cut:'long'},{id:'stripe',n:'Striped tee',lv:5,c:5,cut:'short',pat:'stripe'},{id:'tank',n:'Tank top',lv:6,c:10,cut:'none'},{id:'hoodie',n:'Hoodie',lv:8,c:15,cut:'long',pat:'hood'},{id:'shirt',n:'Shirt',lv:10,c:20,cut:'long',pat:'collar'},{id:'jacket',n:'Jacket',lv:12,c:25,cut:'long',pat:'zip'}];
   const BOT=[{id:'trousers',n:'Trousers',lv:1,c:0,cut:'long'},{id:'shorts',n:'Shorts',lv:4,c:5,cut:'short'},{id:'skirt',n:'Skirt',lv:4,c:5,cut:'skirt'}];
   const SHOE=[{id:'basic',n:'Shoes',lv:1,c:0},{id:'trainer',n:'Trainers',lv:4,c:5},{id:'boot',n:'Boots',lv:7,c:10}];
-  const HAT=[{id:'none',n:'No hat',lv:1,c:0},{id:'cap',n:'Cap',lv:8,c:15},{id:'beanie',n:'Beanie',lv:11,c:20}];
+  const HAT=[{id:'none',n:'No hat',lv:1,c:0},{id:'cap',n:'Cap',lv:8,c:15},{id:'beanie',n:'Beanie',lv:11,c:20},{id:'hard',n:'Hard hat',lv:32,c:0,fix:1}];
+  // outfits from the level looks: free from the level they first appear at. full = they come with their own trousers
+  const OUT=[{id:'pj',n:'Pyjamas',lv:6,c:0,cos:'pj',full:1},{id:'suit',n:'Suit and tie',lv:17,c:0,cos:'suit'},{id:'kit',n:'Football kit',lv:19,c:0,cos:'kit',full:1},{id:'jersey',n:'Basketball jersey',lv:20,c:0,cos:'bball'},{id:'gi',n:'Karate gi',lv:22,c:0,cos:'gi',full:1},{id:'box',n:'Boxing kit',lv:23,c:0,cos:'box',full:1},{id:'bolt',n:'Lightning top',lv:25,c:0,cos:'bolt'},{id:'super',n:'Super suit',lv:26,c:0,cos:'hero'},{id:'j35',n:'Number 35 kit',lv:35,c:0,cos:'j35',full:1}];
   const GLS={id:'glasses',n:'Glasses',lv:6,c:10};
   const ROOM=[{id:'clock',n:'Wall clock',lv:4,c:10,slot:'a',w:24,h:24},{id:'picture',n:'Picture',lv:6,c:15,slot:'a',w:40,h:28},{id:'plant',n:'Big plant',lv:5,c:10,slot:'c',w:24,h:48},{id:'beanbag',n:'Bean bag',lv:8,c:20,slot:'c',w:28,h:18},{id:'guitar',n:'Guitar',lv:9,c:25,slot:'b',w:16,h:56},{id:'shelves',n:'Bookshelves',lv:12,c:35,slot:'b',w:56,h:44}];
   const SLOT={a:'Wall, top left',b:'Wall, right',c:'By the wall'},PET_LV=5,PET2=40;
-  const ALL=TOP.concat(BOT,SHOE,HAT,[GLS],ROOM,HAIRC.filter(h=>h[3]).map(h=>({id:h[0],lv:h[3],c:h[4]})));
+  const ALL=TOP.concat(OUT,BOT,SHOE,HAT,[GLS],ROOM,HAIRC.filter(h=>h[3]).map(h=>({id:h[0],lv:h[3],c:h[4]})));
 
   const DEF=()=>({skin:'s0',eyes:'dark',hair:'short',hairC:'brown',beard:'none',top:'tee',topC:'orange',bottom:'trousers',bottomC:'navy',shoes:'basic',shoesC:'dark',hat:'none',hatC:'red',glasses:false,look:null,own:{},pet:null,pets:[],pn:{},room:{},seen:0});
   function A(){if(!profile.avatar||typeof profile.avatar!=='object')profile.avatar=DEF();const a=profile.avatar,d=DEF();for(const k in d)if(a[k]===undefined||a[k]===null&&k!=='look'&&k!=='pet')a[k]=d[k];if(a.pet&&!PID[a.pet.kind])a.pet.kind=petKind(a.pet.kind);if(a.pets.some(k=>!PID[k]))a.pets=[...new Set(a.pets.map(petKind))];return a}
@@ -3093,10 +3095,10 @@ const AVATAR=(function(){
   const coins=()=>{let x=0;try{x=Math.floor(totalXP()/10)}catch(e){}const o=A().own;let sp=0;for(const k in o)sp+=o[k]||0;return Math.max(0,x-sp)};
   const hex=id=>(COL.find(c=>c[0]===id)||COL[0])[1],by=(L,id)=>L.find(x=>(x.id||x[0])===id)||L[0];
   // an item is yours, locked until its level, affordable, or too dear right now
-  const st=it=>!it.ask&&(it.c===0||A().own[it.id]!==undefined)?'own':level()<it.lv?'lock':coins()>=it.c?'buy':'poor';
-  function resolve(a){const top=by(TOP,a.top),bot=by(BOT,a.bottom);
+  const st=it=>!it.ask&&((it.c===0&&level()>=it.lv)||A().own[it.id]!==undefined)?'own':level()<it.lv?'lock':coins()>=it.c?'buy':'poor';
+  function resolve(a){const top=by(TOP.concat(OUT),a.top),bot=by(BOT,a.bottom);
     return{skin:by(SKIN,a.skin)[2],hairC:by(HAIRC,a.hairC)[2],eye:a.eyes==='dark'?null:by(EYES,a.eyes)[1],hair:a.hair,beard:a.beard,
-      topC:a.topC==='orange'?null:hex(a.topC),cut:top.cut,pat:top.pat,top2:a.topC==='white'?'#D63B3B':'#FFFFFF',bottomC:a.bottomC==='navy'?null:hex(a.bottomC),bcut:bot.cut,
+      topC:a.topC==='orange'?null:hex(a.topC),cut:top.cut,pat:top.pat,top2:a.topC==='white'?'#D63B3B':'#FFFFFF',bottomC:a.bottomC==='navy'?null:hex(a.bottomC),bcut:bot.cut,cos:top.cos||null,
       shoes:a.shoes,shoesC:a.shoesC==='dark'?null:hex(a.shoesC),hat:a.hat,hatC:hex(a.hatC),glasses:a.glasses}}
   // pv = the thing you are trying on before you buy it: {it, pre:{k,v,slot}, pick, thumb}
   let sig='',pv=null;
@@ -3186,12 +3188,15 @@ const AVATAR=(function(){
   const roomThumb=it=>{const c=cv(it.w,it.h);ART[it.id](fill(c.getContext('2d')),0,0);return c};
   const copy=c=>{const t=cv(c.width,c.height);t.getContext('2d').drawImage(c,0,0);t.className=c.className;return t};
   // one option tile. Yours: a tap puts it on. Not yours yet: a tap tries it on, and the bar at the bottom buys it.
-  function opt(o){const b=document.createElement('button');b.type='button';const s=o.it?st(o.it):'own',isPv=!!(pv&&o.it&&pv.it.id===o.it.id);b.className='opt'+(o.on&&!isPv?' on':'')+(isPv?' pv':'')+(s!=='own'?' s-'+s:'')+(o.sw?' swt':'');
+  let anc=null;   // the tile you tapped: after the list is rebuilt it stays where it was on screen, even if rows above come or go
+  function opt(o){const b=document.createElement('button');b.type='button';b.dataset.key=o.pre?o.pre.k+':'+o.pre.v:(o.label||o.aria||'');const s=o.it?st(o.it):'own',isPv=!!(pv&&o.it&&pv.it.id===o.it.id);b.className='opt'+(o.on&&!isPv?' on':'')+(isPv?' pv':'')+(s!=='own'?' s-'+s:'')+(o.sw?' swt':'');
     if(o.thumb)b.appendChild(o.thumb);if(o.sw){const i=document.createElement('i');i.style.background=o.sw;b.appendChild(i)}
     if(o.label){const l=document.createElement('span');l.textContent=o.label;b.appendChild(l)}
     if(s!=='own'){const t=document.createElement('em');t.textContent=s==='lock'?'LV '+o.it.lv:o.it.c?'🪙 '+o.it.c:'Free';b.appendChild(t)}
     b.setAttribute('aria-pressed',!!o.on||isPv);if(o.aria)b.setAttribute('aria-label',o.aria+(s==='lock'?', opens at level '+o.it.lv:s!=='own'?', '+o.it.c+' coins':''));
-    b.onclick=()=>{if(s==='own'){pv=null;o.pick();return}
+    // things from the shop (bought, free or still locked) open the bar first: see it on you, then Wear, Buy or Cancel.
+    // Plain choices (skin, hair, colours) and taking something off happen at a tap.
+    b.onclick=()=>{anc={k:b.dataset.key,top:b.getBoundingClientRect().top};if(s==='own'&&(!o.it||o.on||o.it.id==='none')){pv=null;o.pick();return}
       pv={it:o.it,pre:o.pre,pick:o.pick,thumb:o.thumb};sig='';apply();SCENE.draw();paint()};
     return b}
   function paint(){const pane=$('mePane');if(!pane)return;const a=A(),L=level(),w=document.querySelector('.wrap'),sy=scrollY;pane.innerHTML='';   // rebuilt in place: the list stays where you were
@@ -3205,9 +3210,12 @@ const AVATAR=(function(){
       if(cat==='face'){sws('skin',SKIN,'Skin');sws('eyes',EYES,'Eyes');sec('Beard');const g=grid();BEARD.forEach(b=>g.appendChild(opt({thumb:face({beard:b[0]},'head'),label:b[1],on:a.beard===b[0],pick:set('beard',b[0])})))}
       if(cat==='hair'){sec('Style');const g=grid();HAIR.forEach(h=>g.appendChild(opt({thumb:face({hair:h[0]},'head'),label:h[1],on:a.hair===h[0],pick:set('hair',h[0])})));sws('hairC',HAIRC,'Colour')}
       if(cat==='clothes'){if(L<4)lock('Clothes show from LV 4, when your body arrives. You are LV '+L+'.');
-        const row=(k,list,title)=>{sec(title);const g=grid();list.forEach(t=>g.appendChild(opt({thumb:face({[k]:t.id},'body'),label:t.n,on:a[k]===t.id,it:t,pre:{k,v:t.id},pick:set(k,t.id)})))};
-        row('top',TOP,'Top');sws('topC',COL.slice(0,12),'Top colour');row('bottom',BOT,'Bottom');sws('bottomC',COL.slice(0,12),'Bottom colour');row('shoes',SHOE,'Shoes');sws('shoesC',[COL[12]].concat(COL.slice(2,12)),'Shoe colour')}
-      if(cat==='extras'){sec('Hat');let g=grid();HAT.forEach(t=>g.appendChild(opt({thumb:face({hat:t.id},'head'),label:t.n,on:a.hat===t.id,it:t,pre:{k:'hat',v:t.id},pick:set('hat',t.id)})));if(a.hat!=='none')sws('hatC',COL.slice(0,12),'Hat colour');
+        const row=(k,list,title,note)=>{sec(title,note);const g=grid();list.forEach(t=>g.appendChild(opt({thumb:face({[k]:t.id},'body'),label:t.n,on:a[k]===t.id,it:t,pre:{k,v:t.id},pick:set(k,t.id)})))};
+        const ow=OUT.find(o=>o.id===a.top);   // an outfit from your levels has its own colours (and maybe trousers)
+        row('top',TOP,'Top');if(!ow)sws('topC',COL.slice(0,12),'Top colour');
+        row('top',OUT,'Level outfits','Free from the level they first appear at');
+        if(ow&&ow.full){sec('Bottom','Part of your '+ow.n.toLowerCase())}else{row('bottom',BOT,'Bottom');sws('bottomC',COL.slice(0,12),'Bottom colour')}row('shoes',SHOE,'Shoes');sws('shoesC',[COL[12]].concat(COL.slice(2,12)),'Shoe colour')}
+      if(cat==='extras'){sec('Hat');let g=grid();HAT.forEach(t=>g.appendChild(opt({thumb:face({hat:t.id},'head'),label:t.n,on:a.hat===t.id,it:t,pre:{k:'hat',v:t.id},pick:set('hat',t.id)})));if(a.hat!=='none'&&!by(HAT,a.hat).fix)sws('hatC',COL.slice(0,12),'Hat colour');
         sec('Glasses');g=grid();g.appendChild(opt({thumb:face({glasses:false},'head'),label:'None',on:!a.glasses,pick:set('glasses',false)}));g.appendChild(opt({thumb:face({glasses:true},'head'),label:'Glasses',on:a.glasses,it:GLS,pre:{k:'glasses',v:true},pick:set('glasses',true)}))}
       if(cat==='looks'){sec('Level looks','Every level adds one. Tap to wear it.');const g=grid('lks'),top=HERO.level(),on=a.look!=null&&a.look<=top?a.look:top;
         for(let i=0;i<HERO._n;i++){const b=el('button','opt'+(i===on?' on':'')+(i>top?' s-lock':''));b.type='button';const c=cv(32);HERO._draw(c.getContext('2d'),i,1);b.appendChild(c);b.appendChild(el(i>top?'em':'span','','LV '+STAGES[i][0]));
@@ -3220,18 +3228,22 @@ const AVATAR=(function(){
       if(has){const f=el('label','me-name');f.appendChild(el('span','label','Name'));const inp=el('input');inp.type='text';inp.maxLength=16;inp.placeholder='Name your '+PID[cur].n.toLowerCase();inp.value=a.pet.name||'';inp.onchange=()=>{a.pet.name=inp.value.trim().slice(0,16);a.pn[cur]=a.pet.name;saveState()};f.appendChild(inp);pane.appendChild(f)}
       sec(has?'Your pets':'Choose your pet',has?'One out at a time. Another costs '+PET2+' coins':'The first one is free');
       const g=grid('pets');PETS.forEach(P=>{const mine=a.pets.includes(P.id);
-        g.appendChild(opt({thumb:petThumb(P.id),label:P.n,on:cur===P.id,it:mine?null:{id:'pet-'+P.id,n:P.n,lv:PET_LV,c:has?PET2:0,ask:1},pre:{k:'pet',v:P.id},
+        g.appendChild(opt({thumb:petThumb(P.id),label:P.n,on:cur===P.id,it:mine?{id:'pet-'+P.id,n:P.n,lv:1,c:0}:{id:'pet-'+P.id,n:P.n,lv:PET_LV,c:has?PET2:0,ask:1},pre:{k:'pet',v:P.id},
           pick:()=>{if(!a.pets.includes(P.id))a.pets.push(P.id);if(a.pet){a.pn[cur]=a.pet.name||'';a.pet.kind=P.id;a.pet.name=a.pn[P.id]||''}else a.pet={kind:P.id,name:''};commit()}}))})}
     // trying something on: say what it is and what it costs, and let you buy it or leave it
     if(pv){const it=pv.it,s=st(it),bar=el('div','buybar'),tx=el('div','bb-t');if(pv.thumb)bar.appendChild(copy(pv.thumb));tx.appendChild(el('b','',it.n));
-      tx.appendChild(el('span','',s==='lock'?'Opens at LV '+it.lv:it.c?'🪙 '+it.c+(s==='poor'?' · '+(it.c-coins())+' more needed':''):'Free'));bar.appendChild(tx);
-      const no=el('button','bb-no','Cancel');no.type='button';no.onclick=()=>{clearPv();paint()};bar.appendChild(no);
-      const yes=el('button','bb-yes',it.c?'Buy':'Choose');yes.type='button';yes.disabled=s!=='buy';yes.onclick=()=>{const p=pv;if(it.c)a.own[it.id]=it.c;pv=null;toast((it.c?'Bought: ':'Say hello to your ')+it.n);p.pick()};bar.appendChild(yes);pane.appendChild(bar)}
+      tx.appendChild(el('span','',s==='own'?'Yours':s==='lock'?'Opens at LV '+it.lv:it.c?'🪙 '+it.c+(s==='poor'?' · '+(it.c-coins())+' more needed':''):'Free'));bar.appendChild(tx);
+      const hold=()=>{const t=pane.querySelector('.opt.pv');if(t)anc={k:t.dataset.key,top:t.getBoundingClientRect().top}};   // the tile stays where it is on screen
+      const no=el('button','bb-no','Cancel');no.type='button';no.onclick=()=>{hold();clearPv();paint()};bar.appendChild(no);
+      const k=pv.pre&&pv.pre.k,mine=s==='own',yes=el('button','bb-yes',mine?(k==='room'?'Place':k==='pet'?'Choose':/C$/.test(k||'')?'Use':'Wear'):it.c?'Buy':'Choose');yes.type='button';yes.disabled=!mine&&s!=='buy';
+      yes.onclick=()=>{hold();const p=pv;pv=null;if(!mine){if(it.c)a.own[it.id]=it.c;toast((it.c?'Bought: ':'Say hello to your ')+it.n)}p.pick()};bar.appendChild(yes);pane.appendChild(bar)}
     HERO16.setAvatar(resolve(eff()));   // the portraits borrowed the painter: put your own look back
     if(a.seen!==L){a.seen=L;saveState()}dot();
-    if(Math.abs(scrollY-sy)>1)window.scrollTo(0,sy);zoom()}
+    if(Math.abs(scrollY-sy)>1)window.scrollTo(0,sy);
+    if(anc){const e=[...pane.querySelectorAll('.opt')].find(x=>x.dataset.key===anc.k);if(e){const dy=e.getBoundingClientRect().top-anc.top;if(Math.abs(dy)>1)window.scrollBy(0,dy)}anc=null}
+    zoom()}
   // a dot on the Me tab when a pet is waiting or something new opened since you last looked
-  function dot(){const b=document.querySelector('#tabs [data-go=me]');if(!b)return;const a=A(),L=level();b.classList.toggle('dot',(L>=PET_LV&&!a.pet)||(a.seen<L&&ALL.some(it=>it.c>0&&it.lv>a.seen&&it.lv<=L)))}
+  function dot(){const b=document.querySelector('#tabs [data-go=me]');if(!b)return;const a=A(),L=level();b.classList.toggle('dot',(L>=PET_LV&&!a.pet)||(a.seen<L&&ALL.some(it=>(it.c>0||it.lv>1)&&it.lv>a.seen&&it.lv<=L)))}
   document.querySelectorAll('#meSeg button').forEach(b=>b.onclick=()=>{me=b.dataset.me;clearPv();paint()});
   // leaving Me drops whatever you were trying on
   {const w=document.querySelector('.wrap');new MutationObserver(()=>{if(pv&&w.dataset.tab!=='me')clearPv()}).observe(w,{attributes:true,attributeFilter:['data-tab']})}
@@ -3276,8 +3288,20 @@ const HERO16=(function(){
   for(let j=0;j<16;j++){MASK[j]=[];EDGE[j]=[];for(let i=0;i<16;i++){MASK[j][i]=inE(i,j);EDGE[j][i]=MASK[j][i]&&[[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>!inE(i+a,j+b))}}
   let MOOD=0,FLOOR_SHADOW=false;
   /* ---- your avatar (Me tab): tones, hair, eyes and clothes. With nothing set it draws the original character. ---- */
-  const AV={hair:'short',eye:null,beard:'none',cut:'short',pat:'plain',top2:WH,bcut:'long',shoes:'basic',hat:'none',hatC:'#D63B3B',glasses:false};
+  const AV={hair:'short',eye:null,beard:'none',cut:'short',pat:'plain',top2:WH,bcut:'long',shoes:'basic',hat:'none',hatC:'#D63B3B',glasses:false,cos:null};
   const K0=Object.assign({},K);
+  /* outfits from the level looks: sh = top, pa = trousers (a full outfit), cut = sleeves, det = what goes on top (drawn after the arms), cape */
+  const COS={
+    pj:{sh:'#8FB8F0',pa:'#8FB8F0',cut:'long',det:(d,cx,ty)=>{d.r(cx-5,ty+2,10,1,WH);d.r(cx-5,ty+5,10,1,WH)}},
+    suit:{sh:K0.navy,cut:'long',det:(d,cx,ty)=>{d.r(cx-2,ty,4,2,K0.white);d.r(cx-1,ty+1,2,5,K0.tie)}},
+    kit:{sh:'#E2453C',pa:'#F4F4F4',cut:'long'},
+    bball:{sh:K0.jersey,cut:'long',det:(d,cx,ty)=>{d.r(cx-2,ty+1,3,1,WH);d.p(cx,ty+2,WH);d.p(cx-1,ty+3,WH);d.p(cx-1,ty+4,WH)}},
+    gi:{sh:'#F4F4F4',pa:'#F4F4F4',cut:'long',det:(d,cx,ty)=>{const b=MOOD===2?O:'#E6EAF2';d.r(cx-5,ty+6,10,1,b);d.r(cx-1,ty+7,2,2,b)}},   // a black belt on a solid day
+    box:{sh:K0.white,pa:K0.red,cut:'none'},
+    bolt:{sh:'#22305A',cut:'long',det:(d,cx,ty)=>{d.r(cx-1,ty+2,2,1,K0.sun);d.p(cx-1,ty+3,K0.sun);d.p(cx,ty+4,K0.sun)}},
+    hero:{sh:K0.suit,cut:'long',cape:K0.cape,det:(d,cx,ty)=>{d.r(cx-2,ty+2,4,3,K0.gold);d.r(cx-1,ty+3,2,1,K0.goldS)}},
+    j35:{sh:'#1B1F2E',pa:'#5A6276',cut:'long',det:(d,cx,ty)=>{digit(d,cx-4,ty+1,3,K0.gold);digit(d,cx,ty+1,5,K0.gold)}}};
+  const myTop=()=>AV.cos?COS[AV.cos].sh:K.shirt,myPants=()=>AV.cos&&COS[AV.cos].pa||K.pants,capeOn=()=>!!(AV.cos&&COS[AV.cos].cape);
   const SUNX=0,CLDX=0;   // the LV 4-5 weather sits top left, clear of ponytails and cap peaks
   const mix=(a,b,f)=>{const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16);return'#'+[16,8,0].map(s=>Math.round(((A>>s)&255)*(1-f)+((B>>s)&255)*f).toString(16).padStart(2,'0')).join('')};
   function setAvatar(c){c=c||{};const sk=c.skin;
@@ -3285,7 +3309,7 @@ const HERO16=(function(){
     if(sk){K.skin=sk[0];K.skinS=sk[1];K.skinH=sk[2];[['warm',.2],['pale',.45],['dusk',.7]].forEach(([n,f])=>{K[n]=mix(sk[0],'#A9B1C2',f);K[n+'S']=mix(sk[1],'#848CA0',f);K[n+'H']=mix(sk[2],'#CCD2DE',f)})}
     K.hair=c.hairC?c.hairC[0]:K0.hair;K.hairH=c.hairC?c.hairC[1]:K0.hairH;
     K.shirt=c.topC||K0.shirt;K.pants=c.bottomC||K0.pants;K.pantsS=c.bottomC?dark(c.bottomC,.25):K0.pantsS;K.shoe=c.shoesC||K0.shoe;
-    Object.assign(AV,{hair:c.hair||'short',eye:c.eye||null,beard:c.beard||'none',cut:c.cut||'short',pat:c.pat||'plain',top2:c.top2||WH,bcut:c.bcut||'long',shoes:c.shoes||'basic',hat:c.hat||'none',hatC:c.hatC||'#D63B3B',glasses:!!c.glasses})}
+    Object.assign(AV,{hair:c.hair||'short',eye:c.eye||null,beard:c.beard||'none',cut:c.cut||'short',pat:c.pat||'plain',top2:c.top2||WH,bcut:c.bcut||'long',shoes:c.shoes||'basic',hat:c.hat||'none',hatC:c.hatC||'#D63B3B',glasses:!!c.glasses,cos:COS[c.cos]?c.cos:null})}
   // hair styles: pixels relative to the 16x16 head, in hair colour H with highlight HH
   function hairDo(d,x,y,st,H,HH){if(st==='bald')return;const{p}=d,inn=(i,j)=>j>=0&&j<16&&i>=0&&i<16&&MASK[j][i]&&!EDGE[j][i];
     const cap=(f,hl)=>{for(let j=1;j<8;j++)for(let i=1;i<15;i++)if(inn(i,j)&&f(i,j))p(x+i,y+j,hl&&hl(i,j)?HH:H)},px=(a,c)=>a.forEach(([i,j])=>p(x+i,y+j,c||H));
@@ -3330,10 +3354,11 @@ const HERO16=(function(){
     else if(M==='grit'){r(x+5,y+11,6,1,O);p(x+5,y+12,O);p(x+10,y+12,O)}
     if(o.blush){r(x+2,y+10,2,1,K.blush);r(x+12,y+10,2,1,K.blush)}
     if(o.tear){p(x+4,y+10+(o.tearT||0),K.tear);p(x+4,y+11+(o.tearT||0),K.tear)}
-    if(o.band){r(x+1,y+4,14,2,K.red);r(x+1,y+5,14,1,K.gloveS);r(x-3,y+5,4,1,K.red);r(x-4,y+6+(o.bandT||0),3,1,K.red)}
+    if(o.band&&AV.hat==='none'){r(x+1,y+4,14,2,K.red);r(x+1,y+5,14,1,K.gloveS);r(x-3,y+5,4,1,K.red);r(x-4,y+6+(o.bandT||0),3,1,K.red)}
     if(AV.glasses&&E!=='shades'){const G='#2B3350',LN=mix(S,'#D6EEFF',.5);for(const ex of[2,8]){r(x+ex+1,y+6,4,1,G);r(x+ex+1,y+10,4,1,G);r(x+ex,y+7,1,3,G);r(x+ex+5,y+7,1,3,G);
       for(let j=7;j<10;j++){p(x+ex+1,y+j,LN);p(x+ex+4,y+j,LN)}}}
-    if(AV.hat!=='none'&&!o.band){const c=AV.hatC,cs=dark(c,.25),bn=AV.hat==='beanie';for(let j=0;j<(bn?5:4);j++)for(let i=0;i<16;i++)if(MASK[j][i])p(x+i,y+j,c);
+    if(AV.hat==='hard'){r(x+1,y-1,14,2,K.gold);r(x,y+1,16,1,K.goldS);p(x+7,y-2,K.gold);p(x+8,y-2,K.gold)}
+    else if(AV.hat!=='none'){const c=AV.hatC,cs=dark(c,.25),bn=AV.hat==='beanie';for(let j=0;j<(bn?5:4);j++)for(let i=0;i<16;i++)if(MASK[j][i])p(x+i,y+j,c);
       if(bn){r(x+1,y+4,14,2,cs);for(let i=2;i<14;i+=2)p(x+i,y+4,c);r(x+7,y-2,2,2,WH)}else{r(x+1,y+3,14,1,cs);r(x+2,y+4,16,1,c);r(x+11,y+5,7,1,cs)}}
   }
   // sl = sleeve colour (upper arm), fa = forearm colour (skin with short sleeves), sk = hand
@@ -3365,18 +3390,22 @@ const HERO16=(function(){
     else{leg(L,y,4);leg(R,y,4);shoe(L,y+4);shoe(R,y+4)}
     if(cut==='skirt'&&(!pose||pose==='stand'||pose==='walkA'||pose==='walkB'||pose==='hang'||pose==='runB')){r(cx-6,y,12,2,pa);r(cx+3,y,3,2,ps)}
   }
-  // no shirt or pants given = your own clothes from the Me tab (cut, pattern, colours); a costume passes its own
-  function body(d,cx,ty,o){const{r,p}=d,own=!o.shirt&&!o.tank,sh=o.shirt||K.shirt,sd=dark(sh,.22),pa=o.pants||K.pants,sk=K.skin,bare=o.tank||(own&&AV.cut==='none'),sl=bare?sk:sh,fa=bare||(own&&AV.cut==='short')?sk:sh;
-    if(o.cape){const c=o.cape,f=o.flap||0;r(cx-9,ty+1,18,9,c);r(cx-10+f*2,ty+9,20,3,c);r(cx-10+f*2,ty+11,20,1,dark(c,.3));r(cx-9,ty+1,1,10,dark(c,.25))}
-    legs(d,cx,ty,o.legs||'stand',pa,o.pants?null:AV.bcut);
+  // always your own clothes from the Me tab, or an outfit from your levels (AV.cos). Looks only pass poses (legs, arms, the cape's flap);
+  // the shirts, trousers and capes they pass are ignored.
+  function body(d,cx,ty,o){const{r,p}=d,C=AV.cos&&COS[AV.cos],sh=C?C.sh:K.shirt,sd=dark(sh,.22),full=!!(C&&C.pa),pa=full?C.pa:K.pants,sk=K.skin,cut=C?C.cut:AV.cut,
+      bare=cut==='none',sl=bare?sk:sh,fa=bare||cut==='short'?sk:sh;
+    if(C&&C.cape){const c=C.cape,f=o.flap||0;r(cx-9,ty+1,18,9,c);r(cx-10+f*2,ty+9,20,3,c);r(cx-10+f*2,ty+11,20,1,dark(c,.3));r(cx-9,ty+1,1,10,dark(c,.25))}
+    legs(d,cx,ty,o.legs||'stand',pa,full?null:AV.bcut);
     r(cx-6,ty,12,8,O);r(cx-5,ty,10,7,sh);r(cx+2,ty,3,7,sd);r(cx-5,ty+7,10,1,pa);
     if(bare){r(cx-5,ty,2,2,sk);r(cx+3,ty,2,2,sk)}
-    if(own){const c2=AV.top2,P=AV.pat;
+    if(!C){const c2=AV.top2,P=AV.pat;
       if(P==='stripe'){r(cx-5,ty+2,10,1,c2);r(cx-5,ty+5,10,1,c2)}
       else if(P==='hood'){r(cx-3,ty,6,1,sd);r(cx-2,ty+1,4,1,sd);r(cx-3,ty+4,6,3,sd);r(cx-2,ty+4,4,2,sh)}
       else if(P==='collar'){r(cx-2,ty,4,1,c2);r(cx-1,ty+1,1,6,sd)}
       else if(P==='zip'){r(cx-1,ty,2,7,c2);r(cx-2,ty,1,7,sd)}}
-    return{L:arm(d,cx,ty,-1,o.armL||'down',sl,sk,fa),R:arm(d,cx,ty,1,o.armR||'down',sl,sk,fa)};
+    const h={L:arm(d,cx,ty,-1,o.armL||'down',sl,sk,fa),R:arm(d,cx,ty,1,o.armR||'down',sl,sk,fa)};
+    if(C&&C.det)C.det(d,cx,ty);
+    return h;
   }
   const shadow=(d,w,y)=>d.r(16-(w>>1),y||31,w,1,'rgba(0,0,0,.22)');
   const blink=(t,n)=>t%n===0?'blink':'open';
@@ -3472,7 +3501,7 @@ const HERO16=(function(){
     (d,t)=>{const{p,r}=d,a=t%2;
       if(MOOD===2)[[1,0,1],[26,6,0],[6,14,1],[28,18,0],[2,22,0],[12,9,1],[20,26,1],[30,2,1]].forEach(([x,y,o],i)=>bill(d,x+((t+i)%4<2?0:1),(y+t)%30,(o+((t+i)>>1))%2));
       shadow(d,16);body(d,16,18,{shirt:K.navy,legs:a?'walkA':'walkB',armL:'down',armR:'down'});
-      r(14,18,4,2,K.white);r(15,19,2,5,K.tie);r(21,27,7,4,K.brown);r(21,30,7,1,K.brownS);r(23,26,3,1,O);
+      r(21,27,7,4,K.brown);r(21,30,7,1,K.brownS);r(23,26,3,1,O);
       head(d,8,2,{hair:true,mouth:'soft',eyes:blink(t,16)});
       if(MOOD<2&&t%6<2){p(28,4,WH);p(27,5,WH);p(29,5,WH);p(28,6,WH);p(28,3,K.gold)}},
     // 9  LV20 Team player: dribble, then spin it on a finger, then shoot and score
@@ -3497,13 +3526,13 @@ const HERO16=(function(){
     (d,t)=>{const{p,r}=d,a=t%2,dy=a?0:-1;
       if(MOOD>1){const by=a?0:1;
         [[0,9,5],[1,26,4],[0,29,6]].forEach(([x,y,w])=>r(x+(a?0:1),y,w,1,K.cloudH));
-        r(2,12+by,14,3,K.cape);r(0,14+by-(a?1:0),6,3,K.cape);r(2,15+by,14,1,K.capeS);
-        r(2,17+by,6,2,K.pants);r(2,19+by,6,1,K.pantsS);r(0,17+by,2,2,K.shoe);r(2,20+by,6,2,K.pants);r(0,20+by,2,2,K.shoe);
-        r(7,16+by,11,6,O);r(8,16+by,9,5,K.suit);r(8,20+by,9,1,dark(K.suit,.25));r(11,17+by,3,2,K.gold);
+        if(capeOn()){r(2,12+by,14,3,K.cape);r(0,14+by-(a?1:0),6,3,K.cape);r(2,15+by,14,1,K.capeS)}
+        {const P=myPants(),PS=dark(P,.28);r(2,17+by,6,2,P);r(2,19+by,6,1,PS);r(0,17+by,2,2,K.shoe);r(2,20+by,6,2,P);r(0,20+by,2,2,K.shoe)}
+        r(7,16+by,11,6,O);{const T=myTop();r(8,16+by,9,5,T);r(8,20+by,9,1,dark(T,.25));if(AV.cos==='hero')r(11,17+by,3,2,K.gold)}
         [[3,6],[9,4],[4,24]].forEach(([x,y],i)=>{const xx=(x+t*2+i*7)%14;r(xx,y,3,1,K.cloudH);r(xx+1,y-1,2,1,K.cloudH)});
         head(d,16,6+by,{hair:true,eyes:'shades',mouth:'big'});if(!FLOOR_SHADOW)shadow(d,8,31);return}
       shadow(d,a?12:10);
-      body(d,16,18+dy,{shirt:K.suit,cape:K.cape,flap:a?1:-1,armL:'down',armR:'up'});r(14,20+dy,4,3,K.gold);r(15,21+dy,2,1,K.goldS);
+      body(d,16,18+dy,{shirt:K.suit,cape:K.cape,flap:a?1:-1,armL:'down',armR:'up'});
       head(d,8,2+dy,{hair:true,eyes:'shades',mouth:'soft'});},
     // 12 LV30 Champion: medal, then a silver trophy, then gold with confetti
     (d,t)=>{const{p,r}=d;
@@ -3537,7 +3566,7 @@ const HERO16=(function(){
     let o={shirt:PJ,pants:PJ,armL:'down',armR:'down'},ty=18;
     if(MOOD===1){const s=t%4<2;o.armL=o.armR=s?'reach':'up'}
     if(MOOD===2){const j=t%2;o.armL=o.armR=j?'reach':'down';o.legs=j?'spread':'stand';ty=j?17:18}
-    shadow(d,16);body(d,16,ty,o);r(11,ty+2,10,1,WH);r(11,ty+5,10,1,WH);
+    shadow(d,16);body(d,16,ty,o);
     head(d,8,ty-16,{hair:true,mouth:'neutral',eyes:'blink'});[[13,-1],[17,-1],[15,-2]].forEach(([x,y])=>p(x,ty-16+y,K.hair));
   };
   // 7 Fuelled up: tired with empty hands, then making a coffee, then drinking it, steaming hot
@@ -3548,7 +3577,7 @@ const HERO16=(function(){
       hero(d,18,{armL:'down',armR:'down'},{});cup(d,25,24,(t%4)>1);if(t%4<3)for(let y=19;y<24;y++)if((y+t)%2)p(27,y,'#6B3E1F');return}
     // solid day: a mug held out to the side and steaming, lifted to his mouth for a sip, then back out.
     // The right arm is drawn by hand so the sleeve stays attached to the mug the whole way.
-    const f=t%10,SL=K.shirt,HN=K.skinS,ST=[WH,'#DDE3EE'];
+    const f=t%10,SL=myTop(),HN=K.skinS,ST=[WH,'#DDE3EE'];
     const mug=(x,y,coffee)=>{r(x,y,6,6,O);r(x+1,y+1,4,4,WH);r(x+1,y+4,4,1,K.cloud);if(coffee)r(x+1,y+1,4,1,'#6B3E1F')};
     const arm=pts=>pts.forEach(([x,y])=>r(x,y,2,2,SL));
     body(d,16,18,{armL:'down',armR:'none'});head(d,8,2,{hair:true,mouth:'soft'});
@@ -3568,8 +3597,8 @@ const HERO16=(function(){
     else if(f===3){r(9,by+1,14,1,K.brownS);r(9,by+2,14,1,K.brown);r(11,by,2,1,O);r(19,by,2,1,O);[[7,by+3],[24,by-1]].forEach(([x,y])=>p(x,y,WH))}
     else{board(d,9,by+1,false);sparkle(d,27,by-2,K.sun);sparkle(d,4,by-1,K.sun)}};
   // 12 Pushing harder: a shaky plank, then push-ups, then clap push-ups
-  function pushup(d,ty,clap,sh){const{p,r}=d,S2=sh||'#E2453C';
-    for(let i=0;i<7;i++)r(24+i,ty+1+Math.round(i*(28-ty)/6),2,2,K.pants);r(30,29,2,2,K.shoe);
+  function pushup(d,ty,clap,sh){const{p,r}=d,S2=sh||myTop();
+    for(let i=0;i<7;i++)r(24+i,ty+1+Math.round(i*(28-ty)/6),2,2,myPants());r(30,29,2,2,K.shoe);
     r(13,ty,12,4,O);r(14,ty+1,10,2,S2);
     if(clap){r(13,ty+3,2,3,S2);r(12,ty+6,2,2,K.skin);[[10,ty+5],[9,ty+7],[11,ty+9]].forEach(([x,y])=>p(x,y,K.sun))}
     else{r(15,ty+4,2,26-(ty+4),S2);r(15,26,2,4,K.skin);r(14,30,4,1,K.skin)}
@@ -3587,7 +3616,7 @@ const HERO16=(function(){
     if(big){if(L1==='guard')r(7,19,1,3,K.skin);if(R1==='guard')r(24,19,1,3,K.skin)}};
   // 15 Learning: a closed book, then reading, then a pile of books and a lightbulb
   L[15]=(d,t)=>{const{p,r}=d,SH='#3F7BD9';if(MOOD===2){r(1,27,7,2,K.red);r(2,25,6,2,K.jersey);r(1,23,7,2,K.gold);r(2,29,6,2,'#7B5BD6');[24,26,28,30].forEach(y=>r(7,y,1,1,WH))}
-    shadow(d,16);body(d,16,18,{shirt:SH});head(d,8,2,{hair:true,mouth:'neutral',eyes:blink(t,15)});glasses(d,8,2);
+    shadow(d,16);body(d,16,18,{shirt:SH});head(d,8,2,{hair:true,mouth:'neutral',eyes:blink(t,15)});
     if(MOOD===0){book(d,12,19,false);r(11,21,1,2,K.skin);r(20,21,1,2,K.skin)}else{book(d,12,19,true,t%3===0);r(9,21,1,2,K.skin);r(22,21,1,2,K.skin)}
     if(MOOD===2)bulb(d,25,1,t%2===0)};
   // 16 Applying: a laptop, then typing with paper planes flying out, then a big "sent" tick
@@ -3598,8 +3627,8 @@ const HERO16=(function(){
     if(MOOD===2){[[13,21],[14,22],[15,23],[16,22],[17,21],[18,20],[19,19]].forEach(([x,y])=>p(x,y,WH));plane(d,[24,27,30][t%3],[13,9,5][t%3]);plane(d,[28,25,22][t%3],[3,6,9][t%3]);if(t%2)sparkle(d,29,16,K.sun)}};
   // 18 Making calls: phone in hand, then on a call, then a star in the speech bubble
   L[18]=(d,t)=>{const{p,r}=d,a=t%2;shadow(d,16);
-    if(MOOD===0){body(d,16,18,{shirt:K.navy,legs:a?'walkA':'walkB'});tie(d,18);head(d,8,2,{hair:true,mouth:'neutral',eyes:blink(t,14)});r(22,26,2,4,O);p(22,27,K.sweat);return}
-    body(d,16,18,{shirt:K.navy,armR:'up'});tie(d,18);head(d,8,2,{hair:true});r(23,8,2,4,O);bubble(d,23,0);
+    if(MOOD===0){body(d,16,18,{shirt:K.navy,legs:a?'walkA':'walkB'});head(d,8,2,{hair:true,mouth:'neutral',eyes:blink(t,14)});r(22,26,2,4,O);p(22,27,K.sweat);return}
+    body(d,16,18,{shirt:K.navy,armR:'up'});head(d,8,2,{hair:true});r(23,8,2,4,O);bubble(d,23,0);
     if(MOOD===1){for(let k=0;k<1+(t%3);k++)r(25+k*2,3,1,1,O)}
     else{sparkle(d,27,3,K.gold);p(27,3,K.goldS);[[2,3],[5,1],[3,8],[29,10],[20,1]].forEach(([x,y],i)=>{if((t+i)%2)p(x,y,K.fw[i%5])})}};
   // 19 Playing: a football at his feet, then keepy-uppies, then a header
@@ -3620,9 +3649,9 @@ const HERO16=(function(){
   // 22 Disciplined: karate stance with a white belt, then kicks, then a black belt and a board break
   L[22]=(d,t)=>{const{p,r}=d,GI='#F4F4F4',belt=MOOD===2?O:'#E6EAF2',f=t%4,kick=MOOD>=1&&MOOD<2&&(f===1||f===2);
     if(MOOD===2){const g=t%6;shadow(d,16);const hit=g>=2;
-      body(d,16,18,{shirt:GI,pants:GI,legs:'walkA',armL:'guard',armR:hit?'out':'guard'});r(11,24,10,1,belt);r(15,25,2,2,belt);head(d,8,2,{hair:true,brows:'fierce'});
+      body(d,16,18,{shirt:GI,pants:GI,legs:'walkA',armL:'guard',armR:hit?'out':'guard'});head(d,8,2,{hair:true,brows:'fierce'});
       if(!hit){r(27,13,4,9,K.brown);r(27,13,1,9,K.brownS)}else{const o=Math.min(g-1,3);r(27+o,12-o,4,4,K.brown);r(27+o,19+o,4,4,K.brown);if(g===2)[[0,-2],[0,2],[-2,0],[2,0],[-1,-1],[1,1]].forEach(([a,b])=>p(29+a,17+b,K.sun))}return}
-    shadow(d,16);body(d,16,18,{shirt:GI,pants:GI,legs:kick?'kick':'walkA',armL:'guard',armR:kick?'back':'guard'});r(11,24,10,1,belt);r(15,25,2,2,belt);head(d,8,2,{hair:true,brows:'fierce',mouth:'neutral'})};
+    shadow(d,16);body(d,16,18,{shirt:GI,pants:GI,legs:kick?'kick':'walkA',armL:'guard',armR:kick?'back':'guard'});head(d,8,2,{hair:true,brows:'fierce',mouth:'neutral'})};
   // 24 Balanced: sitting cross-legged, then floating with a calm glow, then higher with sparkles orbiting
   L[24]=(d,t)=>{const{p}=d,SH='#1ABC9C',ty=MOOD===0?21:MOOD===1?19-((t>>1)%2):15-(t%2);
     if(MOOD>0)for(let a=0;a<360;a+=20){if((a/20+t)%3)continue;const rad=a*Math.PI/180;p(Math.round(16+Math.cos(rad)*13),Math.round(ty-1+Math.sin(rad)*12),'#7FE3D2')}
@@ -3631,7 +3660,7 @@ const HERO16=(function(){
   // 25 Charged up: sparks on his hands, then an energy ball, then a full lightning aura
   L[25]=(d,t)=>{const{p,r}=d,SH='#22305A',E='#7FD4FF';
     if(MOOD===2){[[3,8],[28,8],[2,20],[29,20]].forEach(([x,y],i)=>{const c=(t+i)%2?K.sun:E;for(let k=0;k<8;k++)p(x+((k+t)%2?1:0),y+k,c)})}
-    shadow(d,16);const h=body(d,16,18,{shirt:SH,armL:MOOD===2?'up':'down',armR:MOOD===0?'down':MOOD===1?'wave':'up'});r(15,20,2,1,K.sun);p(15,21,K.sun);p(16,22,K.sun);
+    shadow(d,16);const h=body(d,16,18,{shirt:SH,armL:MOOD===2?'up':'down',armR:MOOD===0?'down':MOOD===1?'wave':'up'});
     head(d,8,2,{hair:true,brows:'fierce',mouth:'neutral'});
     if(MOOD===0){if(t%3!==1){p(7,27,K.sun);p(10,26,E);p(21,27,E);p(24,26,K.sun)}}
     if(MOOD===1){const s=t%2;r(23-s,5-s,5+2*s,5+2*s,E);r(24,6,3,3,WH)}
@@ -3647,7 +3676,7 @@ const HERO16=(function(){
     if(MOOD===0){r(2,7,4,1,K.cloud);r(2,10,3,1,K.cloud)}
     if(MOOD===1)pts.slice(0,1+(t%6)).forEach(([x,y])=>p(x,y,'#3F7BD9'));
     if(MOOD===2){pts.forEach(([x,y])=>p(x,y,K.cashS));[[7,6],[8,4],[9,2],[10,1]].forEach(([x,y])=>p(x,y,K.cashS));p(9,1,K.cashS);p(11,1,K.cashS);p(10,0,K.cashS);if(t%2)sparkle(d,12,4,K.sun)}
-    shadow(d,16);body(d,16,18,{shirt:K.navy,armL:MOOD===0?'down':'out',armR:MOOD===2?'up':'down'});tie(d,18);head(d,8,2,{hair:true,eyes:blink(t,14)})};
+    shadow(d,16);body(d,16,18,{shirt:K.navy,armL:MOOD===0?'down':'out',armR:MOOD===2?'up':'down'});head(d,8,2,{hair:true,eyes:blink(t,14)})};
   /* ---- redrawn looks ---- */
   const flip=d=>({p:(x,y,c)=>d.p(x,31-y,c),r:(x,y,w,h,c)=>d.r(x,32-y-h,w,h,c)});
   const shift=(d,dx)=>({p:(x,y,c)=>d.p(x+dx,y,c),r:(x,y,w,h,c)=>d.r(x+dx,y,w,h,c)});
@@ -3666,19 +3695,19 @@ const HERO16=(function(){
   // 20 Team player: dribbles, then spins the ball on one finger, then a jump shot that swishes through the hoop
   function bball(d,x,y,ph){const{p,r}=d;r(x+1,y,3,1,K.ball);r(x,y+1,5,3,K.ball);r(x+1,y+4,3,1,K.ball);p(x+1,y+1,'#F7A35C');
     if(ph===0){r(x+2,y,1,5,K.ballS);r(x,y+2,5,1,K.ballS)}else if(ph===1){p(x+1,y+1,K.ballS);p(x+2,y+2,K.ballS);p(x+3,y+3,K.ballS);p(x,y+3,K.ballS);p(x+4,y+1,K.ballS)}else{p(x+3,y+1,K.ballS);p(x+2,y+2,K.ballS);p(x+1,y+3,K.ballS);p(x,y+1,K.ballS);p(x+4,y+3,K.ballS)}}
-  L[20]=(d,t)=>{const{p,r}=d,SH=K.jersey,jer=(cx,ty)=>{r(cx-2,ty+1,3,1,WH);p(cx,ty+2,WH);p(cx-1,ty+3,WH);p(cx-1,ty+4,WH)};
+  L[20]=(d,t)=>{const{p,r}=d,SH=myTop(),jer=(cx,ty)=>{r(cx-2,ty+1,3,1,WH);p(cx,ty+2,WH);p(cx-1,ty+3,WH);p(cx-1,ty+4,WH)};
     if(MOOD===0){const f=t%4,by=[22,24,26,24][f],hy=f===0?20:21;
-      shadow(d,16);body(d,16,18,{shirt:SH,legs:f===2?'walkA':'stand',armR:'none'});jer(16,18);head(d,8,2,{hair:true,mouth:'soft'});
+      shadow(d,16);body(d,16,18,{shirt:SH,legs:f===2?'walkA':'stand',armR:'none'});head(d,8,2,{hair:true,mouth:'soft'});
       r(22,19,2,2,SH);r(24,hy,2,2,SH);r(26,hy,2,2,K.skin);
       r(25,31,5,1,'rgba(0,0,0,.25)');if(f===2){r(24,27,7,3,K.ball);r(25,26,5,1,K.ball);r(25,30,5,1,K.ball);r(27,26,1,5,K.ballS);r(24,28,7,1,K.ballS)}else bball(d,25,by,0);return}
-    if(MOOD===1){shadow(d,16);body(d,16,18,{shirt:SH,armR:'none'});jer(16,18);head(d,8,2,{hair:true,mouth:'soft'});
+    if(MOOD===1){shadow(d,16);body(d,16,18,{shirt:SH,armR:'none'});head(d,8,2,{hair:true,mouth:'soft'});
       r(22,19,2,2,SH);r(24,12,2,8,SH);r(24,10,2,2,K.skin);p(25,9,K.skin);
       bball(d,23,3,t%3);if(t%2){p(21,4,WH);p(21,5,WH);p(29,6,WH);p(29,7,WH)}else{p(29,4,WH);p(29,5,WH);p(21,6,WH);p(21,7,WH)}return}
     const f=t%10,cx=20,up=f<3?2:0;
     r(0,0,3,13,K.metalH);r(2,0,1,13,K.metalS);r(0,12,3,1,K.metalS);r(0,5,2,1,K.red);r(0,8,2,1,K.red);r(1,5,1,4,K.red);
     shadow(d,16);
     const armR=f<2?'up':f<4?'reach':'down',armL=f<2?'up':f>=7?'up':'down';
-    body(d,cx,18-up,{shirt:SH,armL,armR,legs:up?'stand':'stand'});jer(cx,18-up);head(d,cx-8,2-up,{hair:true});
+    body(d,cx,18-up,{shirt:SH,armL,armR,legs:up?'stand':'stand'});head(d,cx-8,2-up,{hair:true});
     const P=[[25,4],[25,4],[22,0],[16,-1],[10,1],[5,6],[4,10],[4,14],[4,20],[4,26]][f];
     if(f===8)r(4,31,5,1,'rgba(0,0,0,.25)');
     bball(d,P[0],P[1]-(f<2?up:0),f%3);
@@ -3692,10 +3721,10 @@ const HERO16=(function(){
     r(1,2,10,10,G);r(0,4,12,6,G);r(2,3,4,2,GH);r(1,5,2,2,GH);p(8,4,GH);p(6,8,GH)}
   L[27]=(d,t)=>{const{p,r}=d,cx=21,su={shirt:K.suit,cape:K.cape},em=(ty)=>{r(cx-2,ty+2,4,3,K.gold);r(cx-1,ty+3,2,1,K.goldS)};
     tree(d);
-    if(MOOD===0){cat(d,6,13,false);if(t%2){r(9,8,1,3,WH);p(9,12,WH)}shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades',mouth:'neutral'});return}
-    if(MOOD===1){cat(d,6,13,false);const ty=15-(t%2);shadow(d,10);body(d,cx,ty,Object.assign({armL:'out',armR:'down',flap:t%2?1:-1,legs:'walkA'},su));em(ty);head(d,cx-8,ty-16,{hair:true,eyes:'shades'});
+    if(MOOD===0){cat(d,6,13,false);if(t%2){r(9,8,1,3,WH);p(9,12,WH)}shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));head(d,cx-8,2,{hair:true,eyes:'shades',mouth:'neutral'});return}
+    if(MOOD===1){cat(d,6,13,false);const ty=15-(t%2);shadow(d,10);body(d,cx,ty,Object.assign({armL:'out',armR:'down',flap:t%2?1:-1,legs:'walkA'},su));head(d,cx-8,ty-16,{hair:true,eyes:'shades'});
       [[24,26,4],[26,29,3]].forEach(([x,y,w])=>r(x,y+(t%2),w,1,K.cloudH));return}
-    shadow(d,16);body(d,cx,18,Object.assign({armL:'guard',armR:'guard',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,eyes:'shades'});
+    shadow(d,16);body(d,cx,18,Object.assign({armL:'guard',armR:'guard',flap:t%2?1:-1},su));head(d,cx-8,2,{hair:true,eyes:'shades'});
     cat(d,cx-4,19,true);r(cx-6,21,2,2,K.skin);r(cx+4,21,2,2,K.skin);
     [[13,8],[27,4],[11,1]].forEach(([x,y],i)=>heart(d,x,(y-(t+i*2)%6+6)%10,i%2?'#F27B8B':'#E2453C'))};
 
@@ -3704,7 +3733,7 @@ const HERO16=(function(){
     if(up){r(x-1,y+1,1,4,K.skin);r(x+5,y+1,1,4,K.skin)}}
   L[28]=(d,t)=>{const{p,r}=d,a=t%2,F=[[0,'#3A2A1E','#E2453C'],[5,'#C98A0B','#3F7BD9'],[10,'#1B1F2E','#3CC98E'],[16,'#7A4A22','#FFC531'],[21,'#3A2A1E','#9B59B6'],[26,'#E8771A','#1ABC9C']];
     if(MOOD===2){for(let k=0;k<14;k++){p(2+k,k*2,'rgba(255,229,138,.5)');p(29-k,k*2,'rgba(255,229,138,.5)')}}
-    shadow(d,16);body(d,16,18,{shirt:K.suit,cape:K.cape,flap:a?1:-1,armL:MOOD===2?'up':'down',armR:'wave'});r(14,20,4,3,K.gold);r(15,21,2,1,K.goldS);head(d,8,2,{hair:true,eyes:'shades'});
+    shadow(d,16);body(d,16,18,{shirt:K.suit,cape:K.cape,flap:a?1:-1,armL:MOOD===2?'up':'down',armR:'wave'});head(d,8,2,{hair:true,eyes:'shades'});
     const n=MOOD===0?1:MOOD===1?3:6,pick=MOOD===1?[0,3,5]:[0,1,2,3,4,5];
     for(let i=0;i<n;i++){const [x,h,s]=F[MOOD===0?0:pick[i]],jump=MOOD>0&&(t+i)%2;fan(d,x,24-jump,h,s,MOOD>0&&(MOOD===2||(t+i)%2===0))}
     if(MOOD>=1)[[4,14],[27,10],[12,6]].slice(0,MOOD===1?2:3).forEach(([x,y],i)=>heart(d,x,((y-t*2-i*3)%16+16)%16+4));
@@ -3730,7 +3759,7 @@ const HERO16=(function(){
     if(MOOD===1){const k=t%6;bld(d,0,9,9+k*2,false,t);bld(d,23,9,7+k*2,false,t);r(1,31-(9+k*2),7,1,K.sun);r(24,31-(7+k*2),7,1,K.sun);
       const cy=32-(9+k*2)-6;r(28,cy,1,6,K.sunS);r(20,cy,12,1,K.sunS);p(21,cy+1,O);p(21,cy+2,O)}
     if(MOOD===2){bld(d,0,9,27,true,t);bld(d,23,9,22,true,t);r(4,1,1,4,O);p(4,0,t%2?K.red:'#7A2020');r(27,6,1,4,O);r(28,6,3,2,K.red);if(t%3===0)sparkle(d,11,6,K.sun)}
-    shadow(d,16);body(d,16,18,{shirt:'#E8771A',armR:MOOD===2?'up':'down'});head(d,8,2,{hair:true,eyes:blink(t,13)});hat();
+    shadow(d,16);body(d,16,18,{shirt:'#E8771A',armR:MOOD===2?'up':'down'});head(d,8,2,{hair:true,eyes:blink(t,13)});
     if(MOOD===0){r(20,26,7,2,'#7FB4FF');r(20,26,7,1,'#BFD9FF');p(21,27,WH);p(24,27,WH)}};
 
   // 33 Top of the world: at the foot of a big mountain, then up the slope, then on the summit above the clouds with a flag
@@ -3755,16 +3784,16 @@ const HERO16=(function(){
   L[34]=(d,t)=>{const{p,r}=d,cx=24,su={shirt:K.suit,cape:K.cape},em=(ty)=>{r(cx-2,ty+2,4,3,K.gold);r(cx-1,ty+3,2,1,K.goldS)};
     if(MOOD===0){bossCloud(d,0,false,t);[[3,0],[8,2],[13,1],[17,3]].forEach(([x,o])=>{const y=12+((t+o)%8);p(x,y,K.rain);p(x,y+1,K.rain)});
       if(t%6<2){[[10,11],[9,12],[10,13],[11,13],[10,14],[9,15],[8,16]].forEach(([x,y])=>{p(x,y,K.sun);p(x+1,y,K.sunS)})}
-      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));em(18);head(d,cx-8,2,{hair:true,mouth:'neutral',brows:'fierce'});return}
+      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down'},su));head(d,cx-8,2,{hair:true,mouth:'neutral',brows:'fierce'});return}
     if(MOOD===1){const hit=t%3!==0,dx=hit?(t%2?1:-1):0;bossCloud(d,dx,hit,t);
-      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true,brows:'fierce'});
+      shadow(d,16);body(d,cx,18,Object.assign({armL:'down',armR:'down',flap:t%2?1:-1},su));head(d,cx-8,2,{hair:true,brows:'fierce'});
       if(hit){r(20,9,2,2,'#FF3B3B');r(26,9,2,2,'#FF3B3B');p(20,9,WH);p(26,9,WH);
         const beam=(x0,y0)=>{const tx=10,ty2=6,n=x0-tx;for(let k=0;k<=n;k++){const x=x0-k,y=Math.round(y0+(ty2-y0)*k/n);p(x,y,(k+t)%2?'#FF8A8A':'#FF3B3B');p(x,y+1,'#FF3B3B')}};
         beam(26,9);beam(20,9);r(20,9,2,2,'#FF3B3B');r(26,9,2,2,'#FF3B3B');p(20,9,WH);p(26,9,WH);
         sparkle(d,10,6,K.sun);sparkle(d,10,6,WH);p(8,4,K.sun);p(12,8,K.sun)}else{r(20,9,2,2,'#FF8A8A');r(26,9,2,2,'#FF8A8A')}return}
     rainbow(d);sun(d,t,2,2);
     [[0,9],[26,3],[2,20]].forEach(([x,y],i)=>{const xx=i===1?x+(t%4):x-(t%4);smallCloud(d,xx,y,K.cloud)});
-    shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'up',flap:t%2?1:-1},su));em(18);head(d,cx-8,2,{hair:true});
+    shadow(d,16);body(d,cx,18,Object.assign({armL:'up',armR:'up',flap:t%2?1:-1},su));head(d,cx-8,2,{hair:true});
     if(t%2)sparkle(d,30,14,K.sun)};
 
   // 35 Level 35: his own number 35 jersey. The XP bar is nearly full, then it fills up, then he lifts a gold 35 overhead with fireworks
@@ -3776,13 +3805,13 @@ const HERO16=(function(){
       burst(...[[28,4],[27,15],[10,12]][c%3],K.fw[c%5],t%3);burst(...[[27,15],[28,4],[29,24]][c%3],K.fw[(c+2)%5],(t+1)%3);confetti(d,t)}
     shadow(d,16);
     const arms=MOOD===2?['reach','reach']:MOOD===1?['down',t%2?'up':'wave']:['down','down'];
-    body(d,16,18,{shirt:J,pants:'#5A6276',armL:arms[0],armR:arms[1]});digit(d,12,19,3,G);digit(d,16,19,5,G);
+    body(d,16,18,{shirt:J,pants:'#5A6276',armL:arms[0],armR:arms[1]});
     head(d,8,2,{hair:true,eyes:blink(t,12),mouth:'soft'});
     if(MOOD===2){r(9,0,14,8,O);r(10,1,12,6,G);r(10,1,12,1,K.goldH);r(20,1,2,6,K.goldS);digit(d,12,2,3,J);digit(d,16,2,5,J);r(8,1,2,2,G);r(22,1,2,2,G);if(t%3===0)sparkle(d,16,0,WH)}};
   const S=Array.from({length:35},(_,i)=>L[i+1]);
   const TRVO={plane:['#5B84E8','#2E3A5C'],train:['#2FA36B','#2E3A5C'],car:['#E8541A','#2E3A5C'],beach:['#1ABC9C','#3F7BD9'],mountain:['#C0504D','#5A4632'],city:['#22305A','#5A6276'],fields:['#C0504D','#3F7BD9'],cottage:['#B23A3A','#5A6276'],snow:['#FF7A2F','#22305A']};
   const PAPER_MS=4200,PAPER_AIM=600;  // the paper plane throw: aim, then the scene flies it (glide, loop, out)
-  function travel(ctx,kind,lv,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;const d=api(ctx),{p,r}=d,M=MOOD,[SH,PA]=TRVO[kind]||TRVO.beach;
+  function travel(ctx,kind,lv,t){ctx.clearRect(0,0,W,W);ctx.imageSmoothingEnabled=false;const d=api(ctx),{p,r}=d,M=MOOD,SH=myTop(),PA=myPants();
     const sk=lv<=1?'grey':lv===2?'dusk':lv===3?'pale':'skin',hair=true,full=lv>=4,SKC=K[sk];
     const face=(x,y,o)=>head(d,x,y,Object.assign({skin:sk,hair,eyes:M===0?'tired':'open',mouth:M===0?'neutral':'smile'},o||{}));
     const hx=8,hy=full?2:14,fb=o=>{shadow(d,16);return body(d,16,18,Object.assign({shirt:SH,pants:PA},o))},ho=()=>shadow(d,12);
@@ -3798,11 +3827,11 @@ const HERO16=(function(){
     const camera=(x,y)=>{r(x,y,6,4,'#2B2F3A');r(x+2,y+1,2,2,'#7FD4FF');p(x+1,y-1,'#2B2F3A');if(t%6===0)sparkle(d,x+3,y-2,WH)};
     const phone=(x,y)=>{r(x,y,3,5,'#2B2F3A');p(x+1,y+1,'#7FD4FF')};
     const map=(x,y)=>{r(x,y,14,8,'#F4F1E6');r(x+4,y,1,8,'#D8D2C0');r(x+9,y,1,8,'#D8D2C0');r(x+1,y+2,5,1,'#3CC98E');r(x+6,y+5,6,1,'#7FB4FF');p(x+11,y+2,'#E2453C')};
-    const straw=(x,y)=>{r(x-2,y+3,20,2,'#E8C25A');r(x+2,y-1,12,4,'#E8C25A');r(x+2,y+2,12,1,'#C0504D');r(x-2,y+4,20,1,'#C9A040')};
+    const straw=(x,y)=>{if(AV.hat!=='none')return;r(x-2,y+3,20,2,'#E8C25A');r(x+2,y-1,12,4,'#E8C25A');r(x+2,y+2,12,1,'#C0504D');r(x-2,y+4,20,1,'#C9A040')};
     const basket=(x,y)=>{r(x-3,y,7,5,'#B9895A');r(x-3,y+2,7,1,'#946A41');r(x-2,y-2,1,2,'#946A41');r(x+2,y-2,1,2,'#946A41');r(x-1,y-3,3,1,'#946A41');p(x-1,y,'#E2453C')};
     const mug=(x,y)=>{r(x,y,4,4,'#F4F4F4');r(x+4,y+1,1,2,'#F4F4F4');r(x,y,4,1,'#7A4A22');p(x+1,y-2-(t%2),'#E6EAF2');p(x+2,y-3+(t%2),'#E6EAF2')};
     const book=(x,y)=>{r(x,y,12,6,'#F4F1E6');r(x+5,y,2,6,'#C9C2AE');r(x-1,y+5,14,1,'#3F7BD9');[1,3].forEach(k=>{r(x+1,y+k,3,1,'#9AA3B5');r(x+8,y+k,3,1,'#9AA3B5')})};
-    const beanie=(x,y,gog)=>{r(x+1,y-1,14,5,'#E2453C');r(x+1,y+3,14,2,'#B02E27');r(x+6,y-3,4,3,WH);if(gog){r(x+2,y+1,12,3,'#22305A');r(x+3,y+1,4,2,'#7FD4FF');r(x+9,y+1,4,2,'#7FD4FF')}};
+    const beanie=(x,y,gog)=>{if(AV.hat!=='none')return;r(x+1,y-1,14,5,'#E2453C');r(x+1,y+3,14,2,'#B02E27');r(x+6,y-3,4,3,WH);if(gog){r(x+2,y+1,12,3,'#22305A');r(x+3,y+1,4,2,'#7FD4FF');r(x+9,y+1,4,2,'#7FD4FF')}};
     const board=x=>{r(x,8,4,23,'#FF7A2F');r(x+1,6,2,2,'#FF7A2F');r(x+1,31,2,1,'#FF7A2F');r(x+1,11,2,17,'#2C5BD8')};
     const knit=()=>{r(11,19,10,1,'#F4E9D8');[[12,21],[15,21],[18,21],[13,23],[16,23],[19,23]].forEach(([x,y])=>p(x,y,'#F4E9D8'))};
     const flowers=()=>[[3,30,'#F27BD3'],[28,30,'#FFC531'],[24,28,WH],[6,27,'#FFC531']].forEach(([x,y,c])=>{p(x,y,c);p(x,y+1,'#2F8A4A')});
@@ -3839,7 +3868,7 @@ const HERO16=(function(){
       else{ho();face(hx,hy);r(9,13,14,3,'#3CA66B');r(9,15,14,1,'#2F8A57');r(20,12,6,2,'#3CA66B');if(M===2)flag(27,24);else pole(27,18)}
       if(M===0)zzz(d,t);return}
     if(kind==='city'){ // tourist: camera on your chest, then up to your eye with a flash, then shopping bags
-      const cap=y=>{r(10,y-1,12,2,'#E2453C');r(9,y+1,14,3,'#E2453C');r(11,y,4,1,'#FF7A6E');r(21,y+3,6,1,'#B02E27');p(15,y-1,WH)};
+      const cap=y=>{if(AV.hat!=='none')return;r(10,y-1,12,2,'#E2453C');r(9,y+1,14,3,'#E2453C');r(11,y,4,1,'#FF7A6E');r(21,y+3,6,1,'#B02E27');p(15,y-1,WH)};
       const cam=(x,y)=>{r(x,y,10,6,'#2B2F3A');r(x+1,y+1,8,4,'#3B3F4A');r(x+5,y-1,3,1,'#2B2F3A');r(x+2,y+1,4,4,'#5B616A');r(x+3,y+2,2,2,'#7FD4FF');p(x+3,y+2,WH);r(x+7,y+1,2,1,'#C9CFDB')};
       const bag=(x,y,c,l)=>{r(x+1,y-3,1,3,O);r(x+5,y-3,1,3,O);r(x+1,y-3,5,1,O);r(x,y,7,8,c);r(x,y+7,7,1,dark(c,.25));r(x+2,y+2,3,3,l)};
       const eyeCam=y=>{r(7,y,18,6,'#2B2F3A');r(8,y+1,16,4,'#3B3F4A');r(16,y,7,6,'#5B616A');r(17,y+1,5,4,'#7FD4FF');r(17,y+1,2,1,WH);r(9,y-1,4,1,'#2B2F3A');r(10,y+1,3,1,'#C9CFDB');if(t%6<2){sparkle(d,11,y-3,WH);p(11,y-5,WH)}};
