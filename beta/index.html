@@ -645,8 +645,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .scene{overflow:hidden}
 #petCv{position:absolute;left:0;top:0;pointer-events:none}
 #sceneCv,#petCv{transition:transform .35s ease}
-.wrap[data-tab=me][data-me=avatar] #sceneCv,.wrap[data-tab=me][data-me=avatar] #petCv{transform:scale(2.1);transform-origin:50% 90%}
-.wrap[data-tab=me][data-me=pet] .scene:not(.travel) #sceneCv,.wrap[data-tab=me][data-me=pet] .scene:not(.travel) #petCv{transform:scale(2);transform-origin:100% 98%}
 .wrap[data-tab=me][data-me=avatar] .streakframe,.wrap[data-tab=me][data-me=avatar] .perfframe,.wrap[data-tab=me][data-me=avatar] .hud .alert,
 .wrap[data-tab=me][data-me=pet] .scene:not(.travel) .streakframe,.wrap[data-tab=me][data-me=pet] .scene:not(.travel) .perfframe,.wrap[data-tab=me][data-me=pet] .hud .alert{display:none}
 @media (prefers-reduced-motion:reduce){#sceneCv,#petCv{transition:none}}
@@ -2711,7 +2709,7 @@ const SCENE=(function(){
     g.setTransform(2,0,0,2,0,0);
     const hc=$('heroCv'),fly=!TS&&typeof HERO!=='undefined'&&HERO.stage&&HERO.stage()===25&&HERO16.mood===2,surf=TS&&SURF,hy=(surf?(SURFY=4+((t>>1)%2)):fly?-4+(t%4<2?0:1):16)+(TS?SKYUP/2:64);
     if(fly)r(70,110,22,1,'rgba(0,0,0,.14)');
-    boostAura(lp,g,now,hc,hy);perfGlow(g,now,hc,hy);if(hc)g.drawImage(hc,64,hy);
+    boostAura(lp,g,now,hc,hy);perfGlow(g,now,hc,hy);if(hc)g.drawImage(hc,64,hy);AVATAR.zoom(hy,!!TS);
     if(TS){g.setTransform(1,0,0,1,0,SKYUP);travelFront(p,r,g,now,TS);g.setTransform(2,0,0,2,0,0)}
     boostLayer(lp,r,g,now,hc,hy);
     if(cleanAt&&now-cleanAt<2500){for(let i=0;i<16;i++){const x=(i*23+t*5)%W,y=(i*7+t*2)%(H-12);r(x,y,2,2,[C.yellow,C.white,C.pink,C.green][i%4])}}
@@ -3195,7 +3193,7 @@ const AVATAR=(function(){
     b.onclick=()=>{if(s==='own'){pv=null;o.pick();return}
       pv={it:o.it,pre:o.pre,pick:o.pick,thumb:o.thumb};sig='';apply();SCENE.draw();paint()};
     return b}
-  function paint(){const pane=$('mePane');if(!pane)return;const a=A(),L=level(),w=document.querySelector('.wrap');pane.innerHTML='';
+  function paint(){const pane=$('mePane');if(!pane)return;const a=A(),L=level(),w=document.querySelector('.wrap'),sy=scrollY;pane.innerHTML='';   // rebuilt in place: the list stays where you were
     $('coins').textContent='🪙 '+coins();w.dataset.me=me==='pet'&&!(a.pet||(pv&&pv.pre.k==='pet'))?'petnone':me;
     document.querySelectorAll('#meSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.me===me));
     const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt)e.textContent=txt;return e};
@@ -3229,13 +3227,29 @@ const AVATAR=(function(){
       const no=el('button','bb-no','Cancel');no.type='button';no.onclick=()=>{clearPv();paint()};bar.appendChild(no);
       const yes=el('button','bb-yes',it.c?'Buy':'Choose');yes.type='button';yes.disabled=s!=='buy';yes.onclick=()=>{const p=pv;if(it.c)a.own[it.id]=it.c;pv=null;toast((it.c?'Bought: ':'Say hello to your ')+it.n);p.pick()};bar.appendChild(yes);pane.appendChild(bar)}
     HERO16.setAvatar(resolve(eff()));   // the portraits borrowed the painter: put your own look back
-    if(a.seen!==L){a.seen=L;saveState()}dot()}
+    if(a.seen!==L){a.seen=L;saveState()}dot();
+    if(Math.abs(scrollY-sy)>1)window.scrollTo(0,sy);zoom()}
   // a dot on the Me tab when a pet is waiting or something new opened since you last looked
   function dot(){const b=document.querySelector('#tabs [data-go=me]');if(!b)return;const a=A(),L=level();b.classList.toggle('dot',(L>=PET_LV&&!a.pet)||(a.seen<L&&ALL.some(it=>it.c>0&&it.lv>a.seen&&it.lv<=L)))}
   document.querySelectorAll('#meSeg button').forEach(b=>b.onclick=()=>{me=b.dataset.me;clearPv();paint()});
   // leaving Me drops whatever you were trying on
   {const w=document.querySelector('.wrap');new MutationObserver(()=>{if(pv&&w.dataset.tab!=='me')clearPv()}).observe(w,{attributes:true,attributeFilter:['data-tab']})}
-  return{apply,render:paint,roomWall,roomFloor,pet,cheer:()=>{cheerAt=Date.now()},evolved,dot,coins,level,_t:{face,petThumb,PSH,PS,roomThumb,resolve,DEF,ROOM,PETS,HAIR,TOP,BOT,SHOE,HAT}}})();
+  /* editing your avatar or pet: the pinned room zooms in on them, always with the whole body in view (on trips too),
+     and in the pet section on both of you. hy = where the room drew the hero's 32x32 canvas, in 2-pixel units */
+  let zk='',zh=80,zt=false;
+  function zoom(hy,trip){if(hy!=null){zh=hy;zt=trip}const w=document.querySelector('.wrap'),sc=$('sceneCv'),pc=$('petCv');if(!w||!sc)return;
+    const me=w.dataset.tab==='me'?w.dataset.me:'',on=me==='avatar'||me==='pet',W=sc.clientWidth,y0=Math.round(zh/3)*3;   // the 1-pixel bob when flying or surfing doesn't move the camera
+    let kind='';if(me==='pet'&&!zt){const a=A();kind=pv&&pv.pre.k==='pet'?pv.pre.v:a.pet?petKind(a.pet.kind):''}
+    const key=[on,me,zt,y0,W,kind].join();if(key===zk)return;zk=key;
+    let tf='';
+    if(on&&W){let x0=128,x1=192,t0=y0*2,t1=y0*2+64;   // in room pixels (320 x 240)
+      if(kind){const F=PSH.f[kind],r=F.sit[0],ps=PSC[kind],pw=r[2]*ps/4,ph=r[3]*ps/2,hx=Math.min(548,640-F.walk[0][2]*ps/2-4)/2;   // the pet sits at home while you edit it
+        x0=Math.min(x0,hx-pw);x1=Math.max(x1,hx+pw);t0=Math.min(t0,GROUND/2-ph);t1=Math.max(t1,GROUND/2)}
+      const m=12,z=Math.min(1.8,320/(x1-x0+2*m),240/(t1-t0+2*m));
+      if(z>1.02){const k=W/320,cl=(v,lo)=>Math.max(lo,Math.min(0,v)),tx=cl(160-z*(x0+x1)/2,320-320*z),ty=cl(120-z*(t0+t1)/2,240-240*z);
+        tf='translate('+(tx*k).toFixed(1)+'px,'+(ty*k).toFixed(1)+'px) scale('+z.toFixed(3)+')'}}
+    for(const c of [sc,pc])if(c){c.style.transformOrigin='0 0';c.style.transform=tf}}
+  return{apply,render:paint,zoom,roomWall,roomFloor,pet,cheer:()=>{cheerAt=Date.now()},evolved,dot,coins,level,_t:{zs:()=>[zh,zt],face,petThumb,PSH,PS,roomThumb,resolve,DEF,ROOM,PETS,HAIR,TOP,BOT,SHOE,HAT}}})();
 const HERO16=(function(){
   const W=32,O='#1B1F2E',WH='#FFFFFF';
   const K={
